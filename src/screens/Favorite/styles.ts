@@ -13,7 +13,7 @@ export const favoriteStyles = StyleSheet.create({
     textAlign: "center",
     padding: 20,
     color: COLORS.text.primary,
-    fontFamily: "Roboto-Bold",
+    fontFamily: FONT_FAMILIES.bold,
   },
   content: {
     flex: 1,
@@ -35,14 +35,14 @@ export const favoriteStyles = StyleSheet.create({
     fontSize: FONT_SIZES.xl,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text.primary,
-    fontFamily: "Roboto-Bold",
+    fontFamily: FONT_FAMILIES.bold,
     textAlign: "center",
     marginBottom: 12,
   },
   emptyDescription: {
     fontSize: FONT_SIZES.md,
     color: COLORS.text.secondary,
-    fontFamily: "Roboto-Regular",
+    fontFamily: FONT_FAMILIES.regular,
     textAlign: "center",
     lineHeight: 24,
     marginBottom: 30,
@@ -57,7 +57,7 @@ export const favoriteStyles = StyleSheet.create({
     color: COLORS.background,
     fontSize: FONT_SIZES.md,
     fontWeight: FONT_WEIGHTS.bold,
-    fontFamily: "Roboto-Bold",
+    fontFamily: FONT_FAMILIES.bold,
   },
 
   // Recipe cards
@@ -87,13 +87,13 @@ export const favoriteStyles = StyleSheet.create({
     fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text.primary,
-    fontFamily: "Roboto-Bold",
+    fontFamily: FONT_FAMILIES.bold,
     marginBottom: 8,
   },
   recipeDescription: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.text.secondary,
-    fontFamily: "Roboto-Regular",
+    fontFamily: FONT_FAMILIES.regular,
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -109,7 +109,7 @@ export const favoriteStyles = StyleSheet.create({
   infoText: {
     fontSize: FONT_SIZES.xs,
     color: COLORS.text.light,
-    fontFamily: "Roboto-Regular",
+    fontFamily: FONT_FAMILIES.regular,
     marginLeft: 4,
   },
 
@@ -131,7 +131,7 @@ export const favoriteStyles = StyleSheet.create({
     color: COLORS.background,
     fontSize: FONT_SIZES.sm,
     fontWeight: FONT_WEIGHTS.bold,
-    fontFamily: "Roboto-Bold",
+    fontFamily: FONT_FAMILIES.bold,
   },
   removeButton: {
     flex: 1,
@@ -147,7 +147,7 @@ export const favoriteStyles = StyleSheet.create({
     color: COLORS.error,
     fontSize: FONT_SIZES.sm,
     fontWeight: FONT_WEIGHTS.bold,
-    fontFamily: "Roboto-Bold",
+    fontFamily: FONT_FAMILIES.bold,
   },
 
   // Search and filter
@@ -161,7 +161,7 @@ export const favoriteStyles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: FONT_SIZES.md,
-    fontFamily: "Roboto-Regular",
+    fontFamily: FONT_FAMILIES.regular,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
@@ -186,11 +186,11 @@ export const favoriteStyles = StyleSheet.create({
   filterButtonText: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.text.secondary,
-    fontFamily: "Roboto-Regular",
+    fontFamily: FONT_FAMILIES.regular,
   },
   filterButtonTextActive: {
     color: COLORS.background,
-    fontFamily: "Roboto-Bold",
+    fontFamily: FONT_FAMILIES.bold,
   },
 
   // Rating
@@ -206,7 +206,7 @@ export const favoriteStyles = StyleSheet.create({
   ratingText: {
     fontSize: FONT_SIZES.xs,
     color: COLORS.text.light,
-    fontFamily: "Roboto-Regular",
+    fontFamily: FONT_FAMILIES.regular,
   },
 });
 
