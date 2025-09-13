@@ -73,6 +73,7 @@ export const homeStyles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333333",
     marginBottom: 16,
+    marginLeft:20,
     fontFamily: "Roboto",
   },
   categoryContainer: {
@@ -358,41 +359,34 @@ export const homeStyles = StyleSheet.create({
   // Recipe Sections
   recipeSection: {
     marginBottom: 24,
-    marginLeft: 20,
   },
   recipeRow: {
     flexDirection: "row",
     gap: 12,
+    paddingHorizontal: 20,
   },
   recipeCardHorizontal: {
-    width: 150,
-    backgroundColor: "#FFFFFF",
+    width: 171,
+    backgroundColor: "#f7f4eb",
     borderRadius: 8,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
   recipeCardImage: {
     width: "100%",
-    height: 100,
+    height: 171,
   },
   recipeCardTitle: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#333333",
-    fontFamily: "Roboto-Regular",
+    fontFamily: "Roboto",
+    fontWeight: "bold",
     padding: 8,
     lineHeight: 16,
   },
   commonRecipesContainer: {
     flexDirection: "row",
-    paddingHorizontal: 20,
     gap: 12,
+    paddingHorizontal: 20,
   },
 
   // Login Prompt Card

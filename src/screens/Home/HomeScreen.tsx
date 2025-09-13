@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -6,9 +6,13 @@ import {
   ScrollView,
   TextInput,
   Image,
+  Animated,
+  Dimensions,
 } from "react-native";
 import { useAppSelector } from "../../store/hooks";
 import { homeStyles } from "./styles";
+
+const { height } = Dimensions.get("window");
 
 interface HomeScreenProps {
   navigation?: any;
@@ -16,6 +20,26 @@ interface HomeScreenProps {
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const slideAnim = useRef(new Animated.Value(height)).current; // bắt đầu ở ngoài màn hình (bottom)
+
+  const openPrompt = () => {
+    setShowLoginPrompt(true);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closePrompt = () => {
+    Animated.timing(slideAnim, {
+      toValue: height,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setShowLoginPrompt(false));
+  };
 
   const handleProfilePress = () => {
     if (navigation) {
@@ -65,6 +89,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     },
     {
       id: 3,
+      title: isAuthenticated
+        ? "Cơm Tấm Sườn Bì Chả"
+        : "Cách làm cơm tấm sườn bì chả",
+      image: require("../../../assets/images/cachlamcomtam.jpg"),
+    },
+    {
+      id: 4,
+      title: isAuthenticated
+        ? "Bánh Flan Caramel"
+        : "Cách làm cơm tấm sườn bì chả",
+      image: require("../../../assets/images/cachlamcomtam.jpg"),
+    },
+    {
+      id: 5,
       title: isAuthenticated
         ? "Cơm Tấm Sườn Bì Chả"
         : "Cách làm cơm tấm sườn bì chả",
@@ -187,52 +225,97 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         {/* Common Recipes Section */}
         <View style={homeStyles.recipeSection}>
           <Text style={homeStyles.sectionTitle}>Món ăn phổ biến</Text>
-          <View style={homeStyles.commonRecipesContainer}>
-            {commonRecipes.map((recipe) => (
-              <TouchableOpacity
-                key={recipe.id}
-                style={homeStyles.recipeCardHorizontal}
-              >
-                <Image
-                  source={recipe.image}
-                  style={homeStyles.recipeCardImage}
-                />
-                <Text style={homeStyles.recipeCardTitle}>{recipe.title}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={homeStyles.commonRecipesContainer}>
+              {commonRecipes.map((recipe) => (
+                <TouchableOpacity
+                  key={recipe.id}
+                  style={homeStyles.recipeCardHorizontal}
+                >
+                  <Image
+                    source={recipe.image}
+                    style={homeStyles.recipeCardImage}
+                  />
+                  <Text style={homeStyles.recipeCardTitle}>{recipe.title}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
         </View>
 
-        {/* Login Prompt Card - Only for unauthenticated users */}
-        {!isAuthenticated && (
-          <View style={homeStyles.loginPromptCard}>
-            <Text style={homeStyles.loginPromptTitle}>
-              Xin chào bếp trưởng!
-            </Text>
-            <Text style={homeStyles.loginPromptSubtitle}>
-              Để lưu công thức và tạo thực đơn, bạn cần đăng nhập hoặc đăng ký
-              tài khoản mới nhé
-            </Text>
-            <View style={homeStyles.loginPromptButtons}>
-              <TouchableOpacity
-                style={homeStyles.registerButton}
-                onPress={handleRegister}
-              >
-                <Text style={homeStyles.registerButtonText}>Đăng ký</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={homeStyles.loginButton}
-                onPress={handleLogin}
-              >
-                <Text style={homeStyles.loginButtonText}>Đăng nhập</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
+        {/* Create a touchable area for the entire content */}
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => {
+            if (!isAuthenticated) {
+            }
+          }}
+          style={{ flex: 1 }}
+        ></TouchableOpacity>
 
         {/* Add some bottom padding for tab navigator */}
-        <View style={{ height: 100 }} />
+        <View style={{ height: 60 }} />
       </ScrollView>
+      {/* Popup */}
+      {showLoginPrompt && (
+        <Animated.View
+          style={{
+            position: "absolute",
+            zIndex: 10,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "#fff",
+            padding: 20,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            elevation: 5,
+            transform: [{ translateY: slideAnim }],
+          }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
+            Xin chào bếp trưởng!
+          </Text>
+          <Text style={{ marginBottom: 20 }}>
+            Để lưu công thức và tạo thực đơn, bạn cần đăng nhập hoặc đăng ký tài
+            khoản mới nhé.
+          </Text>
+
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-around" }}
+          >
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#FFD54F",
+                paddingVertical: 10,
+                paddingHorizontal: 20,
+                borderRadius: 10,
+              }}
+              onPress={() => {
+                console.log("Đăng ký");
+                closePrompt();
+              }}
+            >
+              <Text style={{ color: "#000" }}>Đăng ký</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#FF7043",
+                paddingVertical: 10,
+                paddingHorizontal: 20,
+                borderRadius: 10,
+              }}
+              onPress={() => {
+                console.log("Đăng nhập");
+                closePrompt();
+              }}
+            >
+              <Text style={{ color: "#fff" }}>Đăng nhập</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      )}
     </View>
   );
 };

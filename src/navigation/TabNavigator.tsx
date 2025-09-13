@@ -105,6 +105,18 @@ const TabNavigator = () => {
           ),
         }}
       />
+      
+      {/* Story Tab - Always available */}
+      <Tab.Screen
+        name="UnauthStory"
+        component={CulinaryStoryScreen}
+        options={{
+          tabBarLabel: "Câu chuyện",
+          tabBarIcon: ({ color }) => (
+            <Text style={{ fontSize: 20, color }}>📖</Text>
+          ),
+        }}
+      />
 
       {/* Favorite Tab - Show different behavior based on authentication */}
       <Tab.Screen
@@ -114,18 +126,6 @@ const TabNavigator = () => {
           tabBarLabel: "Yêu thích",
           tabBarIcon: ({ color }) => (
             <Text style={{ fontSize: 20, color }}>❤️</Text>
-          ),
-        }}
-      />
-
-      {/* Story Tab - Always available */}
-      <Tab.Screen
-        name="UnauthStory"
-        component={CulinaryStoryScreen}
-        options={{
-          tabBarLabel: "Câu chuyện",
-          tabBarIcon: ({ color }) => (
-            <Text style={{ fontSize: 20, color }}>📖</Text>
           ),
         }}
       />
