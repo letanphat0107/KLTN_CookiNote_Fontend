@@ -9,7 +9,6 @@ export const loadingStyles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: "center",
-    marginBottom: 40,
   },
   logo: {
     width: 120,
@@ -29,32 +28,5 @@ export const loadingStyles = StyleSheet.create({
     fontFamily: "Quicksand-Regular",
     marginTop: 8,
     textAlign: "center",
-  },
-  loadingContainer: {
-    alignItems: "center",
-  },
-  loadingIndicator: {
-    marginBottom: 16,
-  },
-  text: {
-    fontSize: 16,
-    color: "#333333",
-    fontFamily: "Quicksand-Regular",
-  },
-  dotsContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 20,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#FF6B6B",
-    marginHorizontal: 4,
-  },
-  dotActive: {
-    backgroundColor: "#FF8E8E",
-    transform: [{ scale: 1.2 }],
   },
 });

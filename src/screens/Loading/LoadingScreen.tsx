@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, Image, Animated } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { View, Text, Image, Animated } from "react-native";
 import { loadingStyles } from "./styles";
 
 interface LoadingScreenProps {
@@ -7,9 +7,8 @@ interface LoadingScreenProps {
 }
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({ navigation }) => {
-  const [activeDot, setActiveDot] = useState(0);
-  const fadeAnim = new Animated.Value(0);
-  const scaleAnim = new Animated.Value(0.8);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
   useEffect(() => {
     // Animation cho logo
@@ -27,11 +26,6 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ navigation }) => {
       }),
     ]).start();
 
-    // Animation cho loading dots
-    const dotInterval = setInterval(() => {
-      setActiveDot((prev) => (prev + 1) % 3);
-    }, 500);
-
     // Chuyển đến trang chủ chưa đăng nhập sau 3 giây
     const navigationTimer = setTimeout(() => {
       if (navigation) {
@@ -40,26 +34,9 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ navigation }) => {
     }, 3000);
 
     return () => {
-      clearInterval(dotInterval);
       clearTimeout(navigationTimer);
     };
-  }, [navigation, fadeAnim, scaleAnim]);
-
-  const renderLoadingDots = () => {
-    return (
-      <View style={loadingStyles.dotsContainer}>
-        {[0, 1, 2].map((index) => (
-          <View
-            key={index}
-            style={[
-              loadingStyles.dot,
-              activeDot === index && loadingStyles.dotActive,
-            ]}
-          />
-        ))}
-      </View>
-    );
-  };
+  }, [navigation]);
 
   return (
     <View style={loadingStyles.container}>
@@ -83,17 +60,6 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ navigation }) => {
           Nơi chia sẻ công thức nấu ăn yêu thích
         </Text>
       </Animated.View>
-
-      {/* Loading Section */}
-      <View style={loadingStyles.loadingContainer}>
-        <ActivityIndicator
-          size="large"
-          color="#FF6B6B"
-          style={loadingStyles.loadingIndicator}
-        />
-        <Text style={loadingStyles.text}>Đang tải ứng dụng...</Text>
-        {renderLoadingDots()}
-      </View>
     </View>
   );
 };
