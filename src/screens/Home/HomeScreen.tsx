@@ -54,21 +54,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       title: isAuthenticated
         ? "Phở Bò Truyền Thống"
         : "Cách làm cơm tấm sườn bì chả",
-      image: "https://via.placeholder.com/150x100",
+      image: require("../../../assets/images/cachlamcomtam.jpg"),
     },
     {
       id: 2,
       title: isAuthenticated
         ? "Bánh Flan Caramel"
         : "Cách làm cơm tấm sườn bì chả",
-      image: "https://via.placeholder.com/150x100",
+      image: require("../../../assets/images/cachlamcomtam.jpg"),
     },
     {
       id: 3,
       title: isAuthenticated
         ? "Cơm Tấm Sườn Bì Chả"
         : "Cách làm cơm tấm sườn bì chả",
-      image: "https://via.placeholder.com/150x100",
+      image: require("../../../assets/images/cachlamcomtam.jpg"),
     },
   ];
 
@@ -78,22 +78,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       title: isAuthenticated
         ? "Canh Chua Cá Lóc"
         : "Cách làm cơm tấm sườn bì chả",
-      image: "https://via.placeholder.com/150x100",
+      image: require("../../../assets/images/cachlamcomtam.jpg"),
     },
     {
       id: 2,
       title: isAuthenticated ? "Thịt Kho Tàu" : "Cách làm cơm tấm sướn bì chả",
-      image: "https://via.placeholder.com/150x100",
+      image: require("../../../assets/images/cachlamcomtam.jpg"),
     },
     {
       id: 3,
       title: isAuthenticated ? "Gà Xào Sả Ớt" : "Cách làm cơm tấm sướn bì chả",
-      image: "https://via.placeholder.com/150x100",
+      image: require("../../../assets/images/cachlamcomtam.jpg"),
     },
     {
       id: 4,
       title: isAuthenticated ? "Chè Ba Màu" : "Cách làm cơm tấm sướn bì chả",
-      image: "https://via.placeholder.com/150x100",
+      image: require("../../../assets/images/cachlamcomtam.jpg"),
     },
   ];
 
@@ -174,7 +174,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   style={homeStyles.recipeCardHorizontal}
                 >
                   <Image
-                    source={{ uri: recipe.image }}
+                    source={recipe.image}
                     style={homeStyles.recipeCardImage}
                   />
                   <Text style={homeStyles.recipeCardTitle}>{recipe.title}</Text>
@@ -194,7 +194,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 style={homeStyles.recipeCardHorizontal}
               >
                 <Image
-                  source={{ uri: recipe.image }}
+                  source={recipe.image}
                   style={homeStyles.recipeCardImage}
                 />
                 <Text style={homeStyles.recipeCardTitle}>{recipe.title}</Text>

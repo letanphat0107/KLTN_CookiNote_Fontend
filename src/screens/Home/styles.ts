@@ -244,10 +244,11 @@ export const homeStyles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: "#FF6B6B",
-    gap: 12,
+    backgroundColor: "#EB5B00",
+    gap: 20,
   },
   searchWrapper: {
+    marginTop: 30,
     flex: 1,
   },
   unauthSearchInput: {
@@ -259,10 +260,11 @@ export const homeStyles = StyleSheet.create({
     fontFamily: "Roboto-Regular",
   },
   accountButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "#FFA952",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
+    marginTop: 30,
   },
   accountButtonText: {
     color: "#FFFFFF",
@@ -329,12 +331,12 @@ export const homeStyles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     paddingHorizontal: 20,
+    paddingVertical: 15,
     justifyContent: "space-between",
-    marginBottom: 20,
   },
   categoryItem: {
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 15,
     width: "18%",
   },
   categoryIconContainer: {
@@ -356,10 +358,10 @@ export const homeStyles = StyleSheet.create({
   // Recipe Sections
   recipeSection: {
     marginBottom: 24,
+    marginLeft: 20,
   },
   recipeRow: {
     flexDirection: "row",
-    paddingHorizontal: 20,
     gap: 12,
   },
   recipeCardHorizontal: {
