@@ -1,127 +1,192 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  TextInput,
+} from "react-native";
+import { favoriteStyles } from './styles';
 
 const FavoriteScreen = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
+
+  // Sample favorite recipes data
+  const favoriteRecipes = [
+    {
+      id: 1,
+      name: 'Phở Bò Truyền Thống',
+      description: 'Món phở bò với nước dùng trong vắt, thơm ngon từ xương bò niệu nhiều giờ...',
+      image: 'https://via.placeholder.com/300x150',
+      rating: 4.8,
+      difficulty: 'Trung bình',
+      time: '2 giờ',
+      category: 'vietnamese'
+    },
+    {
+      id: 2,
+      name: 'Bánh Mì Việt Nam',
+      description: 'Bánh mì giòn tan với nhân thịt và rau củ tươi ngon, đậm đà hương vị Việt...',
+      image: 'https://via.placeholder.com/300x150',
+      rating: 4.6,
+      difficulty: 'Dễ',
+      time: '30 phút',
+      category: 'vietnamese'
+    },
+    {
+      id: 3,
+      name: 'Gỏi Cuốn Tôm Thịt',
+      description: 'Gỏi cuốn tươi mát với tôm, thịt và rau thơm, ăn kèm nước chấm đậm đà...',
+      image: 'https://via.placeholder.com/300x150',
+      rating: 4.7,
+      difficulty: 'Dễ',
+      time: '45 phút',
+      category: 'vietnamese'
+    }
+  ];
+
+  const filters = [
+    { key: 'all', label: 'Tất cả' },
+    { key: 'vietnamese', label: 'Việt Nam' },
+    { key: 'asian', label: 'Châu Á' },
+    { key: 'western', label: 'Phương Tây' }
+  ];
+
+  const handleRemoveFavorite = (recipeId: number) => {
+    // Handle remove from favorites logic
+    console.log('Remove favorite:', recipeId);
+  };
+
+  const handleViewRecipe = (recipeId: number) => {
+    // Handle navigate to recipe detail
+    console.log('View recipe:', recipeId);
+  };
+
+  const renderStars = (rating: number) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push('⭐');
+    }
+    if (hasHalfStar) {
+      stars.push('⭐');
+    }
+    return stars.join('');
+  };
+
+  const renderEmptyState = () => (
+    <View style={favoriteStyles.emptyContainer}>
+      <Text style={favoriteStyles.emptyIcon}>❤️</Text>
+      <Text style={favoriteStyles.emptyTitle}>Chưa có món ăn yêu thích</Text>
+      <Text style={favoriteStyles.emptyDescription}>
+        Hãy khám phá và thêm những món ăn ngon vào danh sách yêu thích của bạn!
+      </Text>
+      <TouchableOpacity style={favoriteStyles.exploreButton}>
+        <Text style={favoriteStyles.exploreButtonText}>Khám phá ngay</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const filteredRecipes = favoriteRecipes.filter(recipe => {
+    const matchesSearch = recipe.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = activeFilter === 'all' || recipe.category === activeFilter;
+    return matchesSearch && matchesFilter;
+  });
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Món Ăn Yêu Thích</Text>
-      
-      <ScrollView style={styles.content}>
-        <View style={styles.favoriteCard}>
-          <Text style={styles.recipeName}>Phở Bò Truyền Thống</Text>
-          <Text style={styles.recipeDescription}>
-            Món phở bò với nước dùng trong vắt, thơm ngon...
-          </Text>
-          <View style={styles.cardActions}>
-            <TouchableOpacity style={styles.viewButton}>
-              <Text style={styles.viewButtonText}>Xem công thức</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.removeButton}>
-              <Text style={styles.removeButtonText}>Bỏ yêu thích</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        
-        <View style={styles.favoriteCard}>
-          <Text style={styles.recipeName}>Bánh Mì Việt Nam</Text>
-          <Text style={styles.recipeDescription}>
-            Bánh mì giòn tan với nhân thịt và rau củ tươi ngon...
-          </Text>
-          <View style={styles.cardActions}>
-            <TouchableOpacity style={styles.viewButton}>
-              <Text style={styles.viewButtonText}>Xem công thức</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.removeButton}>
-              <Text style={styles.removeButtonText}>Bỏ yêu thích</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        
-        <View style={styles.favoriteCard}>
-          <Text style={styles.recipeName}>Gỏi Cuốn Tôm Thịt</Text>
-          <Text style={styles.recipeDescription}>
-            Gỏi cuốn tươi mát với tôm, thịt và rau thơm...
-          </Text>
-          <View style={styles.cardActions}>
-            <TouchableOpacity style={styles.viewButton}>
-              <Text style={styles.viewButtonText}>Xem công thức</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.removeButton}>
-              <Text style={styles.removeButtonText}>Bỏ yêu thích</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
+    <View style={favoriteStyles.container}>
+      <Text style={favoriteStyles.title}>Món Ăn Yêu Thích</Text>
+
+      {/* Search Input */}
+      <View style={favoriteStyles.searchContainer}>
+        <TextInput
+          style={favoriteStyles.searchInput}
+          placeholder="Tìm kiếm món ăn yêu thích..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholderTextColor="#999"
+        />
+      </View>
+
+      {/* Filter Buttons */}
+      <View style={favoriteStyles.filterButtons}>
+        {filters.map(filter => (
+          <TouchableOpacity
+            key={filter.key}
+            style={[
+              favoriteStyles.filterButton,
+              activeFilter === filter.key && favoriteStyles.filterButtonActive
+            ]}
+            onPress={() => setActiveFilter(filter.key)}
+          >
+            <Text style={[
+              favoriteStyles.filterButtonText,
+              activeFilter === filter.key && favoriteStyles.filterButtonTextActive
+            ]}>
+              {filter.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Content */}
+      {filteredRecipes.length === 0 ? (
+        renderEmptyState()
+      ) : (
+        <ScrollView style={favoriteStyles.content} showsVerticalScrollIndicator={false}>
+          {filteredRecipes.map(recipe => (
+            <View key={recipe.id} style={favoriteStyles.favoriteCard}>
+              {/* Recipe Image */}
+              <Image source={{ uri: recipe.image }} style={favoriteStyles.recipeImage} />
+              
+              {/* Recipe Info */}
+              <Text style={favoriteStyles.recipeName}>{recipe.name}</Text>
+              
+              {/* Rating */}
+              <View style={favoriteStyles.ratingContainer}>
+                <Text style={favoriteStyles.ratingStars}>{renderStars(recipe.rating)}</Text>
+                <Text style={favoriteStyles.ratingText}>({recipe.rating})</Text>
+              </View>
+              
+              {/* Recipe Details */}
+              <View style={favoriteStyles.recipeInfo}>
+                <View style={favoriteStyles.infoItem}>
+                  <Text style={favoriteStyles.infoText}>⏱️ {recipe.time}</Text>
+                </View>
+                <View style={favoriteStyles.infoItem}>
+                  <Text style={favoriteStyles.infoText}>📊 {recipe.difficulty}</Text>
+                </View>
+              </View>
+              
+              <Text style={favoriteStyles.recipeDescription}>
+                {recipe.description}
+              </Text>
+              
+              {/* Actions */}
+              <View style={favoriteStyles.cardActions}>
+                <TouchableOpacity 
+                  style={favoriteStyles.viewButton}
+                  onPress={() => handleViewRecipe(recipe.id)}
+                >
+                  <Text style={favoriteStyles.viewButtonText}>Xem công thức</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={favoriteStyles.removeButton}
+                  onPress={() => handleRemoveFavorite(recipe.id)}
+                >
+                  <Text style={favoriteStyles.removeButtonText}>Bỏ yêu thích</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+      )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    padding: 20,
-    color: '#333333',
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  favoriteCard: {
-    backgroundColor: '#F8F8F8',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-  },
-  recipeName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333333',
-    marginBottom: 8,
-  },
-  recipeDescription: {
-    fontSize: 14,
-    color: '#666666',
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  cardActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  viewButton: {
-    flex: 1,
-    backgroundColor: '#FF6B6B',
-    padding: 10,
-    borderRadius: 6,
-    alignItems: 'center',
-  },
-  viewButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  removeButton: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    padding: 10,
-    borderRadius: 6,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#FF6B6B',
-  },
-  removeButtonText: {
-    color: '#FF6B6B',
-    fontSize: 14,
-  },
-});
 
 export default FavoriteScreen;
