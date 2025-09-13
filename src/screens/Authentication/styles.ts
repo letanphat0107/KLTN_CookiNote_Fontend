@@ -194,4 +194,38 @@ export const authStyles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "Quicksand",
   },
+
+  // Demo credentials
+  demoContainer: {
+    backgroundColor: "#FFF3CD",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#FFEAA7",
+  },
+  demoTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#856404",
+    marginBottom: 4,
+    fontFamily: "Quicksand",
+  },
+  demoText: {
+    fontSize: 12,
+    color: "#856404",
+    fontFamily: "Quicksand",
+  },
+
+  // Loading and error states
+  disabledButton: {
+    opacity: 0.6,
+  },
+  errorText: {
+    color: "#DC3545",
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 10,
+    fontFamily: "Quicksand",
+  },
 });

@@ -10,7 +10,7 @@ export type RootStackParamList = {
 
   // Main App
   MainTabs: undefined;
-  UnauthenticatedHome: undefined;
+  HomeScreen: undefined;
 
   // Recipe
   RecipeDetail: { recipeId: string };
@@ -39,4 +39,5 @@ export type UnauthenticatedTabParamList = {
   UnauthHome: undefined;
   UnauthStory: undefined;
   UnauthFavorite: undefined;
+  Profile: undefined;
 };
