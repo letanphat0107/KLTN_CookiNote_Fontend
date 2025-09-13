@@ -237,4 +237,212 @@ export const homeStyles = StyleSheet.create({
     width: "100%",
     gap: 12,
   },
+
+  // Unauthenticated Home styles
+  unauthHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: "#FF6B6B",
+    gap: 12,
+  },
+  searchWrapper: {
+    flex: 1,
+  },
+  unauthSearchInput: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    fontSize: 16,
+    fontFamily: "Roboto-Regular",
+  },
+  accountButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  accountButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontFamily: "Roboto-Bold",
+  },
+  scrollContent: {
+    flex: 1,
+  },
+
+  // Suggestion Banner
+  suggestionBanner: {
+    backgroundColor: "#FFE4B3",
+    flexDirection: "row",
+    alignItems: "center",
+    margin: 20,
+    padding: 16,
+    borderRadius: 12,
+  },
+  bannerContent: {
+    flex: 1,
+  },
+  bannerTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333333",
+    fontFamily: "Roboto-Bold",
+    marginBottom: 4,
+  },
+  bannerSubtitle: {
+    fontSize: 14,
+    color: "#666666",
+    fontFamily: "Roboto-Regular",
+    marginBottom: 12,
+  },
+  bannerButton: {
+    backgroundColor: "#FF6B6B",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+    alignSelf: "flex-start",
+  },
+  bannerButtonText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontFamily: "Roboto-Bold",
+  },
+  bannerImage: {
+    width: 80,
+    height: 60,
+    borderRadius: 8,
+    marginLeft: 12,
+  },
+
+  // Categories Grid
+  categoriesGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    paddingHorizontal: 20,
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  categoryItem: {
+    alignItems: "center",
+    marginBottom: 20,
+    width: "18%",
+  },
+  categoryIconContainer: {
+    width: 50,
+    height: 50,
+    backgroundColor: "#F8F8F8",
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  categoryLabel: {
+    fontSize: 12,
+    color: "#333333",
+    fontFamily: "Roboto-Regular",
+    textAlign: "center",
+  },
+
+  // Recipe Sections
+  recipeSection: {
+    marginBottom: 24,
+  },
+  recipeRow: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    gap: 12,
+  },
+  recipeCardHorizontal: {
+    width: 150,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  recipeCardImage: {
+    width: "100%",
+    height: 100,
+  },
+  recipeCardTitle: {
+    fontSize: 12,
+    color: "#333333",
+    fontFamily: "Roboto-Regular",
+    padding: 8,
+    lineHeight: 16,
+  },
+  commonRecipesContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    gap: 12,
+  },
+
+  // Login Prompt Card
+  loginPromptCard: {
+    backgroundColor: "#FFFFFF",
+    margin: 20,
+    padding: 20,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  loginPromptTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FF6B6B",
+    fontFamily: "Roboto-Bold",
+    marginBottom: 8,
+  },
+  loginPromptSubtitle: {
+    fontSize: 14,
+    color: "#666666",
+    fontFamily: "Roboto-Regular",
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  loginPromptButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  registerButton: {
+    flex: 1,
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#333333",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  registerButtonText: {
+    color: "#333333",
+    fontSize: 14,
+    fontFamily: "Roboto-Bold",
+  },
+  loginButton: {
+    flex: 1,
+    backgroundColor: "#333333",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  loginButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontFamily: "Roboto-Bold",
+  },
 });

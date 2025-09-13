@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
-import { recipeStyles } from './styles';
+import React from "react";
+import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
+import { recipeStyles } from "./styles";
 
 interface RecipeDetailScreenProps {
   route?: {
@@ -15,11 +15,14 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({ route }) => {
 
   return (
     <View style={recipeStyles.container}>
-      <ScrollView style={recipeStyles.content} contentContainerStyle={recipeStyles.scrollContainer}>
+      <ScrollView
+        style={recipeStyles.content}
+        contentContainerStyle={recipeStyles.scrollContainer}
+      >
         {/* Recipe Image */}
         <View style={recipeStyles.imageContainer}>
-          <Image 
-            source={{ uri: 'https://via.placeholder.com/350x200' }} 
+          <Image
+            source={{ uri: "https://via.placeholder.com/350x200" }}
             style={recipeStyles.recipeImage}
           />
         </View>
@@ -86,10 +89,10 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({ route }) => {
 
         {/* Description */}
         <Text style={recipeStyles.description}>
-          Phở bò là món ăn truyền thống của Việt Nam, được chế biến từ bánh phở, 
-          nước dùng trong và ngọt từ xương bò, cùng với thịt bò tái hoặc chín. 
+          Phở bò là món ăn truyền thống của Việt Nam, được chế biến từ bánh phở,
+          nước dùng trong và ngọt từ xương bò, cùng với thịt bò tái hoặc chín.
           Đây là món ăn đặc trưng và được yêu thích nhất của ẩm thực Việt Nam.
-          Recipe ID: {recipeId || 'Not provided'}
+          Recipe ID: {recipeId || "Not provided"}
         </Text>
       </ScrollView>
 
@@ -98,7 +101,7 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({ route }) => {
         <TouchableOpacity style={recipeStyles.favoriteButton}>
           <Text style={recipeStyles.favoriteButtonText}>❤️ Yêu thích</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity style={recipeStyles.shareButton}>
           <Text style={recipeStyles.shareButtonText}>📤 Chia sẻ</Text>
         </TouchableOpacity>

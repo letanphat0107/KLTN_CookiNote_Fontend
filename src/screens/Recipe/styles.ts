@@ -1,6 +1,6 @@
-import { StyleSheet } from 'react-native';
-import { COLORS } from '../../constants/colors';
-import { FONT_FAMILIES, FONT_SIZES, FONT_WEIGHTS } from '../../constants/fonts';
+import { StyleSheet } from "react-native";
+import { COLORS } from "../../constants/colors";
+import { FONT_FAMILIES, FONT_SIZES, FONT_WEIGHTS } from "../../constants/fonts";
 
 export const recipeStyles = StyleSheet.create({
   // Common containers
@@ -27,8 +27,8 @@ export const recipeStyles = StyleSheet.create({
     fontSize: FONT_SIZES.xxxl,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text.primary,
-    fontFamily: 'Roboto-Bold',
-    textAlign: 'center',
+    fontFamily: "Roboto-Bold",
+    textAlign: "center",
   },
 
   // Recipe Detail styles
@@ -36,40 +36,40 @@ export const recipeStyles = StyleSheet.create({
     fontSize: FONT_SIZES.xxxl,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text.primary,
-    fontFamily: 'Roboto-Bold',
-    textAlign: 'center',
+    fontFamily: "Roboto-Bold",
+    textAlign: "center",
     marginBottom: 20,
   },
   description: {
     fontSize: FONT_SIZES.md,
     color: COLORS.text.secondary,
-    fontFamily: 'Roboto-Regular',
+    fontFamily: "Roboto-Regular",
     marginTop: 16,
     lineHeight: 24,
   },
 
   // Recipe Guide styles
   infoSection: {
-    backgroundColor: '#F8F8F8',
+    backgroundColor: "#F8F8F8",
     padding: 16,
     borderRadius: 8,
     marginBottom: 24,
   },
   infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 8,
   },
   infoLabel: {
     fontSize: FONT_SIZES.md,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text.primary,
-    fontFamily: 'Roboto-Bold',
+    fontFamily: "Roboto-Bold",
   },
   infoValue: {
     fontSize: FONT_SIZES.md,
     color: COLORS.text.secondary,
-    fontFamily: 'Roboto-Regular',
+    fontFamily: "Roboto-Regular",
   },
 
   // Sections
@@ -80,20 +80,20 @@ export const recipeStyles = StyleSheet.create({
     fontSize: FONT_SIZES.xl,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.primary,
-    fontFamily: 'Roboto-Bold',
+    fontFamily: "Roboto-Bold",
     marginBottom: 12,
   },
 
   // Ingredients
   ingredientList: {
-    backgroundColor: '#F0F8FF',
+    backgroundColor: "#F0F8FF",
     padding: 16,
     borderRadius: 8,
   },
   ingredient: {
     fontSize: FONT_SIZES.md,
     color: COLORS.text.primary,
-    fontFamily: 'Roboto-Regular',
+    fontFamily: "Roboto-Regular",
     marginBottom: 8,
     lineHeight: 24,
   },
@@ -102,7 +102,7 @@ export const recipeStyles = StyleSheet.create({
   step: {
     marginBottom: 16,
     padding: 16,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: "#FAFAFA",
     borderRadius: 8,
     borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
@@ -111,13 +111,13 @@ export const recipeStyles = StyleSheet.create({
     fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.primary,
-    fontFamily: 'Roboto-Bold',
+    fontFamily: "Roboto-Bold",
     marginBottom: 8,
   },
   stepDescription: {
     fontSize: FONT_SIZES.md,
     color: COLORS.text.primary,
-    fontFamily: 'Roboto-Regular',
+    fontFamily: "Roboto-Regular",
     lineHeight: 24,
   },
 
@@ -125,16 +125,16 @@ export const recipeStyles = StyleSheet.create({
   tip: {
     fontSize: FONT_SIZES.md,
     color: COLORS.text.secondary,
-    fontFamily: 'Roboto-Regular',
+    fontFamily: "Roboto-Regular",
     lineHeight: 24,
-    backgroundColor: '#FFF9E6',
+    backgroundColor: "#FFF9E6",
     padding: 16,
     borderRadius: 8,
   },
 
   // Action buttons
   actionButtons: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 20,
     gap: 12,
     backgroundColor: COLORS.background,
@@ -146,22 +146,22 @@ export const recipeStyles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     padding: 15,
     borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   favoriteButtonText: {
     color: COLORS.background,
     fontSize: FONT_SIZES.md,
     fontWeight: FONT_WEIGHTS.bold,
-    fontFamily: 'Roboto-Bold',
+    fontFamily: "Roboto-Bold",
   },
   shareButton: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     padding: 15,
     borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 2,
     borderColor: COLORS.primary,
   },
@@ -169,31 +169,31 @@ export const recipeStyles = StyleSheet.create({
     color: COLORS.primary,
     fontSize: FONT_SIZES.md,
     fontWeight: FONT_WEIGHTS.bold,
-    fontFamily: 'Roboto-Bold',
+    fontFamily: "Roboto-Bold",
   },
 
   // Recipe image
   recipeImage: {
-    width: '100%',
+    width: "100%",
     height: 250,
     borderRadius: 12,
     marginBottom: 20,
   },
   imageContainer: {
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginBottom: 20,
   },
 
   // Rating and difficulty
   ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
   },
   ratingText: {
     fontSize: FONT_SIZES.md,
-    fontFamily: 'Roboto-Regular',
+    fontFamily: "Roboto-Regular",
     color: COLORS.text.secondary,
     marginLeft: 8,
   },
@@ -202,22 +202,22 @@ export const recipeStyles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    marginLeft: 'auto',
+    marginLeft: "auto",
   },
   difficultyText: {
     color: COLORS.background,
     fontSize: FONT_SIZES.sm,
-    fontFamily: 'Roboto-Medium',
+    fontFamily: "Roboto-Medium",
   },
 
   // Tags
   tagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     marginBottom: 20,
   },
   tag: {
-    backgroundColor: '#F0F0F0',
+    backgroundColor: "#F0F0F0",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
@@ -227,31 +227,31 @@ export const recipeStyles = StyleSheet.create({
   tagText: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.text.secondary,
-    fontFamily: 'Roboto-Regular',
+    fontFamily: "Roboto-Regular",
   },
 
   // Nutrition info
   nutritionContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     backgroundColor: COLORS.surface,
     padding: 16,
     borderRadius: 8,
     marginBottom: 20,
   },
   nutritionItem: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   nutritionValue: {
     fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.primary,
-    fontFamily: 'Roboto-Bold',
+    fontFamily: "Roboto-Bold",
   },
   nutritionLabel: {
     fontSize: FONT_SIZES.xs,
     color: COLORS.text.secondary,
-    fontFamily: 'Roboto-Regular',
+    fontFamily: "Roboto-Regular",
     marginTop: 4,
   },
 });

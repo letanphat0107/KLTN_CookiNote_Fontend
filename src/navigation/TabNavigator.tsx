@@ -2,14 +2,12 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
 
-// Import screens
-import HomeScreen from '../screens/Home/HomeScreen';
+// Import screens for unauthenticated users
+import UnauthenticatedHomeScreen from '../screens/Home/UnauthenticatedHomeScreen';
 import CulinaryStoryScreen from '../screens/CulinaryStory/CulinaryStoryScreen';
-import FavoriteScreen from '../screens/Favorite/FavoriteScreen';
+import { UnauthenticatedTabParamList } from './types';
 
-import { TabParamList } from './types';
-
-const Tab = createBottomTabNavigator<TabParamList>();
+const Tab = createBottomTabNavigator<UnauthenticatedTabParamList>();
 
 const TabNavigator = () => {
   return (
@@ -25,6 +23,10 @@ const TabNavigator = () => {
           paddingBottom: 5,
           paddingTop: 5,
           height: 60,
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -33,8 +35,8 @@ const TabNavigator = () => {
       }}
     >
       <Tab.Screen 
-        name="Home" 
-        component={HomeScreen}
+        name="UnauthHome" 
+        component={UnauthenticatedHomeScreen}
         options={{
           tabBarLabel: 'Trang chủ',
           tabBarIcon: ({ color }) => (
@@ -43,7 +45,7 @@ const TabNavigator = () => {
         }}
       />
       <Tab.Screen 
-        name="CulinaryStory" 
+        name="UnauthStory" 
         component={CulinaryStoryScreen}
         options={{
           tabBarLabel: 'Câu chuyện',
@@ -53,8 +55,10 @@ const TabNavigator = () => {
         }}
       />
       <Tab.Screen 
-        name="Favorite" 
-        component={FavoriteScreen}
+        name="UnauthFavorite" 
+        component={() => (
+          <UnauthenticatedHomeScreen />
+        )}
         options={{
           tabBarLabel: 'Yêu thích',
           tabBarIcon: ({ color }) => (
