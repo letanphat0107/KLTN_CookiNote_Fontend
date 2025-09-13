@@ -8,7 +8,6 @@ import { logoutUser } from "../store/authSlice";
 
 // Import screens
 import HomeScreen from "../screens/Home/HomeScreen";
-import UnauthenticatedHomeScreen from "../screens/Home/UnauthenticatedHomeScreen";
 import FavoriteScreen from "../screens/Favorite/FavoriteScreen";
 import CulinaryStoryScreen from "../screens/CulinaryStory/CulinaryStoryScreen";
 import { UnauthenticatedTabParamList } from "./types";
@@ -95,84 +94,54 @@ const TabNavigator = () => {
         },
       }}
     >
-      {isAuthenticated ? (
-        // Authenticated Tabs
-        <>
-          <Tab.Screen
-            name="UnauthHome"
-            component={HomeScreen}
-            options={{
-              tabBarLabel: "Trang chủ",
-              tabBarIcon: ({ color }) => (
-                <Text style={{ fontSize: 20, color }}>🏠</Text>
-              ),
-            }}
-          />
-          <Tab.Screen
-            name="UnauthFavorite"
-            component={FavoriteScreen}
-            options={{
-              tabBarLabel: "Yêu thích",
-              tabBarIcon: ({ color }) => (
-                <Text style={{ fontSize: 20, color }}>❤️</Text>
-              ),
-            }}
-          />
-          <Tab.Screen
-            name="UnauthStory"
-            component={CulinaryStoryScreen}
-            options={{
-              tabBarLabel: "Câu chuyện",
-              tabBarIcon: ({ color }) => (
-                <Text style={{ fontSize: 20, color }}>📖</Text>
-              ),
-            }}
-          />
-          <Tab.Screen
-            name="Profile"
-            component={ProfileTab}
-            options={{
-              tabBarLabel: "Cá nhân",
-              tabBarIcon: ({ color }) => (
-                <Text style={{ fontSize: 20, color }}>👤</Text>
-              ),
-            }}
-          />
-        </>
-      ) : (
-        // Unauthenticated Tabs
-        <>
-          <Tab.Screen
-            name="UnauthHome"
-            component={UnauthenticatedHomeScreen}
-            options={{
-              tabBarLabel: "Trang chủ",
-              tabBarIcon: ({ color }) => (
-                <Text style={{ fontSize: 20, color }}>🏠</Text>
-              ),
-            }}
-          />
-          <Tab.Screen
-            name="UnauthStory"
-            component={CulinaryStoryScreen}
-            options={{
-              tabBarLabel: "Câu chuyện",
-              tabBarIcon: ({ color }) => (
-                <Text style={{ fontSize: 20, color }}>📖</Text>
-              ),
-            }}
-          />
-          <Tab.Screen
-            name="UnauthFavorite"
-            component={() => <UnauthenticatedHomeScreen />}
-            options={{
-              tabBarLabel: "Yêu thích",
-              tabBarIcon: ({ color }) => (
-                <Text style={{ fontSize: 20, color }}>❤️</Text>
-              ),
-            }}
-          />
-        </>
+      {/* Home Tab - Always use the unified HomeScreen */}
+      <Tab.Screen
+        name="UnauthHome"
+        component={HomeScreen}
+        options={{
+          tabBarLabel: "Trang chủ",
+          tabBarIcon: ({ color }) => (
+            <Text style={{ fontSize: 20, color }}>🏠</Text>
+          ),
+        }}
+      />
+
+      {/* Favorite Tab - Show different behavior based on authentication */}
+      <Tab.Screen
+        name="UnauthFavorite"
+        component={isAuthenticated ? FavoriteScreen : HomeScreen}
+        options={{
+          tabBarLabel: "Yêu thích",
+          tabBarIcon: ({ color }) => (
+            <Text style={{ fontSize: 20, color }}>❤️</Text>
+          ),
+        }}
+      />
+
+      {/* Story Tab - Always available */}
+      <Tab.Screen
+        name="UnauthStory"
+        component={CulinaryStoryScreen}
+        options={{
+          tabBarLabel: "Câu chuyện",
+          tabBarIcon: ({ color }) => (
+            <Text style={{ fontSize: 20, color }}>📖</Text>
+          ),
+        }}
+      />
+
+      {/* Profile Tab - Only show for authenticated users */}
+      {isAuthenticated && (
+        <Tab.Screen
+          name="Profile"
+          component={ProfileTab}
+          options={{
+            tabBarLabel: "Cá nhân",
+            tabBarIcon: ({ color }) => (
+              <Text style={{ fontSize: 20, color }}>👤</Text>
+            ),
+          }}
+        />
       )}
     </Tab.Navigator>
   );
