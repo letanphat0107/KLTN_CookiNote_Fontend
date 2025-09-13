@@ -1,24 +1,29 @@
 // User and authentication types
 export interface User {
-  id: string;
+  user_id: number;
   email: string;
-  username: string;
-  firstName?: string;
-  lastName?: string;
-  avatar?: string;
-  preferences?: UserPreferences;
-  createdAt: Date;
-  updatedAt: Date;
+  password: string;
+  auth_provider: string;
+  avatar_url?: string;
+  created_at: string;
+  display_name: string;
+  email_verified: boolean;
+  enabled: boolean;
+  name: string;
+  password_changed_at?: string;
+  role: string;
 }
 
-export interface UserPreferences {
-  dietaryRestrictions: string[];
-  allergies: string[];
-  favoriteIngredients: string[];
-  dislikedIngredients: string[];
-  cookingSkillLevel: 'beginner' | 'intermediate' | 'advanced';
-  preferredMealTypes: string[];
-  maxCookingTime?: number; // minutes
+export interface EmailOtp {
+  id: number;
+  email_otp: string;
+  attempts: number;
+  code_hash: string;
+  created_at: string;
+  expires_at: string;
+  max_attempts: number;
+  purpose: string;
+  user_id: number;
 }
 
 export interface AuthState {
@@ -36,7 +41,6 @@ export interface LoginCredentials {
 export interface RegisterData {
   email: string;
   password: string;
-  username: string;
-  firstName?: string;
-  lastName?: string;
+  display_name: string;
+  name: string;
 }

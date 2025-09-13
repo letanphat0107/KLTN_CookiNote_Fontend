@@ -6,6 +6,7 @@ import { Text } from 'react-native';
 import UnauthenticatedHomeScreen from '../screens/Home/UnauthenticatedHomeScreen';
 import CulinaryStoryScreen from '../screens/CulinaryStory/CulinaryStoryScreen';
 import { UnauthenticatedTabParamList } from './types';
+import HomeScreen from '../screens/Home/HomeScreen';
 
 const Tab = createBottomTabNavigator<UnauthenticatedTabParamList>();
 

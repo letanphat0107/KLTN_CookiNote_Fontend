@@ -1,43 +1,74 @@
 // Recipe related types
 export interface Recipe {
-  id: string;
+  id: number;
   title: string;
   description: string;
-  imageUrl?: string;
-  prepTime: number; // minutes
-  cookTime: number; // minutes
-  servings: number;
-  difficulty: 'easy' | 'medium' | 'hard';
-  calories?: number;
-  ingredients: Ingredient[];
-  instructions: Instruction[];
-  tags: string[];
-  nutrition?: Nutrition;
-  createdAt: Date;
-  updatedAt: Date;
+  image_url?: string;
+  prepare_time: number;
+  cook_time: number;
+  difficulty: string;
+  view: number;
+  category_id: number;
+  user_id: number;
+  created_at: string;
 }
 
-export interface Ingredient {
-  id: string;
+export interface RecipeStep {
+  id: number;
+  content: string;
+  image_url?: string;
+  step_no: number;
+  recipe_id: number;
+}
+
+export interface RecipeIngredient {
+  id: number;
   name: string;
-  amount: number;
-  unit: string;
-  notes?: string;
+  quantity: string;
+  recipe_id: number;
 }
 
-export interface Instruction {
-  id: string;
-  step: number;
+export interface Category {
+  id: number;
   description: string;
-  imageUrl?: string;
-  timer?: number; // seconds
+  name: string;
 }
 
-export interface Nutrition {
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
-  sugar: number;
+export interface Favorite {
+  recipe_id: number;
+  user_id: number;
+}
+
+export interface Share {
+  id: number;
+  share_code: string;
+  recipe_id: number;
+  user_id: number;
+}
+
+export interface ShoppingList {
+  id: number;
+  checked: boolean;
+  ingredient: string;
+  quantity: string;
+  recipe_id: number;
+  user_id: number;
+}
+
+export interface DailyMenu {
+  id: number;
+  created_at: string;
+  meal_type: string;
+  note: string;
+  recipe_id: number;
+}
+
+export interface WeeklyMenu {
+  id: number;
+  day_of_week: number;
+  meal_type: string;
+  note: string;
+  week: number;
+  recipe_id: number;
+  user_id: number;
 }

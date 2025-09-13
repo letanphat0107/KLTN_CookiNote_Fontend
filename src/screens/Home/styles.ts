@@ -269,6 +269,13 @@ export const homeStyles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Roboto-Bold",
   },
+  userAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+  },
   scrollContent: {
     flex: 1,
   },

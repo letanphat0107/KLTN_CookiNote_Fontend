@@ -105,21 +105,6 @@ const UnauthenticatedHomeScreen: React.FC<UnauthenticatedHomeScreenProps> = ({
         style={homeStyles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Today's Suggestion Banner */}
-        <View style={homeStyles.suggestionBanner}>
-          <View style={homeStyles.bannerContent}>
-            <Text style={homeStyles.bannerTitle}>Hôm nay ăn gì?</Text>
-            <Text style={homeStyles.bannerSubtitle}>Đã có CookiNote lo!</Text>
-            <TouchableOpacity style={homeStyles.bannerButton}>
-              <Text style={homeStyles.bannerButtonText}>Xem ngay</Text>
-            </TouchableOpacity>
-          </View>
-          <Image
-            source={{ uri: "https://via.placeholder.com/120x80" }}
-            style={homeStyles.bannerImage}
-          />
-        </View>
-
         {/* Categories Grid */}
         <View style={homeStyles.categoriesGrid}>
           {categories.map((category, index) => (
