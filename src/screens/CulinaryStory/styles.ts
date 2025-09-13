@@ -1,6 +1,6 @@
-import { StyleSheet } from 'react-native';
-import { COLORS } from '../../constants/colors';
-import { FONT_FAMILIES, FONT_SIZES, FONT_WEIGHTS } from '../../constants/fonts';
+import { StyleSheet } from "react-native";
+import { COLORS } from "../../constants/colors";
+import { FONT_FAMILIES, FONT_SIZES, FONT_WEIGHTS } from "../../constants/fonts";
 
 export const culinaryStoryStyles = StyleSheet.create({
   container: {
@@ -10,10 +10,10 @@ export const culinaryStoryStyles = StyleSheet.create({
   title: {
     fontSize: FONT_SIZES.xxl,
     fontWeight: FONT_WEIGHTS.bold,
-    textAlign: 'center',
+    textAlign: "center",
     padding: 20,
     color: COLORS.text.primary,
-    fontFamily: 'Roboto-Bold',
+    fontFamily: "Roboto-Bold",
   },
   content: {
     flex: 1,
@@ -33,15 +33,15 @@ export const culinaryStoryStyles = StyleSheet.create({
     fontSize: FONT_SIZES.xxxl,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.background,
-    fontFamily: 'Roboto-Bold',
-    textAlign: 'center',
+    fontFamily: "Roboto-Bold",
+    textAlign: "center",
     marginBottom: 8,
   },
   headerSubtitle: {
     fontSize: FONT_SIZES.md,
     color: COLORS.background,
-    fontFamily: 'Roboto-Regular',
-    textAlign: 'center',
+    fontFamily: "Roboto-Regular",
+    textAlign: "center",
     opacity: 0.9,
   },
 
@@ -53,7 +53,7 @@ export const culinaryStoryStyles = StyleSheet.create({
     marginBottom: 20,
     borderWidth: 1,
     borderColor: COLORS.border,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 4,
@@ -68,7 +68,7 @@ export const culinaryStoryStyles = StyleSheet.create({
     borderWidth: 2,
   },
   storyImage: {
-    width: '100%',
+    width: "100%",
     height: 200,
     borderRadius: 12,
     marginBottom: 16,
@@ -76,8 +76,8 @@ export const culinaryStoryStyles = StyleSheet.create({
   storyCategory: {
     fontSize: FONT_SIZES.xs,
     color: COLORS.primary,
-    fontFamily: 'Roboto-Bold',
-    textTransform: 'uppercase',
+    fontFamily: "Roboto-Bold",
+    textTransform: "uppercase",
     letterSpacing: 1,
     marginBottom: 8,
   },
@@ -85,30 +85,30 @@ export const culinaryStoryStyles = StyleSheet.create({
     fontSize: FONT_SIZES.xl,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text.primary,
-    fontFamily: 'Roboto-Bold',
+    fontFamily: "Roboto-Bold",
     marginBottom: 12,
     lineHeight: 28,
   },
   storyContent: {
     fontSize: FONT_SIZES.md,
     color: COLORS.text.secondary,
-    fontFamily: 'Roboto-Regular',
+    fontFamily: "Roboto-Regular",
     lineHeight: 24,
     marginBottom: 16,
   },
-  
+
   // Story metadata
   storyMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
   },
   authorInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   authorAvatar: {
@@ -122,28 +122,28 @@ export const culinaryStoryStyles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.text.primary,
-    fontFamily: 'Roboto-Medium',
+    fontFamily: "Roboto-Medium",
   },
   publishDate: {
     fontSize: FONT_SIZES.xs,
     color: COLORS.text.light,
-    fontFamily: 'Roboto-Regular',
+    fontFamily: "Roboto-Regular",
   },
-  
+
   // Read more button
   readMoreButton: {
     backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginTop: 12,
   },
   readMoreText: {
     color: COLORS.background,
     fontSize: FONT_SIZES.sm,
     fontWeight: FONT_WEIGHTS.bold,
-    fontFamily: 'Roboto-Bold',
+    fontFamily: "Roboto-Bold",
   },
 
   // Categories filter
@@ -155,11 +155,11 @@ export const culinaryStoryStyles = StyleSheet.create({
     fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text.primary,
-    fontFamily: 'Roboto-Bold',
+    fontFamily: "Roboto-Bold",
     marginBottom: 12,
   },
   categoriesList: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   categoryButton: {
     backgroundColor: COLORS.surface,
@@ -177,18 +177,18 @@ export const culinaryStoryStyles = StyleSheet.create({
   categoryButtonText: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.text.secondary,
-    fontFamily: 'Roboto-Regular',
+    fontFamily: "Roboto-Regular",
   },
   categoryButtonTextActive: {
     color: COLORS.background,
-    fontFamily: 'Roboto-Bold',
+    fontFamily: "Roboto-Bold",
   },
 
   // Empty state
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 40,
   },
   emptyIcon: {
@@ -199,15 +199,15 @@ export const culinaryStoryStyles = StyleSheet.create({
     fontSize: FONT_SIZES.xl,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text.primary,
-    fontFamily: 'Roboto-Bold',
-    textAlign: 'center',
+    fontFamily: "Roboto-Bold",
+    textAlign: "center",
     marginBottom: 12,
   },
   emptyDescription: {
     fontSize: FONT_SIZES.md,
     color: COLORS.text.secondary,
-    fontFamily: 'Roboto-Regular',
-    textAlign: 'center',
+    fontFamily: "Roboto-Regular",
+    textAlign: "center",
     lineHeight: 24,
   },
 
@@ -219,21 +219,21 @@ export const culinaryStoryStyles = StyleSheet.create({
     fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text.primary,
-    fontFamily: 'Roboto-Bold',
+    fontFamily: "Roboto-Bold",
     marginBottom: 16,
     paddingHorizontal: 20,
   },
-  
+
   // Loading state
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     fontSize: FONT_SIZES.md,
     color: COLORS.text.secondary,
-    fontFamily: 'Roboto-Regular',
+    fontFamily: "Roboto-Regular",
     marginTop: 16,
   },
 });

@@ -61,7 +61,7 @@ export const authStyles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "Quicksand",
   },
-  
+
   // Additional styles for different screens
   forgotPassword: {
     alignItems: "center",
@@ -98,7 +98,7 @@ export const authStyles = StyleSheet.create({
     fontWeight: "bold",
     fontFamily: "Quicksand",
   },
-  
+
   // Register screen specific styles
   registerButton: {
     backgroundColor: "#FF6B6B",
@@ -126,7 +126,7 @@ export const authStyles = StyleSheet.create({
     fontWeight: "bold",
     fontFamily: "Quicksand",
   },
-  
+
   // Terms and conditions
   termsContainer: {
     flexDirection: "row",
@@ -152,7 +152,7 @@ export const authStyles = StyleSheet.create({
     color: "#FF6B6B",
     fontFamily: "Quicksand",
   },
-  
+
   // Password requirements
   passwordRequirements: {
     backgroundColor: "#F0F8FF",
@@ -173,12 +173,12 @@ export const authStyles = StyleSheet.create({
     marginBottom: 4,
     fontFamily: "Quicksand",
   },
-  
+
   // Button containers
   buttonContainer: {
     gap: 12,
   },
-  
+
   // Success message
   successMessage: {
     backgroundColor: "#E8F5E8",
