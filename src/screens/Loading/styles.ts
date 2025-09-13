@@ -8,18 +8,20 @@ export const loadingStyles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   logoContainer: {
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
   },
   logo: {
-    width: 120,
-    height: 120,
-    marginBottom: 20,
+    width: 100,
+    height: 100,
+    marginRight: 20,
   },
   appName: {
-    fontSize: 28,
+    fontSize: 48,
     fontWeight: "bold",
-    color: "#FF6B6B",
-    fontFamily: "Quicksand-Bold",
+    color: "#FF7043",
+    fontFamily: "Quicksand",
     letterSpacing: 1,
   },
   tagline: {

@@ -56,9 +56,6 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ navigation }) => {
           resizeMode="contain"
         />
         <Text style={loadingStyles.appName}>CookiNote</Text>
-        <Text style={loadingStyles.tagline}>
-          Nơi chia sẻ công thức nấu ăn yêu thích
-        </Text>
       </Animated.View>
     </View>
   );
