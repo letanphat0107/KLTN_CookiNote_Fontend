@@ -28,7 +28,7 @@ const AuthHeader: React.FC<AuthHeaderProps> = ({
       {showBackButton && (
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <Image
-            source={require("../../../assets/images/Vector.png")}
+            source={require("../../assets/images/vector.png")}
             style={styles.backIcon}
             resizeMode="contain"
           />
@@ -37,7 +37,7 @@ const AuthHeader: React.FC<AuthHeaderProps> = ({
 
       <View style={styles.logoContainer}>
         <Image
-          source={require("../../../assets/images/logo.png")}
+          source={require("../../assets/images/logo.png")}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -52,26 +52,26 @@ const AuthHeader: React.FC<AuthHeaderProps> = ({
 const styles = StyleSheet.create({
   container: {
     paddingTop: 50,
-    paddingBottom: 30,
+    paddingBottom: 80,
     alignItems: "center",
     backgroundColor: "#FFFFFF",
   },
   backButton: {
     position: "absolute",
-    left: 20,
-    top: 50,
+    left: 0,
+    top: 30,
     zIndex: 1,
-    padding: 10,
   },
   backIcon: {
-    width: 24,
-    height: 24,
+    width: 30,
+    height: 30,
     tintColor: "#333333",
   },
   logoContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 60,
     marginBottom: 20,
   },
   logo: {

@@ -8,7 +8,7 @@ export const authStyles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     padding: 20,
-    justifyContent: "center",
+    justifyContent: "flex-start",
   },
   title: {
     fontSize: 28,

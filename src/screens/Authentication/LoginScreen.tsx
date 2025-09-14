@@ -57,7 +57,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       contentContainerStyle={authStyles.scrollContainer}
       showsVerticalScrollIndicator={false}
     >
-      <AuthHeader title="Đăng nhập" showBackButton={false} />
+      <AuthHeader title="Đăng nhập" showBackButton={true} />
 
       <View style={authStyles.form}>
         <View style={authStyles.inputGroup}>
