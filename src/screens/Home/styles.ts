@@ -73,7 +73,7 @@ export const homeStyles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333333",
     marginBottom: 16,
-    marginLeft:20,
+    marginLeft: 20,
     fontFamily: "Roboto",
   },
   categoryContainer: {
@@ -385,8 +385,16 @@ export const homeStyles = StyleSheet.create({
   },
   commonRecipesContainer: {
     flexDirection: "row",
-    gap: 12,
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
+  },
+  commonRecipeCard: {
+    width: "48%",
+    backgroundColor: "#f7f4eb",
+    borderRadius: 8,
+    overflow: "hidden",
+    marginBottom: 12,
   },
 
   // Login Prompt Card

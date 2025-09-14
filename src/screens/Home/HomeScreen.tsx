@@ -90,19 +90,40 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     {
       id: 3,
       title: isAuthenticated
-        ? "Cơm Tấm Sườn Bì Chả"
-        : "Cách làm cơm tấm sườn bì chả",
+        ? "Cơm Tấm Sườn Bì Chả 3"
+        : "Cách làm cơm tấm sườn bì chả 3",
       image: require("../../../assets/images/cachlamcomtam.jpg"),
     },
     {
       id: 4,
       title: isAuthenticated
         ? "Bánh Flan Caramel"
-        : "Cách làm cơm tấm sườn bì chả",
+        : "Cách làm cơm tấm sườn bì chả 4",
       image: require("../../../assets/images/cachlamcomtam.jpg"),
     },
     {
       id: 5,
+      title: isAuthenticated
+        ? "Cơm Tấm Sườn Bì Chả"
+        : "Cách làm cơm tấm sườn bì chả 5",
+      image: require("../../../assets/images/cachlamcomtam.jpg"),
+    },
+    {
+      id: 6,
+      title: isAuthenticated
+        ? "Cơm Tấm Sườn Bì Chả"
+        : "Cách làm cơm tấm sườn bì chả",
+      image: require("../../../assets/images/cachlamcomtam.jpg"),
+    },
+    {
+      id: 7,
+      title: isAuthenticated
+        ? "Bánh Flan Caramel"
+        : "Cách làm cơm tấm sườn bì chả",
+      image: require("../../../assets/images/cachlamcomtam.jpg"),
+    },
+    {
+      id: 8,
       title: isAuthenticated
         ? "Cơm Tấm Sườn Bì Chả"
         : "Cách làm cơm tấm sườn bì chả",
@@ -131,6 +152,27 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     {
       id: 4,
       title: isAuthenticated ? "Chè Ba Màu" : "Cách làm cơm tấm sướn bì chả",
+      image: require("../../../assets/images/cachlamcomtam.jpg"),
+    },
+    {
+      id: 5,
+      title: isAuthenticated
+        ? "Cơm Tấm Sườn Bì Chả"
+        : "Cách làm cơm tấm sườn bì chả 5",
+      image: require("../../../assets/images/cachlamcomtam.jpg"),
+    },
+    {
+      id: 6,
+      title: isAuthenticated
+        ? "Cơm Tấm Sườn Bì Chả"
+        : "Cách làm cơm tấm sườn bì chả",
+      image: require("../../../assets/images/cachlamcomtam.jpg"),
+    },
+    {
+      id: 7,
+      title: isAuthenticated
+        ? "Bánh Flan Caramel"
+        : "Cách làm cơm tấm sườn bì chả",
       image: require("../../../assets/images/cachlamcomtam.jpg"),
     },
   ];
@@ -225,22 +267,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         {/* Common Recipes Section */}
         <View style={homeStyles.recipeSection}>
           <Text style={homeStyles.sectionTitle}>Món ăn phổ biến</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={homeStyles.commonRecipesContainer}>
-              {commonRecipes.map((recipe) => (
-                <TouchableOpacity
-                  key={recipe.id}
-                  style={homeStyles.recipeCardHorizontal}
-                >
-                  <Image
-                    source={recipe.image}
-                    style={homeStyles.recipeCardImage}
-                  />
-                  <Text style={homeStyles.recipeCardTitle}>{recipe.title}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </ScrollView>
+          <View style={homeStyles.commonRecipesContainer}>
+            {commonRecipes.map((recipe) => (
+              <TouchableOpacity
+                key={recipe.id}
+                style={homeStyles.commonRecipeCard}
+              >
+                <Image
+                  source={recipe.image}
+                  style={homeStyles.recipeCardImage}
+                />
+                <Text style={homeStyles.recipeCardTitle}>{recipe.title}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
 
         {/* Create a touchable area for the entire content */}
