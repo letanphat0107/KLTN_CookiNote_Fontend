@@ -57,8 +57,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         {/* Demo credentials info */}
         <View style={authStyles.demoContainer}>
           <Text style={authStyles.demoTitle}>Demo Account:</Text>
-          <Text style={authStyles.demoText}>Username: phat123</Text>
-          <Text style={authStyles.demoText}>Password: 111111</Text>
+          <Text style={authStyles.demoText}>Username: p</Text>
+          <Text style={authStyles.demoText}>Password: 1</Text>
         </View>
 
         <TextInput

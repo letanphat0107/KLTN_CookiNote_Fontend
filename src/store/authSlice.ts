@@ -11,7 +11,7 @@ const mockAuthService = {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Hardcoded validation theo yêu cầu
-    if (credentials.email === "phat123" && credentials.password === "111111") {
+    if (credentials.email === "p" && credentials.password === "1") {
       const user: User = {
         user_id: 1,
         email: "phat123@cookinote.com",
