@@ -3,9 +3,12 @@ import { StyleSheet } from "react-native";
 export const authStyles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  scrollContainer: {
+    flexGrow: 1,
     padding: 20,
     justifyContent: "center",
-    backgroundColor: "#FFFFFF",
   },
   title: {
     fontSize: 28,
@@ -226,6 +229,42 @@ export const authStyles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
     marginTop: 10,
+    fontFamily: "Quicksand",
+  },
+
+  // New rounded GUI styles
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333333",
+    marginBottom: 8,
+    fontFamily: "Quicksand",
+  },
+  roundedInput: {
+    height: 48,
+    borderWidth: 1.5,
+    borderColor: "#E0E0E0",
+    borderRadius: 24,
+    paddingHorizontal: 20,
+    fontSize: 16,
+    backgroundColor: "#FFFFFF",
+    fontFamily: "Quicksand",
+  },
+  roundedButton: {
+    backgroundColor: "#FF6B6B",
+    height: 48,
+    borderRadius: 24,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  roundedButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
     fontFamily: "Quicksand",
   },
 });

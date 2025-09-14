@@ -8,6 +8,9 @@ import { checkAuthStatus } from "../store/authSlice";
 // Import screens
 import LoadingScreen from "../screens/Loading/LoadingScreen";
 import LoginScreen from "../screens/Authentication/LoginScreen";
+import RegisterScreen from "../screens/Authentication/RegisterScreen";
+import ForgotPasswordScreen from "../screens/Authentication/ForgotPasswordScreen";
+import NewPasswordScreen from "../screens/Authentication/NewPasswordScreen";
 
 import TabNavigator from "./TabNavigator";
 
@@ -83,12 +86,18 @@ const RootNavigator = () => {
         <>
           {/* Loading */}
           <Stack.Screen name="Loading" component={LoadingScreen} />
-          
+
           {/* Unauthenticated Home with limited features */}
           <Stack.Screen name="HomeScreen" component={TabNavigator} />
 
           {/* Authentication */}
           <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen
+            name="ForgotPassword"
+            component={ForgotPasswordScreen}
+          />
+          <Stack.Screen name="NewPassword" component={NewPasswordScreen} />
 
           {/* Public recipe viewing */}
           <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />

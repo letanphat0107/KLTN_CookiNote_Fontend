@@ -6,9 +6,11 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { loginUser, clearError } from "../../store/authSlice";
+import AuthHeader from "../../components/AuthHeader";
 import { authStyles } from "./styles";
 
 interface LoginScreenProps {
@@ -50,43 +52,46 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   }, [dispatch]);
 
   return (
-    <View style={authStyles.container}>
-      <Text style={authStyles.title}>Đăng Nhập</Text>
+    <ScrollView
+      style={authStyles.container}
+      contentContainerStyle={authStyles.scrollContainer}
+      showsVerticalScrollIndicator={false}
+    >
+      <AuthHeader title="Đăng nhập" showBackButton={false} />
 
       <View style={authStyles.form}>
-        {/* Demo credentials info */}
-        <View style={authStyles.demoContainer}>
-          <Text style={authStyles.demoTitle}>Demo Account:</Text>
-          <Text style={authStyles.demoText}>Username: p</Text>
-          <Text style={authStyles.demoText}>Password: 1</Text>
+        <View style={authStyles.inputGroup}>
+          <Text style={authStyles.inputLabel}>Tên đăng nhập</Text>
+          <TextInput
+            style={authStyles.roundedInput}
+            placeholder=""
+            placeholderTextColor="#999"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!isLoading}
+          />
         </View>
 
-        <TextInput
-          style={authStyles.input}
-          placeholder="Email hoặc tên đăng nhập"
-          placeholderTextColor="#999"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          autoCorrect={false}
-          editable={!isLoading}
-        />
-
-        <TextInput
-          style={authStyles.input}
-          placeholder="Mật khẩu"
-          placeholderTextColor="#999"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          autoCapitalize="none"
-          autoCorrect={false}
-          editable={!isLoading}
-        />
+        <View style={authStyles.inputGroup}>
+          <Text style={authStyles.inputLabel}>Mật khẩu</Text>
+          <TextInput
+            style={authStyles.roundedInput}
+            placeholder=""
+            placeholderTextColor="#999"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!isLoading}
+          />
+        </View>
 
         <TouchableOpacity
           style={[
-            authStyles.loginButton,
+            authStyles.roundedButton,
             isLoading && authStyles.disabledButton,
           ]}
           onPress={handleLogin}
@@ -95,28 +100,33 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           {isLoading ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
-            <Text style={authStyles.loginButtonText}>Đăng Nhập</Text>
+            <Text style={authStyles.roundedButtonText}>Đăng nhập</Text>
           )}
         </TouchableOpacity>
 
         {error && <Text style={authStyles.errorText}>{error}</Text>}
 
-        <TouchableOpacity style={authStyles.forgotPassword}>
-          <Text style={authStyles.forgotPasswordText}>Quên mật khẩu?</Text>
-        </TouchableOpacity>
+        <View style={{ marginTop: 20, alignItems: "center" }}>
+          <TouchableOpacity
+            onPress={() => navigation?.navigate("ForgotPassword")}
+            disabled={isLoading}
+          >
+            <Text style={authStyles.linkText}>Quên mật khẩu?</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={authStyles.registerLink}
-          onPress={handleRegister}
-          disabled={isLoading}
-        >
-          <Text style={authStyles.registerLinkText}>
-            Chưa có tài khoản?{" "}
-            <Text style={authStyles.registerLinkTextBold}>Đăng ký</Text>
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={{ marginTop: 15 }}
+            onPress={() => navigation?.navigate("Register")}
+            disabled={isLoading}
+          >
+            <Text style={authStyles.secondaryText}>
+              Chưa có tài khoản?{" "}
+              <Text style={authStyles.linkText}>Đăng ký</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
