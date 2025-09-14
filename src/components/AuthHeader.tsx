@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 interface AuthHeaderProps {
@@ -27,15 +27,20 @@ const AuthHeader: React.FC<AuthHeaderProps> = ({
     <View style={styles.container}>
       {showBackButton && (
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <Text style={styles.backIcon}>←</Text>
+          <Image
+            source={require("../../../assets/images/Vector.png")}
+            style={styles.backIcon}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
       )}
 
       <View style={styles.logoContainer}>
-        <View style={styles.logoBox}>
-          <Text style={styles.logoIcon}>🍳</Text>
-          <Text style={styles.logoText}>CookiNote</Text>
-        </View>
+        <Image
+          source={require("../../../assets/images/logo.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
         <Text style={styles.appName}>CookiNote</Text>
       </View>
 
@@ -59,38 +64,27 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   backIcon: {
-    fontSize: 24,
-    color: "#333333",
-    fontWeight: "bold",
+    width: 24,
+    height: 24,
+    tintColor: "#333333",
   },
   logoContainer: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  logoBox: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF0E6",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginBottom: 8,
+    justifyContent: "center",
+    marginBottom: 20,
   },
-  logoIcon: {
-    fontSize: 20,
-    marginRight: 8,
-  },
-  logoText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333333",
-    fontFamily: "Quicksand",
+  logo: {
+    width: 100,
+    height: 100,
+    marginRight: 20,
   },
   appName: {
-    fontSize: 24,
+    fontSize: 44,
     fontWeight: "bold",
-    color: "#FF6B6B",
+    color: "#FF7043",
     fontFamily: "Quicksand",
+    letterSpacing: 1,
   },
   title: {
     fontSize: 24,
