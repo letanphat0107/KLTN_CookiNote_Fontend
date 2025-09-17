@@ -278,6 +278,8 @@ export const homeStyles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 2,
     borderColor: "#FFFFFF",
+    marginTop: 30,
+
   },
   scrollContent: {
     flex: 1,

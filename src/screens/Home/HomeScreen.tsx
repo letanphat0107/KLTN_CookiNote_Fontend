@@ -194,7 +194,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           <TouchableOpacity onPress={handleProfilePress}>
             <Image
               source={{
-                uri: user?.avatar_url || "https://via.placeholder.com/40x40",
+                uri: user?.avatar_url || "https://i.pinimg.com/736x/6b/43/47/6b43478d2362f5e6ba3457abc8adcb06.jpg",
               }}
               style={homeStyles.userAvatar}
             />
