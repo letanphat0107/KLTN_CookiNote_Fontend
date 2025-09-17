@@ -52,7 +52,7 @@ const AuthHeader: React.FC<AuthHeaderProps> = ({
 const styles = StyleSheet.create({
   container: {
     paddingTop: 50,
-    paddingBottom: 80,
+    paddingBottom: 40,
     alignItems: "center",
     backgroundColor: "#FFFFFF",
   },
