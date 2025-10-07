@@ -316,6 +316,272 @@ export const recipeStyles = StyleSheet.create({
     fontFamily: "Roboto-Regular",
     marginTop: 4,
   },
+
+  // Recipe Guide Screen styles
+  guideHeader: {
+    backgroundColor: "#FF6B35",
+    paddingTop: 50,
+    paddingBottom: 15,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  backButton: {
+    padding: 5,
+  },
+  backButtonText: {
+    fontSize: 24,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+  },
+  guideTitle: {
+    fontSize: 18,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontFamily: "Roboto",
+    flex: 1,
+    textAlign: "center",
+  },
+  stepIndicator: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 15,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  stepIndicatorText: {
+    fontSize: 14,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontFamily: "Roboto",
+  },
+
+  // Timer Section
+  timerSection: {
+    backgroundColor: "#FFF3E0",
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+  },
+  timerDisplay: {
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  timerText: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#FF6B35",
+    fontFamily: "Roboto",
+  },
+  timerStatus: {
+    fontSize: 14,
+    color: "#666666",
+    fontFamily: "Roboto",
+  },
+  timerControls: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+  },
+  timerButton: {
+    backgroundColor: "#FF6B35",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginHorizontal: 2,
+    marginVertical: 2,
+    minWidth: 50,
+    alignItems: "center",
+  },
+  stopButton: {
+    backgroundColor: "#F44336",
+  },
+  timerButtonText: {
+    fontSize: 12,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontFamily: "Roboto",
+  },
+
+  // Step Content
+  stepContentGUI: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  stepScrollContainer: {
+    padding: 20,
+    paddingBottom: 100,
+  },
+  currentStep: {
+    backgroundColor: "#FFFFFF",
+  },
+  currentStepNumber: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#FF6B35",
+    marginBottom: 15,
+    textAlign: "center",
+    fontFamily: "Roboto",
+  },
+  stepGuideImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 12,
+    marginBottom: 15,
+  },
+  currentStepContent: {
+    fontSize: 18,
+    color: "#333333",
+    lineHeight: 26,
+    marginBottom: 20,
+    fontFamily: "Roboto",
+  },
+  suggestedTimeContainer: {
+    backgroundColor: "#E3F2FD",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 15,
+  },
+  suggestedTimeText: {
+    fontSize: 16,
+    color: "#1976D2",
+    fontWeight: "500",
+    fontFamily: "Roboto",
+  },
+  tipsContainer: {
+    backgroundColor: "#FFF8E1",
+    borderRadius: 8,
+    padding: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "#FFC107",
+  },
+  tipsTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#F57C00",
+    marginBottom: 5,
+    fontFamily: "Roboto",
+  },
+  tipsText: {
+    fontSize: 14,
+    color: "#F57C00",
+    lineHeight: 20,
+    fontFamily: "Roboto",
+  },
+
+  // Navigation Buttons
+  navigationButtons: {
+    flexDirection: "row",
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  navButton: {
+    flex: 1,
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: "center",
+    marginHorizontal: 5,
+  },
+  prevButton: {
+    backgroundColor: "#757575",
+  },
+  nextButton: {
+    backgroundColor: "#FF6B35",
+  },
+  completeButton: {
+    backgroundColor: "#4CAF50",
+  },
+  disabledButton: {
+    backgroundColor: "#E0E0E0",
+  },
+  navButtonText: {
+    fontSize: 16,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontFamily: "Roboto",
+  },
+  disabledButtonText: {
+    color: "#BDBDBD",
+  },
+
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 20,
+    width: "80%",
+    maxWidth: 300,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333333",
+    textAlign: "center",
+    marginBottom: 20,
+    fontFamily: "Roboto",
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: "center",
+    fontFamily: "Roboto",
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  modalCancelButton: {
+    flex: 1,
+    backgroundColor: "#E0E0E0",
+    borderRadius: 8,
+    paddingVertical: 10,
+    alignItems: "center",
+    marginRight: 10,
+  },
+  modalConfirmButton: {
+    flex: 1,
+    backgroundColor: "#FF6B35",
+    borderRadius: 8,
+    paddingVertical: 10,
+    alignItems: "center",
+    marginLeft: 10,
+  },
+  modalCancelText: {
+    fontSize: 16,
+    color: "#666666",
+    fontWeight: "bold",
+    fontFamily: "Roboto",
+  },
+  modalConfirmText: {
+    fontSize: 16,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontFamily: "Roboto",
+  },
 });
 
 export default recipeStyles;
