@@ -6,7 +6,6 @@ export const accountStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    padding: 20,
   },
   content: {
     flex: 1,
@@ -26,45 +25,51 @@ export const accountStyles = StyleSheet.create({
   // Header styles
   header: {
     backgroundColor: "#FF6B35",
-    paddingTop: 50,
+    paddingTop: 0,
     paddingBottom: 20,
     paddingHorizontal: 20,
     flexDirection: "row",
     alignItems: "center",
   },
   backButton: {
-    marginRight: 20,
+    position: "absolute",
+    left: 20,
+    top: 50,
+    zIndex: 1,
   },
-  backButtonText: {
-    fontSize: 24,
-    color: "#FFFFFF",
-    fontWeight: "bold",
+  backIcon: {
+    width: 30,
+    height: 30,
+    tintColor: "#ffffff",
   },
   headerTitle: {
-    fontSize: 20,
+    position: "absolute",
+    left: 60,
+    top: 46,
+    zIndex: 1,
+    fontSize: 26,
     color: "#FFFFFF",
-    fontWeight: "bold",
+    fontWeight: "medium",
     fontFamily: "Roboto",
   },
 
   // Logo section
   logoSection: {
     backgroundColor: "#FF6B35",
-    paddingBottom: 60,
+    paddingTop: 40,
+    marginBottom:100,
     alignItems: "center",
   },
   logoContainer: {
-    backgroundColor: "#FFF3E0",
-    borderRadius: 100,
-    width: 200,
-    height: 200,
+    width: 160,
+    height: 160,
+    paddingTop: 160,
     justifyContent: "center",
     alignItems: "center",
   },
   logo: {
-    width: 80,
-    height: 80,
-    marginBottom: 10,
+    width: 160,
+    height: 160,
   },
   appName: {
     fontSize: 18,
@@ -82,11 +87,12 @@ export const accountStyles = StyleSheet.create({
     borderRadius: 8,
   },
   userName: {
-    fontSize: 20,
+    fontSize: 26,
     fontWeight: "bold",
     color: "#333333",
-    marginBottom: 4,
+    marginBottom: 20,
     fontFamily: "Roboto",
+    textAlign: "center",
   },
   userEmail: {
     fontSize: 16,
@@ -104,6 +110,7 @@ export const accountStyles = StyleSheet.create({
   // Menu container
   menuContainer: {
     paddingHorizontal: 20,
+    marginTop: 20,  
     marginBottom: 40,
   },
   menuItem: {

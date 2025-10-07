@@ -1,8 +1,9 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { logoutUser } from "../../store/authSlice";
 import { accountStyles } from "./styles";
+import AccountHeader from "../../components/AccountHeader";
 
 interface AccountScreenProps {
   navigation?: any;
@@ -46,30 +47,11 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
 
   return (
     <View style={accountStyles.container}>
-      {/* Header */}
-      <View style={accountStyles.header}>
-        <TouchableOpacity onPress={handleBack} style={accountStyles.backButton}>
-          <Text style={accountStyles.backButtonText}>←</Text>
-        </TouchableOpacity>
-        <Text style={accountStyles.headerTitle}>Tài khoản</Text>
-      </View>
-
-      {/* Logo Section */}
-      <View style={accountStyles.logoSection}>
-        <View style={accountStyles.logoContainer}>
-          <Image
-            source={require("../../../assets/images/logo.png")}
-            style={accountStyles.logo}
-            resizeMode="contain"
-          />
-          <Text style={accountStyles.appName}>CookiNote</Text>
-        </View>
-      </View>
-
-      {/* User Name */}
-      <Text style={accountStyles.userName}>
-        {user?.display_name || "Leslie Gilliams"}
-      </Text>
+      <AccountHeader
+        title="Tài khoản"
+        userName={user?.display_name || "Leslie Gilliams"}
+        onBackPress={handleBack}
+      />
 
       {/* Menu Items */}
       <View style={accountStyles.menuContainer}>
@@ -97,7 +79,7 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
       </View>
 
       {/* Logout Button */}
-      <View style={accountStyles.logoContainer}>
+      <View style={accountStyles.logoutContainer}>
         <TouchableOpacity
           style={accountStyles.logoutButton}
           onPress={handleLogout}

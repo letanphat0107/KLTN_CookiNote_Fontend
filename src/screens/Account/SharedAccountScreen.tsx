@@ -1,75 +1,59 @@
 import React from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { accountStyles } from "./styles";
+import AccountHeader from "../../components/AccountHeader";
 
-const SharedAccountScreen = () => {
+interface SharedAccountScreenProps {
+  navigation?: any;
+  route?: {
+    params?: {
+      userId?: string;
+      userName?: string;
+    };
+  };
+}
+
+const SharedAccountScreen: React.FC<SharedAccountScreenProps> = ({
+  navigation,
+  route,
+}) => {
+  const userId = route?.params?.userId;
+  const userName = route?.params?.userName || "User Profile";
+
+  const handleBack = () => {
+    if (navigation) {
+      navigation.goBack();
+    }
+  };
+
   return (
     <View style={accountStyles.container}>
-      <Text style={accountStyles.title}>Tài Khoản Chia Sẻ</Text>
+      <AccountHeader
+        title="Trang cá nhân"
+        userName={userName}
+        onBackPress={handleBack}
+      />
 
       <ScrollView style={accountStyles.content}>
-        <View style={accountStyles.profileHeader}>
-          <View style={accountStyles.avatar}>
-            <Text style={accountStyles.avatarText}>NA</Text>
-          </View>
-          <Text style={accountStyles.userName}>Nguyễn Văn A</Text>
-          <Text style={accountStyles.userDescription}>
-            Yêu thích nấu ăn và chia sẻ những công thức độc đáo
+        <View style={accountStyles.userInfo}>
+          <Text style={accountStyles.avatarText}>
+            Đây là trang cá nhân được chia sẻ của {userName}
           </Text>
-        </View>
 
-        <View style={accountStyles.statsContainer}>
-          <View style={accountStyles.statItem}>
-            <Text style={accountStyles.statNumber}>15</Text>
-            <Text style={accountStyles.statLabel}>Công thức</Text>
+          <View style={accountStyles.statsContainer}>
+            <View style={accountStyles.statItem}>
+              <Text style={accountStyles.statNumber}>25</Text>
+              <Text style={accountStyles.statLabel}>Công thức</Text>
+            </View>
+            <View style={accountStyles.statItem}>
+              <Text style={accountStyles.statNumber}>150</Text>
+              <Text style={accountStyles.statLabel}>Người theo dõi</Text>
+            </View>
+            <View style={accountStyles.statItem}>
+              <Text style={accountStyles.statNumber}>89</Text>
+              <Text style={accountStyles.statLabel}>Đang theo dõi</Text>
+            </View>
           </View>
-          <View style={accountStyles.statItem}>
-            <Text style={accountStyles.statNumber}>128</Text>
-            <Text style={accountStyles.statLabel}>Người theo dõi</Text>
-          </View>
-          <View style={accountStyles.statItem}>
-            <Text style={accountStyles.statNumber}>45</Text>
-            <Text style={accountStyles.statLabel}>Đang theo dõi</Text>
-          </View>
-        </View>
-
-        <View style={accountStyles.section}>
-          <Text style={accountStyles.sectionTitle}>Công thức đã chia sẻ</Text>
-
-          <View style={accountStyles.recipeCard}>
-            <Text style={accountStyles.recipeName}>Phở Bò Truyền Thống</Text>
-            <Text style={accountStyles.recipeStats}>
-              👁 245 lượt xem • ❤️ 18 yêu thích
-            </Text>
-          </View>
-
-          <View style={accountStyles.recipeCard}>
-            <Text style={accountStyles.recipeName}>Bánh Mì Việt Nam</Text>
-            <Text style={accountStyles.recipeStats}>
-              👁 189 lượt xem • ❤️ 12 yêu thích
-            </Text>
-          </View>
-
-          <View style={accountStyles.recipeCard}>
-            <Text style={accountStyles.recipeName}>Gỏi Cuốn Tôm Thịt</Text>
-            <Text style={accountStyles.recipeStats}>
-              👁 156 lượt xem • ❤️ 9 yêu thích
-            </Text>
-          </View>
-        </View>
-
-        <View style={accountStyles.actionButtons}>
-          <TouchableOpacity style={accountStyles.editButton}>
-            <Text style={accountStyles.editButtonText}>
-              Chỉnh sửa trang cá nhân
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={accountStyles.shareButton}>
-            <Text style={accountStyles.shareButtonText}>
-              Chia sẻ trang cá nhân
-            </Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
