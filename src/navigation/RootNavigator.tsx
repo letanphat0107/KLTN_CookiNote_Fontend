@@ -18,7 +18,6 @@ import RecipeDetailScreen from "../screens/Recipe/RecipeDetailScreen";
 import RecipeGuideScreen from "../screens/Recipe/RecipeGuideScreen";
 import AccountScreen from "../screens/Account/AccountScreen";
 import ProfileScreen from "../screens/Account/ProfileScreen";
-import ChangePasswordScreen from "../screens/Account/ChangePasswordScreen";
 import SharedAccountScreen from "../screens/Account/SharedAccountScreen";
 import AdminDashboardScreen from "../screens/Admin/AdminDashboardScreen";
 import ManageDishesScreen from "../screens/Admin/ManageDishesScreen";
@@ -60,8 +59,8 @@ const RootNavigator = () => {
           <Stack.Screen name="Account" component={AccountScreen} />
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen
-            name="ChangePassword"
-            component={ChangePasswordScreen}
+            name="NewPassword"
+            component={NewPasswordScreen}
           />
           <Stack.Screen name="SharedAccount" component={SharedAccountScreen} />
 

@@ -26,7 +26,7 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
 
   const handleChangePassword = () => {
     if (navigation) {
-      navigation.navigate("ChangePassword", {
+      navigation.navigate("NewPassword", {
         mode: "change",
         email: user?.email,
       });
