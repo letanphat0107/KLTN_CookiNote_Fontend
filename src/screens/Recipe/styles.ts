@@ -72,53 +72,94 @@ export const recipeStyles = StyleSheet.create({
     fontFamily: "Roboto-Regular",
   },
 
-  // Sections
+  // Section styles
   section: {
-    marginBottom: 24,
+    marginVertical: 20,
+    paddingHorizontal: 20,
   },
   sectionTitle: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.primary,
-    fontFamily: "Roboto-Bold",
-    marginBottom: 12,
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333333",
+    marginBottom: 15,
+    fontFamily: "Roboto",
   },
 
-  // Ingredients
-  ingredientList: {
-    backgroundColor: "#F0F8FF",
+  // Ingredients styles
+  ingredientsContainer: {
+    backgroundColor: "#F9F9F9",
+    borderRadius: 12,
     padding: 16,
-    borderRadius: 8,
   },
-  ingredient: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text.primary,
-    fontFamily: "Roboto-Regular",
-    marginBottom: 8,
-    lineHeight: 24,
+  ingredientItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+  },
+  ingredientBullet: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#FF6B35",
+    marginRight: 12,
+  },
+  ingredientName: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333333",
+    fontFamily: "Roboto",
+  },
+  ingredientQuantity: {
+    fontSize: 16,
+    color: "#666666",
+    fontWeight: "500",
+    fontFamily: "Roboto",
   },
 
-  // Steps
-  step: {
-    marginBottom: 16,
+  // Steps styles
+  stepsContainer: {
+    backgroundColor: "#F9F9F9",
+    borderRadius: 12,
     padding: 16,
-    backgroundColor: "#FAFAFA",
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.primary,
+  },
+  stepItem: {
+    flexDirection: "row",
+    marginBottom: 20,
+    alignItems: "flex-start",
   },
   stepNumber: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.primary,
-    fontFamily: "Roboto-Bold",
-    marginBottom: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#FF6B35",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+    marginTop: 4,
   },
-  stepDescription: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text.primary,
-    fontFamily: "Roboto-Regular",
+  stepNumberText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+    fontFamily: "Roboto",
+  },
+  stepContent: {
+    flex: 1,
+  },
+  stepText: {
+    fontSize: 16,
+    color: "#333333",
     lineHeight: 24,
+    marginBottom: 8,
+    fontFamily: "Roboto",
+  },
+  stepImage: {
+    width: "100%",
+    height: 150,
+    borderRadius: 8,
+    marginTop: 8,
   },
 
   // Tips
@@ -132,44 +173,65 @@ export const recipeStyles = StyleSheet.create({
     borderRadius: 8,
   },
 
-  // Action buttons
+  // Updated action buttons
   actionButtons: {
     flexDirection: "row",
-    padding: 20,
-    gap: 12,
-    backgroundColor: COLORS.background,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    borderTopColor: "#E0E0E0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
   },
   favoriteButton: {
     flex: 1,
-    backgroundColor: COLORS.primary,
-    padding: 15,
+    backgroundColor: "#FF6B6B",
     borderRadius: 8,
+    paddingVertical: 12,
     alignItems: "center",
-    justifyContent: "center",
+    marginRight: 8,
   },
   favoriteButtonText: {
-    color: COLORS.background,
-    fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.bold,
-    fontFamily: "Roboto-Bold",
+    fontSize: 14,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontFamily: "Roboto",
   },
   shareButton: {
     flex: 1,
-    backgroundColor: "transparent",
-    padding: 15,
+    backgroundColor: "#4CAF50",
     borderRadius: 8,
+    paddingVertical: 12,
     alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: COLORS.primary,
+    marginHorizontal: 4,
   },
   shareButtonText: {
-    color: COLORS.primary,
-    fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.bold,
-    fontFamily: "Roboto-Bold",
+    fontSize: 14,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontFamily: "Roboto",
+  },
+  startCookingButton: {
+    flex: 1,
+    backgroundColor: "#FF6B35",
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: "center",
+    marginLeft: 8,
+  },
+  startCookingButtonText: {
+    fontSize: 14,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontFamily: "Roboto",
   },
 
   // Recipe image

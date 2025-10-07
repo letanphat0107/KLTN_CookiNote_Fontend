@@ -8,16 +8,83 @@ interface RecipeDetailScreenProps {
       recipeId?: string;
     };
   };
+  navigation?: any;
 }
 
-const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({ route }) => {
+// Mock data for ingredients and steps
+const mockIngredients = [
+  { id: 1, name: "Xương bò", quantity: "1kg", recipe_id: 1 },
+  { id: 2, name: "Bánh phở khô", quantity: "400g", recipe_id: 1 },
+  { id: 3, name: "Thịt bò tái", quantity: "200g", recipe_id: 1 },
+  { id: 4, name: "Hành tây", quantity: "1 củ", recipe_id: 1 },
+  { id: 5, name: "Gừng", quantity: "50g", recipe_id: 1 },
+  { id: 6, name: "Hạt tiêu", quantity: "1 thìa cà phê", recipe_id: 1 },
+  { id: 7, name: "Muối", quantity: "1 thìa cà phê", recipe_id: 1 },
+  { id: 8, name: "Đường phèn", quantity: "1 thìa canh", recipe_id: 1 },
+];
+
+const mockSteps = [
+  {
+    id: 1,
+    content:
+      "Rửa sạch xương bò, cho vào nồi nước sôi chần 5 phút để loại bỏ tạp chất",
+    step_no: 1,
+    recipe_id: 1,
+    image_url: "https://via.placeholder.com/300x200",
+  },
+  {
+    id: 2,
+    content: "Nướng hành tây và gừng trên bếp gas cho thơm, sau đó rửa sạch",
+    step_no: 2,
+    recipe_id: 1,
+    image_url: "https://via.placeholder.com/300x200",
+  },
+  {
+    id: 3,
+    content:
+      "Cho xương bò đã chần vào nồi nước lạnh, nấu trên lửa lớn đến khi sôi",
+    step_no: 3,
+    recipe_id: 1,
+    image_url: "https://via.placeholder.com/300x200",
+  },
+  {
+    id: 4,
+    content:
+      "Hạ lửa nhỏ, vớt bọt, thêm hành tây, gừng nướng và gia vị. Niêu 2-3 tiếng",
+    step_no: 4,
+    recipe_id: 1,
+    image_url: "https://via.placeholder.com/300x200",
+  },
+];
+
+const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
+  route,
+  navigation,
+}) => {
   const recipeId = route?.params?.recipeId;
+
+  const handleStartCooking = () => {
+    if (navigation) {
+      navigation.navigate("RecipeGuide", { recipeId });
+    }
+  };
+
+  const handleAddToFavorite = () => {
+    // TODO: Implement add to favorite logic
+    console.log("Added to favorites");
+  };
+
+  const handleShare = () => {
+    // TODO: Implement share logic
+    console.log("Share recipe");
+  };
 
   return (
     <View style={recipeStyles.container}>
       <ScrollView
         style={recipeStyles.content}
         contentContainerStyle={recipeStyles.scrollContainer}
+        showsVerticalScrollIndicator={false}
       >
         {/* Recipe Image */}
         <View style={recipeStyles.imageContainer}>
@@ -92,18 +159,78 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({ route }) => {
           Phở bò là món ăn truyền thống của Việt Nam, được chế biến từ bánh phở,
           nước dùng trong và ngọt từ xương bò, cùng với thịt bò tái hoặc chín.
           Đây là món ăn đặc trưng và được yêu thích nhất của ẩm thực Việt Nam.
-          Recipe ID: {recipeId || "Not provided"}
         </Text>
+
+        {/* Ingredients Section */}
+        <View style={recipeStyles.section}>
+          <Text style={recipeStyles.sectionTitle}>🥄 Nguyên liệu</Text>
+          <View style={recipeStyles.ingredientsContainer}>
+            {mockIngredients.map((ingredient) => (
+              <View key={ingredient.id} style={recipeStyles.ingredientItem}>
+                <View style={recipeStyles.ingredientBullet} />
+                <Text style={recipeStyles.ingredientName}>
+                  {ingredient.name}
+                </Text>
+                <Text style={recipeStyles.ingredientQuantity}>
+                  {ingredient.quantity}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Steps Section */}
+        <View style={recipeStyles.section}>
+          <Text style={recipeStyles.sectionTitle}>📝 Các bước thực hiện</Text>
+          <View style={recipeStyles.stepsContainer}>
+            {mockSteps.map((step) => (
+              <View key={step.id} style={recipeStyles.stepItem}>
+                <View style={recipeStyles.stepNumber}>
+                  <Text style={recipeStyles.stepNumberText}>
+                    {step.step_no}
+                  </Text>
+                </View>
+                <View style={recipeStyles.stepContent}>
+                  <Text style={recipeStyles.stepText}>{step.content}</Text>
+                  {step.image_url && (
+                    <Image
+                      source={{ uri: step.image_url }}
+                      style={recipeStyles.stepImage}
+                    />
+                  )}
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Bottom spacing for fixed buttons */}
+        <View style={{ height: 100 }} />
       </ScrollView>
 
       {/* Action Buttons */}
       <View style={recipeStyles.actionButtons}>
-        <TouchableOpacity style={recipeStyles.favoriteButton}>
+        <TouchableOpacity
+          style={recipeStyles.favoriteButton}
+          onPress={handleAddToFavorite}
+        >
           <Text style={recipeStyles.favoriteButtonText}>❤️ Yêu thích</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={recipeStyles.shareButton}>
+        <TouchableOpacity
+          style={recipeStyles.shareButton}
+          onPress={handleShare}
+        >
           <Text style={recipeStyles.shareButtonText}>📤 Chia sẻ</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={recipeStyles.startCookingButton}
+          onPress={handleStartCooking}
+        >
+          <Text style={recipeStyles.startCookingButtonText}>
+            👨‍🍳 Bắt đầu nấu
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

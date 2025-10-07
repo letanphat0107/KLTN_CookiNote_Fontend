@@ -59,6 +59,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   };
 
+  const handleRecipePress = (recipe: any) => {
+    if (navigation) {
+      navigation.navigate("RecipeDetail", { recipeId: recipe.id });
+    }
+  };
+
   const categories = [
     { icon: "🍜", name: "Món Việt" },
     { icon: "🍝", name: "Món Ý" },
@@ -254,6 +260,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 <TouchableOpacity
                   key={recipe.id}
                   style={homeStyles.recipeCardHorizontal}
+                  onPress={() => handleRecipePress(recipe)}
                 >
                   <Image
                     source={recipe.image}
@@ -274,6 +281,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               <TouchableOpacity
                 key={recipe.id}
                 style={homeStyles.commonRecipeCard}
+                onPress={() => handleRecipePress(recipe)}
               >
                 <Image
                   source={recipe.image}
