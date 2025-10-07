@@ -8,8 +8,9 @@ export const accountStyles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   content: {
+    marginTop: 150,
     flex: 1,
-    paddingHorizontal: 20,
+    backgroundColor: "#FFFFFF",
   },
 
   // Title styles
@@ -57,7 +58,7 @@ export const accountStyles = StyleSheet.create({
   logoSection: {
     backgroundColor: "#FF6B35",
     paddingTop: 40,
-    marginBottom:100,
+    marginBottom: 100,
     alignItems: "center",
   },
   logoContainer: {
@@ -110,7 +111,7 @@ export const accountStyles = StyleSheet.create({
   // Menu container
   menuContainer: {
     paddingHorizontal: 20,
-    marginTop: 20,  
+    marginTop: 20,
     marginBottom: 40,
   },
   menuItem: {
@@ -147,30 +148,81 @@ export const accountStyles = StyleSheet.create({
 
   // Form styles
   form: {
-    flex: 1,
+    padding: 20,
   },
   inputGroup: {
     marginBottom: 20,
   },
   label: {
     fontSize: 16,
-    fontWeight: "bold",
     color: "#333333",
+    fontWeight: "bold",
     marginBottom: 8,
     fontFamily: "Roboto",
   },
-  input: {
+
+  // Read-only field
+  readOnlyField: {
+    backgroundColor: "#F5F5F5",
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: "#E0E0E0",
-    borderRadius: 8,
-    padding: 12,
+  },
+  readOnlyText: {
     fontSize: 16,
-    backgroundColor: "#F8F8F8",
+    color: "#666666",
     fontFamily: "Roboto",
   },
-  textArea: {
-    height: 100,
-    textAlignVertical: "top",
+
+  // Editable field
+  editableField: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    paddingRight: 12,
+  },
+  fieldText: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333333",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    fontFamily: "Roboto",
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333333",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    fontFamily: "Roboto",
+  },
+  editIcon: {
+    padding: 8,
+  },
+  editIconText: {
+    fontSize: 18,
+    color: "#FF6B35",
+  },
+
+  // Save button
+  saveButton: {
+    backgroundColor: "#FF6B35",
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  saveButtonText: {
+    fontSize: 16,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontFamily: "Roboto",
   },
 
   // Password requirements
