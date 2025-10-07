@@ -8,7 +8,6 @@ export const accountStyles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   content: {
-    marginTop: 150,
     flex: 1,
     backgroundColor: "#FFFFFF",
   },

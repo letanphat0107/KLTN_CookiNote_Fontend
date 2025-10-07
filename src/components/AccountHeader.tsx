@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     color: "#333333",
     textAlign: "center",
     marginTop: 100,
-    marginBottom: 40,
+    marginBottom: 10,
     fontFamily: "Roboto",
   },
 });
