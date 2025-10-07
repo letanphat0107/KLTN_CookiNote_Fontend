@@ -43,7 +43,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   const handleProfilePress = () => {
     if (navigation) {
-      navigation.navigate("Profile");
+      navigation.navigate("Account");
     }
   };
 
@@ -194,7 +194,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           <TouchableOpacity onPress={handleProfilePress}>
             <Image
               source={{
-                uri: user?.avatar_url || "https://i.pinimg.com/736x/6b/43/47/6b43478d2362f5e6ba3457abc8adcb06.jpg",
+                uri:
+                  user?.avatar_url ||
+                  "https://i.pinimg.com/736x/6b/43/47/6b43478d2362f5e6ba3457abc8adcb06.jpg",
               }}
               style={homeStyles.userAvatar}
             />

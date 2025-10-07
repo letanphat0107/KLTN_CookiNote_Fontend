@@ -1,10 +1,9 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text, TouchableOpacity, Alert } from "react-native";
+import { Text } from "react-native";
 
 // Redux
-import { useAppSelector, useAppDispatch } from "../store/hooks";
-import { logoutUser } from "../store/authSlice";
+import { useAppSelector } from "../store/hooks";
 
 // Import screens
 import HomeScreen from "../screens/Home/HomeScreen";
@@ -15,60 +14,7 @@ import { UnauthenticatedTabParamList } from "./types";
 const Tab = createBottomTabNavigator<UnauthenticatedTabParamList>();
 
 const TabNavigator = () => {
-  const dispatch = useAppDispatch();
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
-
-  const handleLogout = () => {
-    Alert.alert("Đăng xuất", "Bạn có chắc muốn đăng xuất?", [
-      { text: "Hủy", style: "cancel" },
-      {
-        text: "Đăng xuất",
-        style: "destructive",
-        onPress: () => dispatch(logoutUser()),
-      },
-    ]);
-  };
-
-  const ProfileTab = () => (
-    <TouchableOpacity
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 20,
-        backgroundColor: "#FFFFFF",
-      }}
-      onPress={handleLogout}
-    >
-      <Text style={{ fontSize: 50, marginBottom: 16 }}>👤</Text>
-      <Text
-        style={{
-          fontSize: 18,
-          fontWeight: "bold",
-          color: "#333333",
-          marginBottom: 8,
-        }}
-      >
-        {user?.display_name || "User"}
-      </Text>
-      <Text style={{ fontSize: 14, color: "#666666", marginBottom: 20 }}>
-        {user?.email}
-      </Text>
-      <TouchableOpacity
-        style={{
-          backgroundColor: "#FF6B6B",
-          paddingHorizontal: 20,
-          paddingVertical: 10,
-          borderRadius: 8,
-        }}
-        onPress={handleLogout}
-      >
-        <Text style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "bold" }}>
-          Đăng xuất
-        </Text>
-      </TouchableOpacity>
-    </TouchableOpacity>
-  );
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   return (
     <Tab.Navigator
@@ -105,7 +51,7 @@ const TabNavigator = () => {
           ),
         }}
       />
-      
+
       {/* Story Tab - Always available */}
       <Tab.Screen
         name="UnauthStory"
@@ -129,20 +75,6 @@ const TabNavigator = () => {
           ),
         }}
       />
-
-      {/* Profile Tab - Only show for authenticated users */}
-      {isAuthenticated && (
-        <Tab.Screen
-          name="Profile"
-          component={ProfileTab}
-          options={{
-            tabBarLabel: "Cá nhân",
-            tabBarIcon: ({ color }) => (
-              <Text style={{ fontSize: 20, color }}>👤</Text>
-            ),
-          }}
-        />
-      )}
     </Tab.Navigator>
   );
 };
