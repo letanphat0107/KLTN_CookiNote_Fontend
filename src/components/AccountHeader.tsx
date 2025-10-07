@@ -20,7 +20,11 @@ const AccountHeader: React.FC<AccountHeaderProps> = ({
       <View style={styles.header}>
         {showBackButton && (
           <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
-            <Text style={styles.backButtonText}>←</Text>
+            <Image
+              source={require("../../assets/images/vector.png")}
+              style={styles.backIcon}
+              resizeMode="contain"
+            />
           </TouchableOpacity>
         )}
         <Text style={styles.headerTitle}>{title}</Text>
@@ -34,7 +38,6 @@ const AccountHeader: React.FC<AccountHeaderProps> = ({
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appName}>CookiNote</Text>
         </View>
       </View>
 
@@ -57,13 +60,13 @@ const styles = StyleSheet.create({
   backButton: {
     marginRight: 20,
   },
-  backButtonText: {
-    fontSize: 24,
-    color: "#FFFFFF",
-    fontWeight: "bold",
+  backIcon: {
+    width: 30,
+    height: 30,
+    tintColor: "#ffffff",
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 26,
     color: "#FFFFFF",
     fontWeight: "bold",
     fontFamily: "Roboto",
@@ -72,22 +75,23 @@ const styles = StyleSheet.create({
   // Logo section
   logoSection: {
     backgroundColor: "#FF6B35",
-    paddingBottom: 60,
     alignItems: "center",
+    height: 120, // Chiều cao vùng màu cam
+    position: "relative",
   },
+
   logoContainer: {
-    backgroundColor: "#FFF3E0",
-    borderRadius: 100,
-    width: 200,
-    height: 200,
+    position: "absolute",
+    top: 35, // ✅ Logo nhô ra nửa ngoài (tùy chỉnh)
     justifyContent: "center",
     alignItems: "center",
   },
+
   logo: {
-    width: 80,
-    height: 80,
-    marginBottom: 10,
+    width: 160,
+    height: 160,
   },
+
   appName: {
     fontSize: 18,
     fontWeight: "bold",
@@ -101,7 +105,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333333",
     textAlign: "center",
-    marginTop: 30,
+    marginTop: 100,
     marginBottom: 40,
     fontFamily: "Roboto",
   },
