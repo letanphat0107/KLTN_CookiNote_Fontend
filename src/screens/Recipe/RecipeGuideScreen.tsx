@@ -76,6 +76,7 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
   route,
   navigation,
 }) => {
+  const recipeId = route?.params?.recipeId;
   const [currentStep, setCurrentStep] = useState(0);
   const [timer, setTimer] = useState(0); // seconds
   const [isTimerRunning, setIsTimerRunning] = useState(false);
@@ -85,6 +86,17 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
   const currentStepData = mockSteps[currentStep];
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === mockSteps.length - 1;
+
+  // Set default timer when step changes
+  useEffect(() => {
+    const suggestedTime = currentStepData?.suggested_time;
+    if (suggestedTime) {
+      setTimer(suggestedTime * 60); // convert minutes to seconds
+    } else {
+      setTimer(0); // 00:00 if no suggested time
+    }
+    setIsTimerRunning(false); // Stop timer when changing steps
+  }, [currentStep, currentStepData]);
 
   // Timer effect
   useEffect(() => {
@@ -115,7 +127,16 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
 
   const stopTimer = () => {
     setIsTimerRunning(false);
-    setTimer(0);
+  };
+
+  const resetTimer = () => {
+    setIsTimerRunning(false);
+    const suggestedTime = currentStepData?.suggested_time;
+    if (suggestedTime) {
+      setTimer(suggestedTime * 60);
+    } else {
+      setTimer(0);
+    }
   };
 
   const startCustomTimer = () => {
@@ -127,17 +148,32 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
     }
   };
 
+  const toggleTimer = () => {
+    if (isTimerRunning) {
+      setIsTimerRunning(false);
+    } else {
+      if (timer > 0) {
+        setIsTimerRunning(true);
+      } else {
+        // If timer is 0, start with suggested time
+        const suggestedTime = currentStepData?.suggested_time;
+        if (suggestedTime) {
+          setTimer(suggestedTime * 60);
+          setIsTimerRunning(true);
+        }
+      }
+    }
+  };
+
   const handlePrevious = () => {
     if (!isFirstStep) {
       setCurrentStep(currentStep - 1);
-      stopTimer();
     }
   };
 
   const handleNext = () => {
     if (!isLastStep) {
       setCurrentStep(currentStep + 1);
-      stopTimer();
     }
   };
 
@@ -153,8 +189,8 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
           },
         },
         {
-          text: "Về trang chủ",
-          onPress: () => navigation?.navigate("HomeScreen"),
+          text: "Trở về",
+          onPress: () => navigation?.navigate("RecipeDetail", { recipeId }),
         },
       ]
     );
@@ -189,6 +225,25 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
             {isTimerRunning ? "Đang đếm ngược" : "Dừng"}
           </Text>
         </View>
+
+        {/* Main Start/Stop Button */}
+        <View style={recipeStyles.mainTimerControl}>
+          <TouchableOpacity
+            style={[
+              recipeStyles.mainTimerButton,
+              isTimerRunning
+                ? recipeStyles.stopMainButton
+                : recipeStyles.startMainButton,
+            ]}
+            onPress={toggleTimer}
+          >
+            <Text style={recipeStyles.mainTimerButtonText}>
+              {isTimerRunning ? "⏸️ Dừng" : "▶️ Bắt đầu"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Timer Controls */}
         <View style={recipeStyles.timerControls}>
           <TouchableOpacity
             style={recipeStyles.timerButton}
@@ -221,10 +276,10 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
             <Text style={recipeStyles.timerButtonText}>Tùy chỉnh</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[recipeStyles.timerButton, recipeStyles.stopButton]}
-            onPress={stopTimer}
+            style={recipeStyles.timerButton}
+            onPress={resetTimer}
           >
-            <Text style={recipeStyles.timerButtonText}>Dừng</Text>
+            <Text style={recipeStyles.timerButtonText}>Reset</Text>
           </TouchableOpacity>
         </View>
       </View>

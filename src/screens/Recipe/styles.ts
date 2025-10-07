@@ -379,6 +379,38 @@ export const recipeStyles = StyleSheet.create({
     color: "#666666",
     fontFamily: "Roboto",
   },
+
+  // Main Timer Control
+  mainTimerControl: {
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  mainTimerButton: {
+    borderRadius: 25,
+    paddingHorizontal: 30,
+    paddingVertical: 12,
+    minWidth: 140,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  startMainButton: {
+    backgroundColor: "#4CAF50",
+  },
+  stopMainButton: {
+    backgroundColor: "#F44336",
+  },
+  mainTimerButtonText: {
+    fontSize: 18,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontFamily: "Roboto",
+  },
+
+  // Timer Controls (smaller buttons)
   timerControls: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -387,18 +419,15 @@ export const recipeStyles = StyleSheet.create({
   timerButton: {
     backgroundColor: "#FF6B35",
     borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     marginHorizontal: 2,
     marginVertical: 2,
-    minWidth: 50,
+    minWidth: 45,
     alignItems: "center",
   },
-  stopButton: {
-    backgroundColor: "#F44336",
-  },
   timerButtonText: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#FFFFFF",
     fontWeight: "bold",
     fontFamily: "Roboto",
