@@ -29,6 +29,7 @@ export const culinaryStoryStyles = StyleSheet.create({
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     marginBottom: 20,
+    paddingTop: 40,
   },
   headerTitle: {
     fontSize: FONT_SIZES.xxxl,

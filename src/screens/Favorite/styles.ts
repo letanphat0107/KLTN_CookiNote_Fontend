@@ -12,6 +12,7 @@ export const favoriteStyles = StyleSheet.create({
     fontWeight: FONT_WEIGHTS.bold,
     textAlign: "center",
     padding: 20,
+    paddingTop: 40,
     color: COLORS.text.primary,
     fontFamily: FONT_FAMILIES.bold,
   },

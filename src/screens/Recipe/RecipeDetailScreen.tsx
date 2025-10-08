@@ -30,14 +30,14 @@ const mockSteps = [
       "Rửa sạch xương bò, cho vào nồi nước sôi chần 5 phút để loại bỏ tạp chất",
     step_no: 1,
     recipe_id: 1,
-    image_url: "https://via.placeholder.com/300x200",
+    image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
   },
   {
     id: 2,
     content: "Nướng hành tây và gừng trên bếp gas cho thơm, sau đó rửa sạch",
     step_no: 2,
     recipe_id: 1,
-    image_url: "https://via.placeholder.com/300x200",
+    image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
   },
   {
     id: 3,
@@ -45,7 +45,7 @@ const mockSteps = [
       "Cho xương bò đã chần vào nồi nước lạnh, nấu trên lửa lớn đến khi sôi",
     step_no: 3,
     recipe_id: 1,
-    image_url: "https://via.placeholder.com/300x200",
+    image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
   },
   {
     id: 4,
@@ -53,7 +53,7 @@ const mockSteps = [
       "Hạ lửa nhỏ, vớt bọt, thêm hành tây, gừng nướng và gia vị. Niêu 2-3 tiếng",
     step_no: 4,
     recipe_id: 1,
-    image_url: "https://via.placeholder.com/300x200",
+    image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
   },
 ];
 
@@ -89,7 +89,7 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
         {/* Recipe Image */}
         <View style={recipeStyles.imageContainer}>
           <Image
-            source={{ uri: "https://via.placeholder.com/350x200" }}
+            source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s" }}
             style={recipeStyles.recipeImage}
           />
         </View>
