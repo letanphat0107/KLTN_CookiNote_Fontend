@@ -226,14 +226,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         {isAuthenticated && (
           <View style={homeStyles.suggestionBanner}>
             <View style={homeStyles.bannerContent}>
-              <Text style={homeStyles.bannerTitle}>Hôm nay ăn gì?</Text>
-              <Text style={homeStyles.bannerSubtitle}>Đã có CookiNote lo!</Text>
+              <View style = {homeStyles.bannerTextContainer}>
+                <Text style={homeStyles.bannerTitle}>Hôm nay ăn gì?</Text>
+                <Text style={homeStyles.bannerSubtitle}>
+                  Đã có CookiNote lo!
+                </Text>
+              </View>
               <TouchableOpacity style={homeStyles.bannerButton}>
                 <Text style={homeStyles.bannerButtonText}>Xem ngay</Text>
               </TouchableOpacity>
             </View>
             <Image
-              source={{ uri: "https://via.placeholder.com/120x80" }}
+              source={{
+                uri: "https://cdn.eva.vn/upload/4-2021/images/2021-12-02/hom-nay-an-gi-anh-1638435422-875-width640height480.jpeg",
+              }}
               style={homeStyles.bannerImage}
             />
           </View>

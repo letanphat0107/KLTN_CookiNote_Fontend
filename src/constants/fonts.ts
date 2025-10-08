@@ -1,3 +1,14 @@
+// Font families
+export const FONTS = {
+  primary: "Roboto",
+  secondary: "Quicksand",
+  bannerTop: "Poppins",
+  bannerBottom: "Pacifico",
+  bold: "Roboto-Bold",
+  medium: "Roboto-Medium",
+  light: "Roboto-Light",
+};
+
 // Font sizes
 export const FONT_SIZES = {
   xs: 12,
@@ -6,17 +17,15 @@ export const FONT_SIZES = {
   lg: 18,
   xl: 20,
   xxl: 24,
-  xxxl: 28,
-  display: 32,
+  xxxl: 32,
 };
 
 // Font weights
 export const FONT_WEIGHTS = {
-  light: '300' as const,
-  regular: '400' as const,
-  medium: '500' as const,
-  semibold: '600' as const,
-  bold: '700' as const,
+  light: "300" as const,
+  normal: "400" as const,
+  medium: "500" as const,
+  bold: "700" as const,
 };
 
 // Font families (to be updated when custom fonts are added)

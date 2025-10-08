@@ -1,5 +1,7 @@
 import { StyleSheet } from "react-native";
-import { COLORS } from "../../constants";
+import { COLORS, FONTS } from "../../constants";
+import { Dimensions } from "react-native";
+const { width } = Dimensions.get("window");
 
 export const homeStyles = StyleSheet.create({
   container: {
@@ -280,7 +282,6 @@ export const homeStyles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#FFFFFF",
     marginTop: 30,
-
   },
   scrollContent: {
     flex: 1,
@@ -290,33 +291,43 @@ export const homeStyles = StyleSheet.create({
   suggestionBanner: {
     backgroundColor: "#FFE4B3",
     flexDirection: "row",
-    alignItems: "center",
     margin: 20,
     padding: 16,
-    borderRadius: 12,
+    width: width - 40,
+    aspectRatio: 16 / 9,
+    borderRadius: 30,
+    overflow: "hidden",
+    position: "relative",
   },
   bannerContent: {
     flex: 1,
+    zIndex: 1,
+    alignItems: "flex-end", // ✅ căn text, button về bên trái
+    justifyContent: "space-between",
+  },
+  bannerTextContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    padding: 16,
+    borderRadius: 12,
+    alignItems: "flex-end", // ✅ căn text về bên trái
   },
   bannerTitle: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#333333",
-    fontFamily: "Roboto-Bold",
+    fontFamily: FONTS.bannerTop,
     marginBottom: 4,
   },
   bannerSubtitle: {
-    fontSize: 14,
+    fontSize: 24,
     color: "#666666",
-    fontFamily: "Roboto-Regular",
-    marginBottom: 12,
+    fontFamily: FONTS.bannerBottom,
   },
   bannerButton: {
     backgroundColor: "#FF6B6B",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 16,
-    alignSelf: "flex-start",
   },
   bannerButtonText: {
     color: "#FFFFFF",
@@ -324,10 +335,12 @@ export const homeStyles = StyleSheet.create({
     fontFamily: "Roboto-Bold",
   },
   bannerImage: {
-    width: 80,
-    height: 60,
-    borderRadius: 8,
-    marginLeft: 12,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    resizeMode: "cover",
   },
 
   // Categories Grid
