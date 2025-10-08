@@ -65,7 +65,7 @@ export const favoriteStyles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     padding: 16,
     borderRadius: 12,
-    marginBottom: 16,
+    marginBottom: 70,
     borderWidth: 1,
     borderColor: COLORS.border,
     shadowColor: "#000",

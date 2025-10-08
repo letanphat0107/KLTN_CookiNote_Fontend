@@ -19,6 +19,8 @@ export interface RecipeStep {
   image_url?: string;
   step_no: number;
   recipe_id: number;
+  suggested_time?: number;
+  tips?: string;
 }
 
 export interface RecipeIngredient {
