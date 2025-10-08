@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import { COLORS } from "../../constants";
 
 export const homeStyles = StyleSheet.create({
   container: {
@@ -245,7 +246,7 @@ export const homeStyles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: "#EB5B00",
+    backgroundColor: COLORS.primary,
     gap: 20,
   },
   searchWrapper: {

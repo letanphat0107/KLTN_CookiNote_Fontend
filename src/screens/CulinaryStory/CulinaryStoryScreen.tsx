@@ -22,7 +22,7 @@ const CulinaryStoryScreen = () => {
       category: "culture",
       author: "Chef Minh",
       publishDate: "2 ngày trước",
-      image: "https://via.placeholder.com/350x200",
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
       featured: true
     },
     {
@@ -32,7 +32,7 @@ const CulinaryStoryScreen = () => {
       category: "tips",
       author: "Chef An",
       publishDate: "5 ngày trước",
-      image: "https://via.placeholder.com/350x200",
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
       featured: false
     },
     {
@@ -42,7 +42,7 @@ const CulinaryStoryScreen = () => {
       category: "travel",
       author: "Food Explorer",
       publishDate: "1 tuần trước",
-      image: "https://via.placeholder.com/350x200",
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
       featured: false
     },
     {
@@ -52,7 +52,7 @@ const CulinaryStoryScreen = () => {
       category: "history",
       author: "Historian Chef",
       publishDate: "2 tuần trước",
-      image: "https://via.placeholder.com/350x200",
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
       featured: false
     }
   ];

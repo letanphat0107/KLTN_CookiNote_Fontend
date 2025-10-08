@@ -18,6 +18,7 @@ export const culinaryStoryStyles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
+    marginBottom: 50,
   },
 
   // Header section

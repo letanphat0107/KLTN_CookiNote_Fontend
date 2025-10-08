@@ -53,7 +53,7 @@ export const authStyles = StyleSheet.create({
     fontFamily: "Quicksand",
   },
   linkText: {
-    color: "#FF6B6B",
+    color: "#FF7043",
     fontSize: 14,
     textAlign: "center",
     fontFamily: "Quicksand",
@@ -254,7 +254,7 @@ export const authStyles = StyleSheet.create({
     fontFamily: "Quicksand",
   },
   roundedButton: {
-    backgroundColor: "#FF6B6B",
+    backgroundColor: "#FF7043",
     height: 48,
     borderRadius: 24,
     justifyContent: "center",

@@ -1,6 +1,6 @@
 // Color palette for the app
 export const COLORS = {
-  primary: '#FF6B6B',
+  primary: '#FF7043',
   secondary: '#4ECDC4',
   accent: '#45B7D1',
   background: '#FFFFFF',

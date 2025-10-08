@@ -18,6 +18,7 @@ export const favoriteStyles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
+    marginBottom: 50,
   },
 
   // Empty state
@@ -65,7 +66,7 @@ export const favoriteStyles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     padding: 16,
     borderRadius: 12,
-    marginBottom: 70,
+    marginBottom: 30,
     borderWidth: 1,
     borderColor: COLORS.border,
     shadowColor: "#000",
