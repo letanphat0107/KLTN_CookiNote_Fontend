@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Keyboard, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 interface AuthHeaderProps {
@@ -14,6 +14,21 @@ const AuthHeader: React.FC<AuthHeaderProps> = ({
   onBackPress,
 }) => {
   const navigation = useNavigation();
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
 
   const handleBack = () => {
     if (onBackPress) {
@@ -24,7 +39,7 @@ const AuthHeader: React.FC<AuthHeaderProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isKeyboardVisible && styles.containerKeyboard]}>
       {showBackButton && (
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <Image
@@ -35,16 +50,18 @@ const AuthHeader: React.FC<AuthHeaderProps> = ({
         </TouchableOpacity>
       )}
 
-      <View style={styles.logoContainer}>
+      <View style={[styles.logoContainer, isKeyboardVisible && styles.logoContainerKeyboard]}>
         <Image
           source={require("../../assets/images/logo.png")}
-          style={styles.logo}
+          style={[styles.logo, isKeyboardVisible && styles.logoKeyboard]}
           resizeMode="contain"
         />
-        <Text style={styles.appName}>CookiNote</Text>
+        {!isKeyboardVisible && (
+          <Text style={styles.appName}>CookiNote</Text>
+        )}
       </View>
 
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, isKeyboardVisible && styles.titleKeyboard]}>{title}</Text>
     </View>
   );
 };
@@ -55,6 +72,10 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     alignItems: "center",
     backgroundColor: "#FFFFFF",
+  },
+  containerKeyboard: {
+    paddingTop: 30,
+    paddingBottom: 20,
   },
   backButton: {
     position: "absolute",
@@ -74,10 +95,19 @@ const styles = StyleSheet.create({
     marginTop: 60,
     marginBottom: 20,
   },
+  logoContainerKeyboard: {
+    marginTop: 20,
+    marginBottom: 10,
+  },
   logo: {
     width: 100,
     height: 100,
     marginRight: 20,
+  },
+  logoKeyboard: {
+    width: 60,
+    height: 60,
+    marginRight: 0,
   },
   appName: {
     fontSize: 44,
@@ -91,6 +121,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333333",
     fontFamily: "Quicksand",
+  },
+  titleKeyboard: {
+    fontSize: 18,
   },
 });
 
