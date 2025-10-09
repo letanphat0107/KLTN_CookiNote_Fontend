@@ -640,7 +640,7 @@ export const recipeStyles = StyleSheet.create({
     elevation: 1000,
   },
   toastContent: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#FF6B35",
     borderRadius: 12,
     padding: 16,
     flexDirection: "row",
@@ -666,6 +666,12 @@ export const recipeStyles = StyleSheet.create({
     fontSize: 16,
     color: "#FFFFFF",
     fontWeight: "bold",
+  },
+  disabledCookingButton: {
+    backgroundColor: "#CCCCCC",
+  },
+  disabledCookingButtonText: {
+    color: "#666666",
   },
 });
 

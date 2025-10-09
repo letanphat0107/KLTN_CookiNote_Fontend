@@ -1,6 +1,14 @@
-import React from "react";
-import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  Animated,
+} from "react-native";
 import { recipeStyles } from "./styles";
+import { useAppSelector } from "../../store/hooks";
 
 interface RecipeDetailScreenProps {
   route?: {
@@ -30,14 +38,16 @@ const mockSteps = [
       "Rửa sạch xương bò, cho vào nồi nước sôi chần 5 phút để loại bỏ tạp chất",
     step_no: 1,
     recipe_id: 1,
-    image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
+    image_url:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
   },
   {
     id: 2,
     content: "Nướng hành tây và gừng trên bếp gas cho thơm, sau đó rửa sạch",
     step_no: 2,
     recipe_id: 1,
-    image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
+    image_url:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
   },
   {
     id: 3,
@@ -45,7 +55,8 @@ const mockSteps = [
       "Cho xương bò đã chần vào nồi nước lạnh, nấu trên lửa lớn đến khi sôi",
     step_no: 3,
     recipe_id: 1,
-    image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
+    image_url:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
   },
   {
     id: 4,
@@ -53,7 +64,8 @@ const mockSteps = [
       "Hạ lửa nhỏ, vớt bọt, thêm hành tây, gừng nướng và gia vị. Niêu 2-3 tiếng",
     step_no: 4,
     recipe_id: 1,
-    image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
+    image_url:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
   },
 ];
 
@@ -62,25 +74,128 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
   navigation,
 }) => {
   const recipeId = route?.params?.recipeId;
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+
+  // Toast message state
+  const [toastMessage, setToastMessage] = useState("");
+  const [showToast, setShowToast] = useState(false);
+  const toastOpacity = useState(new Animated.Value(0))[0];
+  const toastTranslateY = useState(new Animated.Value(-100))[0];
+
+  // Toast functions
+  const showToastMessage = (message: string, duration: number = 3000) => {
+    // Hide any existing toast first
+    hideToast();
+
+    setToastMessage(message);
+    setShowToast(true);
+
+    // Animate in
+    Animated.parallel([
+      Animated.timing(toastOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(toastTranslateY, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Auto hide after duration
+    setTimeout(() => {
+      hideToast();
+    }, duration);
+  };
+
+  const hideToast = () => {
+    if (showToast) {
+      Animated.parallel([
+        Animated.timing(toastOpacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(toastTranslateY, {
+          toValue: -100,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setShowToast(false);
+        setToastMessage("");
+      });
+    }
+  };
 
   const handleStartCooking = () => {
+    if (!isAuthenticated) {
+      showToastMessage(
+        "🔐 Vui lòng đăng nhập để sử dụng chế độ hướng dẫn nấu ăn!",
+        4000
+      );
+
+      // Navigate to login after showing toast
+      setTimeout(() => {
+        if (navigation) {
+          navigation.navigate("Login");
+        }
+      }, 2000);
+      return;
+    }
+
     if (navigation) {
       navigation.navigate("RecipeGuide", { recipeId });
     }
   };
 
   const handleAddToFavorite = () => {
+    if (!isAuthenticated) {
+      showToastMessage(
+        "❤️ Vui lòng đăng nhập để lưu công thức yêu thích!",
+        3000
+      );
+      return;
+    }
+
     // TODO: Implement add to favorite logic
+    showToastMessage("❤️ Đã thêm vào danh sách yêu thích!", 2000);
     console.log("Added to favorites");
   };
 
   const handleShare = () => {
     // TODO: Implement share logic
+    showToastMessage("📤 Đang chia sẻ công thức...", 2000);
     console.log("Share recipe");
   };
 
   return (
     <View style={recipeStyles.container}>
+      {/* Toast Message */}
+      {showToast && (
+        <Animated.View
+          style={[
+            recipeStyles.toastContainer,
+            {
+              opacity: toastOpacity,
+              transform: [{ translateY: toastTranslateY }],
+            },
+          ]}
+        >
+          <View style={recipeStyles.toastContent}>
+            <Text style={recipeStyles.toastText}>{toastMessage}</Text>
+            <TouchableOpacity
+              style={recipeStyles.toastCloseButton}
+              onPress={hideToast}
+            >
+              <Text style={recipeStyles.toastCloseText}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      )}
+
       <ScrollView
         style={recipeStyles.content}
         contentContainerStyle={recipeStyles.scrollContainer}
@@ -89,7 +204,9 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
         {/* Recipe Image */}
         <View style={recipeStyles.imageContainer}>
           <Image
-            source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s" }}
+            source={{
+              uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
+            }}
             style={recipeStyles.recipeImage}
           />
         </View>
@@ -225,11 +342,19 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={recipeStyles.startCookingButton}
+          style={[
+            recipeStyles.startCookingButton,
+            !isAuthenticated && recipeStyles.disabledCookingButton,
+          ]}
           onPress={handleStartCooking}
         >
-          <Text style={recipeStyles.startCookingButtonText}>
-            👨‍🍳 Bắt đầu nấu
+          <Text
+            style={[
+              recipeStyles.startCookingButtonText,
+              !isAuthenticated && recipeStyles.disabledCookingButtonText,
+            ]}
+          >
+            {!isAuthenticated ? "👨‍🍳 Bắt đầu nấu" : "👨‍🍳 Bắt đầu nấu"}
           </Text>
         </TouchableOpacity>
       </View>

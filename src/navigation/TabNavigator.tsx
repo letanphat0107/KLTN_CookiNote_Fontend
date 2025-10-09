@@ -67,7 +67,7 @@ const TabNavigator = () => {
 
       {/* Favorite Tab - Show different component based on authentication */}
       <Tab.Screen
-        name="UnauthFavorite"
+        name="Favorite"
         component={isAuthenticated ? FavoriteScreen : UnauthenticatedFavorite}
         options={{
           tabBarLabel: "Yêu thích",
