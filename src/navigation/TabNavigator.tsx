@@ -8,10 +8,11 @@ import { useAppSelector } from "../store/hooks";
 // Import screens
 import HomeScreen from "../screens/Home/HomeScreen";
 import FavoriteScreen from "../screens/Favorite/FavoriteScreen";
+import UnauthenticatedFavorite from "../screens/Home/UnauthenticatedFavorite";
 import CulinaryStoryScreen from "../screens/CulinaryStory/CulinaryStoryScreen";
-import { UnauthenticatedTabParamList } from "./types";
+import { TabParamList } from "./types";
 
-const Tab = createBottomTabNavigator<UnauthenticatedTabParamList>();
+const Tab = createBottomTabNavigator<TabParamList>();
 
 const TabNavigator = () => {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
@@ -42,7 +43,7 @@ const TabNavigator = () => {
     >
       {/* Home Tab - Always use the unified HomeScreen */}
       <Tab.Screen
-        name="UnauthHome"
+        name="Home"
         component={HomeScreen}
         options={{
           tabBarLabel: "Trang chủ",
@@ -54,7 +55,7 @@ const TabNavigator = () => {
 
       {/* Story Tab - Always available */}
       <Tab.Screen
-        name="UnauthStory"
+        name="CulinaryStory"
         component={CulinaryStoryScreen}
         options={{
           tabBarLabel: "Câu chuyện",
@@ -64,10 +65,10 @@ const TabNavigator = () => {
         }}
       />
 
-      {/* Favorite Tab - Show different behavior based on authentication */}
+      {/* Favorite Tab - Show different component based on authentication */}
       <Tab.Screen
         name="UnauthFavorite"
-        component={isAuthenticated ? FavoriteScreen : HomeScreen}
+        component={isAuthenticated ? FavoriteScreen : UnauthenticatedFavorite}
         options={{
           tabBarLabel: "Yêu thích",
           tabBarIcon: ({ color }) => (

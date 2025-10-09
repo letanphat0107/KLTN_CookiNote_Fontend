@@ -33,11 +33,6 @@ export type TabParamList = {
   Home: undefined;
   CulinaryStory: undefined;
   Favorite: undefined;
+  UnauthFavorite: undefined;
 };
 
-export type UnauthenticatedTabParamList = {
-  UnauthHome: undefined;
-  UnauthStory: undefined;
-  UnauthFavorite: undefined;
-  Profile: undefined;
-};

@@ -58,10 +58,7 @@ const RootNavigator = () => {
           <Stack.Screen name="RecipeGuide" component={RecipeGuideScreen} />
           <Stack.Screen name="Account" component={AccountScreen} />
           <Stack.Screen name="Profile" component={ProfileScreen} />
-          <Stack.Screen
-            name="NewPassword"
-            component={NewPasswordScreen}
-          />
+          <Stack.Screen name="NewPassword" component={NewPasswordScreen} />
           <Stack.Screen name="SharedAccount" component={SharedAccountScreen} />
 
           {/* Admin screens - conditional based on user role */}
