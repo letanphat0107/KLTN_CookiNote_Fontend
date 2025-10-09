@@ -5,11 +5,11 @@ import { Text } from "react-native";
 // Redux
 import { useAppSelector } from "../store/hooks";
 
-// Import screens
+// Import screens and navigators
 import HomeScreen from "../screens/Home/HomeScreen";
 import FavoriteScreen from "../screens/Favorite/FavoriteScreen";
 import UnauthenticatedFavorite from "../screens/Home/UnauthenticatedFavorite";
-import CulinaryStoryScreen from "../screens/CulinaryStory/CulinaryStoryScreen";
+import CulinaryStoryNavigator from "./CulinaryStoryNavigator"; // Change this import
 import { TabParamList } from "./types";
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -53,10 +53,10 @@ const TabNavigator = () => {
         }}
       />
 
-      {/* Story Tab - Always available */}
+      {/* Story Tab - Use Stack Navigator */}
       <Tab.Screen
         name="CulinaryStory"
-        component={CulinaryStoryScreen}
+        component={CulinaryStoryNavigator} // Change this to use Navigator
         options={{
           tabBarLabel: "Câu chuyện",
           tabBarIcon: ({ color }) => (

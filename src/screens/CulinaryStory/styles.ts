@@ -238,6 +238,232 @@ export const culinaryStoryStyles = StyleSheet.create({
     fontFamily: "Roboto-Regular",
     marginTop: 16,
   },
+
+  // Detail screen styles
+  detailContainer: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  detailHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 15,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+  },
+  backButton: {
+    padding: 8,
+  },
+  backIcon: {
+    width: 30,
+    height: 30,
+    tintColor: "#333333",
+  },
+  detailHeaderTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333333",
+  },
+  shareHeaderButton: {
+    padding: 8,
+  },
+  shareHeaderText: {
+    fontSize: 20,
+  },
+  detailContent: {
+    flex: 1,
+  },
+  detailImage: {
+    width: "100%",
+    height: 250,
+    resizeMode: "cover",
+  },
+  detailInfo: {
+    padding: 20,
+  },
+  detailMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 15,
+  },
+  categoryBadge: {
+    backgroundColor: "#FF6B35",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+  },
+  categoryBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  readTime: {
+    fontSize: 14,
+    color: "#666666",
+  },
+  detailTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333333",
+    lineHeight: 32,
+    marginBottom: 15,
+  },
+  statsContainer: {
+    flexDirection: "row",
+    marginBottom: 20,
+  },
+  statItem: {
+    fontSize: 14,
+    color: "#666666",
+    marginRight: 20,
+  },
+  authorSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+    paddingVertical: 15,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+
+  authorBio: {
+    fontSize: 12,
+    color: "#666666",
+    marginTop: 2,
+  },
+  authorFollowers: {
+    fontSize: 12,
+    color: "#999999",
+    marginTop: 2,
+  },
+  followButton: {
+    backgroundColor: "#FF6B35",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  followButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  contentSection: {
+    marginBottom: 25,
+  },
+  fullContent: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: "#333333",
+  },
+  tagsSection: {
+    marginBottom: 25,
+  },
+  tagsTitle: {
+    fontSize: 14,
+    color: "#666666",
+    marginBottom: 10,
+  },
+  tagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  tag: {
+    backgroundColor: "#F5F5F5",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  tagText: {
+    fontSize: 12,
+    color: "#666666",
+  },
+  actionSection: {
+    flexDirection: "row",
+    marginBottom: 30,
+  },
+  actionButton: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginRight: 10,
+  },
+  actionButtonText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#333333",
+  },
+  likedButton: {
+    backgroundColor: "#FFE5E5",
+  },
+  likedButtonText: {
+    color: "#FF6B35",
+  },
+  relatedSection: {
+    marginBottom: 30,
+  },
+  relatedTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333333",
+    marginBottom: 15,
+  },
+  relatedStoryCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+  },
+  relatedStoryImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginRight: 15,
+  },
+  relatedStoryInfo: {
+    flex: 1,
+  },
+  relatedStoryTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#333333",
+    marginBottom: 4,
+  },
+  relatedStoryReadTime: {
+    fontSize: 12,
+    color: "#666666",
+  },
+  relatedStoryArrow: {
+    fontSize: 16,
+    color: "#999999",
+  },
+  toastContainer: {
+    position: "absolute",
+    top: 100,
+    left: 20,
+    right: 20,
+    backgroundColor: "#4CAF50",
+    padding: 12,
+    borderRadius: 8,
+    zIndex: 1000,
+    elevation: 1000,
+  },
+  toastText: {
+    color: "#FFFFFF",
+    textAlign: "center",
+    fontSize: 14,
+    fontWeight: "500",
+  },
 });
 
 export default culinaryStoryStyles;

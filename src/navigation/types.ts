@@ -11,6 +11,7 @@ export type RootStackParamList = {
   // Main App
   MainTabs: undefined;
   HomeScreen: undefined;
+  CulinaryStoryDetail: { storyId: string };
 
   // Recipe
   RecipeDetail: { recipeId: string };
@@ -32,6 +33,7 @@ export type RootStackParamList = {
 export type TabParamList = {
   Home: undefined;
   CulinaryStory: undefined;
+  CulinaryStoryDetail: { storyId: string };
   Favorite: undefined;
   UnauthFavorite: undefined;
 };
