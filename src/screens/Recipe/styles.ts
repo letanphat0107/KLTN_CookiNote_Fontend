@@ -330,10 +330,10 @@ export const recipeStyles = StyleSheet.create({
   backButton: {
     padding: 5,
   },
-  backButtonText: {
-    fontSize: 24,
-    color: "#FFFFFF",
-    fontWeight: "bold",
+  backIcon: {
+    width: 30,
+    height: 30,
+    tintColor: "#ffffff",
   },
   guideTitle: {
     fontSize: 18,
@@ -610,6 +610,62 @@ export const recipeStyles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "bold",
     fontFamily: "Roboto",
+  },
+
+  // Countdown styles
+  countdownContainer: {
+    backgroundColor: "#FFF3E0",
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginVertical: 10,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#FF6B35",
+  },
+  countdownText: {
+    fontSize: 16,
+    color: "#FF6B35",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+  // Toast styles
+  toastContainer: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+    right: 20,
+    zIndex: 1000,
+    elevation: 1000,
+  },
+  toastContent: {
+    backgroundColor: "#4CAF50",
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  toastText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#FFFFFF",
+    fontWeight: "500",
+    lineHeight: 20,
+  },
+  toastCloseButton: {
+    marginLeft: 12,
+    padding: 4,
+  },
+  toastCloseText: {
+    fontSize: 16,
+    color: "#FFFFFF",
+    fontWeight: "bold",
   },
 });
 

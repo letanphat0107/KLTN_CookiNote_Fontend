@@ -306,10 +306,10 @@ export const homeStyles = StyleSheet.create({
     justifyContent: "space-between",
   },
   bannerTextContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
     padding: 16,
     borderRadius: 12,
-    alignItems: "flex-end", // ✅ căn text về bên trái
+    alignItems: "flex-end",
   },
   bannerTitle: {
     fontSize: 24,
@@ -320,19 +320,21 @@ export const homeStyles = StyleSheet.create({
   },
   bannerSubtitle: {
     fontSize: 24,
-    color: "#666666",
+    fontWeight: "bold",
+    color: "#333333",
     fontFamily: FONTS.bannerBottom,
   },
   bannerButton: {
-    backgroundColor: "#FF6B6B",
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    padding: 16,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 16,
   },
   bannerButtonText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontFamily: "Roboto-Bold",
+    fontSize: 24,
+    fontWeight: "bold",
+    fontFamily: "Roboto",
   },
   bannerImage: {
     position: "absolute",
