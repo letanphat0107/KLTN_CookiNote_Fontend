@@ -94,6 +94,7 @@ const styles = StyleSheet.create({
   logo: {
     width: 160,
     height: 160,
+    borderRadius: 80, // Để logo thành hình tròn
   },
 
   appName: {
