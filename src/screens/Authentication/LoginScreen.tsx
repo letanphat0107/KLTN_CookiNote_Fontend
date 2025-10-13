@@ -64,24 +64,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         // Login successful
         dispatch(loginSuccess(result.data));
 
-        Alert.alert(
-          "Đăng nhập thành công",
-          `Chào mừng ${result.data.displayName}!`,
-          [
-            {
-              text: "OK",
-              onPress: () => {
-                // Navigate to main app
-                if (navigation) {
-                  navigation.reset({
-                    index: 0,
-                    routes: [{ name: "MainTabs" }],
-                  });
-                }
-              },
-            },
-          ]
-        );
+        
       } else {
         // Handle login errors
         const errorMessage = result.message || "Đăng nhập thất bại";

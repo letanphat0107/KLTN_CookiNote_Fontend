@@ -201,7 +201,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <Image
               source={{
                 uri:
-                  user?.avatar_url ||
+                  user?.avatarUrl ||
                   "https://i.pinimg.com/736x/6b/43/47/6b43478d2362f5e6ba3457abc8adcb06.jpg",
               }}
               style={homeStyles.userAvatar}
