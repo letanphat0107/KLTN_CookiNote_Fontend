@@ -68,10 +68,6 @@ const RootNavigator = () => {
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="NewPassword" component={NewPasswordScreen} />
           <Stack.Screen name="SharedAccount" component={SharedAccountScreen} />
-          <Stack.Screen
-            name="OTPVerification"
-            component={OTPVerificationScreen}
-          />
 
           {/* Authentication screens (for logout/re-login) */}
           <Stack.Screen name="Login" component={LoginScreen} />
@@ -79,6 +75,10 @@ const RootNavigator = () => {
           <Stack.Screen
             name="ForgotPassword"
             component={ForgotPasswordScreen}
+          />
+          <Stack.Screen
+            name="OTPVerification"
+            component={OTPVerificationScreen}
           />
 
           {/* Admin screens - conditional based on user role */}
