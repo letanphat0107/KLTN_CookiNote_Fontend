@@ -292,6 +292,15 @@ export const accountStyles = StyleSheet.create({
     fontWeight: "bold",
     fontFamily: "Roboto",
   },
+  logoutButtonDisabled: {
+    backgroundColor: "#CCCCCC",
+    opacity: 0.7,
+  },
+  logoutButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
   // Profile header styles (for SharedAccountScreen)
   profileHeader: {
@@ -414,5 +423,45 @@ export const accountStyles = StyleSheet.create({
     color: "#666666",
     fontSize: 16,
     fontFamily: "Roboto",
+  },
+
+  // User info section styles
+  userInfoSection: {
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 20,
+    marginVertical: 15,
+    borderRadius: 12,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  userInfoTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333333",
+    marginBottom: 15,
+  },
+  userInfoItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+  },
+  userInfoLabel: {
+    fontSize: 14,
+    color: "#666666",
+    fontWeight: "500",
+  },
+  userInfoValue: {
+    fontSize: 14,
+    color: "#333333",
+    fontWeight: "600",
+    flex: 1,
+    textAlign: "right",
   },
 });

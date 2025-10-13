@@ -18,7 +18,7 @@ interface ProfileScreenProps {
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const { user } = useAppSelector((state) => state.auth);
 
-  const [displayName, setDisplayName] = useState(user?.display_name || "");
+  const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [email, setEmail] = useState(user?.email || "");
   const [isEditingDisplayName, setIsEditingDisplayName] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
@@ -46,7 +46,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   return (
     <View style={accountStyles.container}>
-      <AccountHeader title="Thông tin cá nhân" userName={user?.display_name || "Leslie Gilliams"} onBackPress={handleBack} />
+      <AccountHeader title="Thông tin cá nhân" userName={user?.displayName || "Leslie Gilliams"} onBackPress={handleBack} />
 
       <ScrollView style={accountStyles.content}>
         <View style={accountStyles.form}>
@@ -55,7 +55,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             <Text style={accountStyles.label}>Tên đăng nhập</Text>
             <View style={accountStyles.readOnlyField}>
               <Text style={accountStyles.readOnlyText}>
-                {user?.name || "phat123"}
+                {user?.username || "phat123"}
               </Text>
             </View>
           </View>

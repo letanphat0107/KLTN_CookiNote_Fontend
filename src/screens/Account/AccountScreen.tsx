@@ -1,5 +1,11 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { logoutUser } from "../../store/authSlice";
 import { accountStyles } from "./styles";
@@ -11,7 +17,7 @@ interface AccountScreenProps {
 
 const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, isLoading } = useAppSelector((state) => state.auth);
 
   const handleBack = () => {
     if (navigation) {
@@ -40,7 +46,34 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
       {
         text: "Đăng xuất",
         style: "destructive",
-        onPress: () => dispatch(logoutUser()),
+        onPress: async () => {
+          try {
+            // Dispatch logout thunk
+            const result = await dispatch(logoutUser());
+
+            if (
+              logoutUser.fulfilled.match(result) ||
+              logoutUser.rejected.match(result)
+            ) {
+              // Navigate to login screen after logout (successful or failed)
+              if (navigation) {
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: "MainTabs" }],
+                });
+              }
+            }
+          } catch (error) {
+            console.error("Logout error:", error);
+            // Even if logout fails, still navigate to login
+            if (navigation) {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "Login" }],
+              });
+            }
+          }
+        },
       },
     ]);
   };
@@ -49,7 +82,9 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
     <View style={accountStyles.container}>
       <AccountHeader
         title="Tài khoản"
-        userName={user?.display_name || "Leslie Gilliams"}
+        userName={user?.displayName || "User"}
+        userEmail={user?.email}
+        userAvatar={user?.avatarUrl} // Add avatar prop
         onBackPress={handleBack}
       />
 
@@ -58,6 +93,7 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
         <TouchableOpacity
           style={accountStyles.menuItem}
           onPress={handleProfile}
+          disabled={isLoading}
         >
           <View style={accountStyles.menuLeft}>
             <Text style={accountStyles.menuIcon}>👤</Text>
@@ -69,6 +105,7 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
         <TouchableOpacity
           style={accountStyles.menuItem}
           onPress={handleChangePassword}
+          disabled={isLoading}
         >
           <View style={accountStyles.menuLeft}>
             <Text style={accountStyles.menuIcon}>🔒</Text>
@@ -76,15 +113,46 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
           </View>
           <Text style={accountStyles.menuArrow}>›</Text>
         </TouchableOpacity>
+
+        {/* <TouchableOpacity style={accountStyles.menuItem} disabled={isLoading}>
+          <View style={accountStyles.menuLeft}>
+            <Text style={accountStyles.menuIcon}>📊</Text>
+            <Text style={accountStyles.menuText}>Thống kê nấu ăn</Text>
+          </View>
+          <Text style={accountStyles.menuArrow}>›</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={accountStyles.menuItem} disabled={isLoading}>
+          <View style={accountStyles.menuLeft}>
+            <Text style={accountStyles.menuIcon}>⚙️</Text>
+            <Text style={accountStyles.menuText}>Cài đặt</Text>
+          </View>
+          <Text style={accountStyles.menuArrow}>›</Text>
+        </TouchableOpacity> */}
       </View>
 
       {/* Logout Button */}
       <View style={accountStyles.logoutContainer}>
         <TouchableOpacity
-          style={accountStyles.logoutButton}
+          style={[
+            accountStyles.logoutButton,
+            isLoading && accountStyles.logoutButtonDisabled,
+          ]}
           onPress={handleLogout}
+          disabled={isLoading}
         >
-          <Text style={accountStyles.logoutButtonText}>Đăng xuất</Text>
+          {isLoading ? (
+            <View style={accountStyles.logoutButtonContent}>
+              <ActivityIndicator size="small" color="#FFFFFF" />
+              <Text
+                style={[accountStyles.logoutButtonText, { marginLeft: 10 }]}
+              >
+                Đang đăng xuất...
+              </Text>
+            </View>
+          ) : (
+            <Text style={accountStyles.logoutButtonText}>Đăng xuất</Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>

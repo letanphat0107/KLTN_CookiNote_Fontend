@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { AuthState, User, Tokens, LoginResponse } from "../types/user";
+import { API_CONFIG, API_HEADERS } from "../config/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const TOKEN_KEY = "auth_tokens";
@@ -41,6 +42,60 @@ export const checkAuthStatus = createAsyncThunk(
   }
 );
 
+// Async thunk for logout API
+export const logoutUser = createAsyncThunk(
+  "auth/logout",
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as { auth: AuthState };
+      const { tokens } = state.auth;
+
+      if (!tokens) {
+        // No tokens, just clear local storage
+        await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+        return;
+      }
+
+      // Call logout API
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}/cookinote/auth/logout`,
+        {
+          method: "POST",
+          headers: {
+            ...API_HEADERS,
+            Authorization: `Bearer ${tokens.accessToken}`,
+          },
+          body: JSON.stringify({
+            refreshToken: tokens.refreshToken,
+          }),
+        }
+      );
+
+      console.log("Logout API response status:", response.status);
+
+      // Even if API fails, we still clear local storage
+      await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+
+      if (!response.ok) {
+        console.warn("Logout API failed, but local storage cleared");
+      }
+
+      return;
+    } catch (error) {
+      console.error("Logout error:", error);
+
+      // Clear local storage even if API call fails
+      try {
+        await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+      } catch (storageError) {
+        console.error("Error clearing storage during logout:", storageError);
+      }
+
+      return rejectWithValue("Logout failed, but local data cleared");
+    }
+  }
+);
+
 const initialState: AuthState = {
   user: null,
   tokens: null,
@@ -57,12 +112,15 @@ const authSlice = createSlice({
       state.isLoading = action.payload;
     },
     loginSuccess: (state, action: PayloadAction<LoginResponse["data"]>) => {
-      const { userId, email, displayName, tokens } = action.payload;
+      const { userId, username, email, displayName, avatarUrl, tokens } =
+        action.payload;
 
       state.user = {
         userId,
+        username,
         email,
         displayName,
+        avatarUrl,
       };
       state.tokens = tokens;
       state.isAuthenticated = true;
@@ -75,8 +133,10 @@ const authSlice = createSlice({
         USER_KEY,
         JSON.stringify({
           userId,
+          username,
           email,
           displayName,
+          avatarUrl,
         })
       );
     },
@@ -88,7 +148,8 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    logout: (state) => {
+    // Local logout (without API call)
+    localLogout: (state) => {
       state.user = null;
       state.tokens = null;
       state.isAuthenticated = false;
@@ -124,6 +185,25 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.isLoading = false;
         state.error = null;
+      })
+      // Logout API cases
+      .addCase(logoutUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.tokens = null;
+        state.isAuthenticated = false;
+        state.error = null;
+        state.isLoading = false;
+      })
+      .addCase(logoutUser.rejected, (state) => {
+        // Even if logout API fails, we clear the local state
+        state.user = null;
+        state.tokens = null;
+        state.isAuthenticated = false;
+        state.error = null;
+        state.isLoading = false;
       });
   },
 });
@@ -133,7 +213,7 @@ export const {
   loginSuccess,
   loginFailure,
   clearError,
-  logout,
+  localLogout,
   updateTokens,
 } = authSlice.actions;
 

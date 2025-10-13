@@ -4,6 +4,8 @@ import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 interface AccountHeaderProps {
   title: string;
   userName?: string;
+  userEmail?: string;
+  userAvatar?: string;
   showBackButton?: boolean;
   onBackPress?: () => void;
 }
@@ -11,6 +13,8 @@ interface AccountHeaderProps {
 const AccountHeader: React.FC<AccountHeaderProps> = ({
   title,
   userName,
+  userEmail,
+  userAvatar,
   showBackButton = true,
   onBackPress,
 }) => {
@@ -34,7 +38,7 @@ const AccountHeader: React.FC<AccountHeaderProps> = ({
       <View style={styles.logoSection}>
         <View style={styles.logoContainer}>
           <Image
-            source={require("../../assets/images/logo.png")}
+            source={userAvatar ? { uri: userAvatar } : require("../../assets/images/logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />

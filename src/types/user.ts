@@ -26,8 +26,10 @@ export interface LoginResponse {
   message: string;
   data: {
     userId: number;
+    username: string;
     email: string;
     displayName: string;
+    avatarUrl?: string;
     tokens: Tokens;
   };
 }

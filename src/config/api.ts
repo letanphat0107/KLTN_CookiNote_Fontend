@@ -7,6 +7,7 @@ export const API_CONFIG = {
       VERIFY_OTP: "/cookinote/auth/verify-otp",
       RESEND_OTP: "/cookinote/auth/resend-otp",
       LOGIN: "/cookinote/auth/login",
+      LOGOUT: "/cookinote/auth/logout", // Add this
     },
   },
 };
