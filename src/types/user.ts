@@ -1,16 +1,16 @@
 // User and authentication types
 export interface User {
-  user_id: number;
+  userId: number;
   email: string;
   password: string;
-  auth_provider: string;
-  avatar_url?: string;
-  created_at: string;
-  display_name: string;
-  email_verified: boolean;
+  authProvider: string;
+  avatarUrl?: string;
+  createdAt: string;
+  displayName: string;
+  emailVerified: boolean;
   enabled: boolean;
-  name: string;
-  password_changed_at?: string;
+  username: string;
+  passwordChangedAt?: string;
   role: string;
 }
 

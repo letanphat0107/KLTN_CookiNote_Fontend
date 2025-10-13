@@ -5,6 +5,7 @@ export type RootStackParamList = {
   // Authentication
   Login: undefined;
   Register: undefined;
+  OTPVerification: { email: string; purpose: "register" | "email_change" }; // Add this
   ForgotPassword: undefined;
   NewPassword: { email?: string };
 
@@ -37,4 +38,3 @@ export type TabParamList = {
   Favorite: undefined;
   UnauthFavorite: undefined;
 };
-

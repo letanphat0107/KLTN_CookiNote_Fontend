@@ -24,6 +24,7 @@ import ManageDishesScreen from "../screens/Admin/ManageDishesScreen";
 import AddRecipeScreen from "../screens/Admin/AddRecipeScreen";
 
 import { RootStackParamList } from "./types";
+import OTPVerificationScreen from "../screens/Authentication/OTPVerificationScreen";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -60,6 +61,7 @@ const RootNavigator = () => {
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="NewPassword" component={NewPasswordScreen} />
           <Stack.Screen name="SharedAccount" component={SharedAccountScreen} />
+          <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
 
           {/* Admin screens - conditional based on user role */}
           {user?.role === "admin" && (
@@ -89,6 +91,7 @@ const RootNavigator = () => {
           {/* Authentication */}
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
           <Stack.Screen
             name="ForgotPassword"
             component={ForgotPasswordScreen}

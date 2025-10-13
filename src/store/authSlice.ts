@@ -13,20 +13,20 @@ const mockAuthService = {
     // Hardcoded validation theo yêu cầu
     if (credentials.email === "p" && credentials.password === "1") {
       const user: User = {
-        user_id: 1,
+        userId: 1,
         email: "phat123@cookinote.com",
         password: "", // không trả về password
-        auth_provider: "local",
-        avatar_url: "https://i.pinimg.com/736x/6b/43/47/6b43478d2362f5e6ba3457abc8adcb06.jpg",
-        created_at: new Date().toISOString(),
-        display_name: "Phat Developer",
-        email_verified: true,
+        authProvider: "local",
+        avatarUrl: "https://i.pinimg.com/736x/6b/43/47/6b43478d2362f5e6ba3457abc8adcb06.jpg",
+        createdAt: new Date().toISOString(),
+        displayName: "Phat Developer",
+        emailVerified: true,
         enabled: true,
-        name: "phat123",
+        username: "phat123",
         role: "user",
       };
 
-      const token = `mock_token_${Date.now()}_${user.user_id}`;
+      const token = `mock_token_${Date.now()}_${user.userId}`;
       return { user, token };
     } else {
       throw new Error("Tên đăng nhập hoặc mật khẩu không đúng");
@@ -80,7 +80,7 @@ export const loginUser = createAsyncThunk(
       // Lưu vào AsyncStorage
       await AuthStorage.saveAuthData(token, user);
 
-      console.log("✅ Login successful for user:", user.display_name);
+      console.log("✅ Login successful for user:", user.displayName);
       return { user, token };
     } catch (error) {
       console.error("❌ Login failed:", error);

@@ -158,23 +158,34 @@ export const authStyles = StyleSheet.create({
 
   // Password requirements
   passwordRequirements: {
-    backgroundColor: "#F0F8FF",
-    padding: 16,
+    marginTop: 15,
+    padding: 15,
+    backgroundColor: "#F8F9FA",
     borderRadius: 8,
-    marginTop: 20,
+    borderLeftWidth: 3,
+    borderLeftColor: "#FF6B35",
   },
-  requirementTitle: {
-    fontSize: 16,
+  requirementsTitle: {
+    fontSize: 14,
     fontWeight: "bold",
     color: "#333333",
     marginBottom: 8,
-    fontFamily: "Quicksand",
   },
-  requirement: {
-    fontSize: 14,
+  requirementItem: {
+    fontSize: 12,
     color: "#666666",
     marginBottom: 4,
-    fontFamily: "Quicksand",
+    lineHeight: 16,
+  },
+  passwordStrength: {
+    fontSize: 12,
+    marginTop: 5,
+    fontWeight: "500",
+  },
+  passwordMatch: {
+    fontSize: 12,
+    marginTop: 5,
+    fontWeight: "500",
   },
 
   // Button containers
@@ -266,5 +277,71 @@ export const authStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     fontFamily: "Quicksand",
+  },
+
+  // OTP styles
+  otpEmailContainer: {
+    backgroundColor: "#F8F9FA",
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 25,
+    alignItems: "center",
+  },
+  otpDescription: {
+    fontSize: 14,
+    color: "#666666",
+    textAlign: "center",
+    marginBottom: 10,
+    lineHeight: 20,
+  },
+  otpEmailText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FF6B35",
+  },
+  otpInput: {
+    textAlign: "center",
+    fontSize: 18,
+    letterSpacing: 4,
+    fontWeight: "bold",
+  },
+  resendContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 20,
+  },
+  resendText: {
+    fontSize: 14,
+    color: "#666666",
+  },
+  resendButton: {
+    fontSize: 14,
+    color: "#FF6B35",
+    fontWeight: "bold",
+  },
+  resendButtonDisabled: {
+    color: "#CCCCCC",
+  },
+  helpContainer: {
+    marginTop: 30,
+    padding: 15,
+    backgroundColor: "#F0F8FF",
+    borderRadius: 8,
+  },
+  helpText: {
+    fontSize: 12,
+    color: "#666666",
+    lineHeight: 18,
+  },
+  infoContainer: {
+    marginTop: 20,
+    paddingHorizontal: 10,
+  },
+  infoText: {
+    fontSize: 12,
+    color: "#999999",
+    textAlign: "center",
+    lineHeight: 16,
   },
 });
