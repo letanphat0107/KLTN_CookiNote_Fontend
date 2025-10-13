@@ -9,7 +9,7 @@ const USER_KEY = "user_data";
 // Async thunk to check authentication status
 export const checkAuthStatus = createAsyncThunk(
   "auth/checkAuthStatus",
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, dispatch }) => {
     try {
       // Get tokens and user data from AsyncStorage
       const [tokensString, userString] = await Promise.all([
@@ -24,14 +24,30 @@ export const checkAuthStatus = createAsyncThunk(
       const tokens: Tokens = JSON.parse(tokensString);
       const user: User = JSON.parse(userString);
 
-      // Check if access token is expired
+      // Check if access token is expired (with 5 minute buffer)
       const now = Math.floor(Date.now() / 1000);
       const tokenExpiryTime = now + tokens.accessExpiresInSeconds;
+      const bufferTime = 5 * 60; // 5 minutes buffer
 
-      if (tokenExpiryTime <= now) {
-        // Token expired, try to refresh or logout
-        await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
-        return rejectWithValue("Token expired");
+      if (tokenExpiryTime <= now + bufferTime) {
+        console.log(
+          "Access token expired or expiring soon, attempting refresh..."
+        );
+
+        try {
+          // Try to refresh the token
+          const refreshResult = await dispatch(refreshTokens()).unwrap();
+
+          // Update tokens with new ones
+          const updatedTokens = refreshResult;
+
+          return { user, tokens: updatedTokens };
+        } catch (refreshError) {
+          console.error("Token refresh failed:", refreshError);
+          // Clear expired data
+          await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+          return rejectWithValue("Token refresh failed");
+        }
       }
 
       return { user, tokens };
@@ -45,46 +61,44 @@ export const checkAuthStatus = createAsyncThunk(
 // Async thunk for logout API
 export const logoutUser = createAsyncThunk(
   "auth/logout",
-  async (_, { getState, rejectWithValue }) => {
+  async (_, { getState, rejectWithValue, dispatch }) => {
     try {
       const state = getState() as { auth: AuthState };
       const { tokens } = state.auth;
 
       if (!tokens) {
-        // No tokens, just clear local storage
         await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
         return;
       }
 
-      // Call logout API
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}/cookinote/auth/logout`,
-        {
-          method: "POST",
-          headers: {
-            ...API_HEADERS,
-            Authorization: `Bearer ${tokens.accessToken}`,
-          },
-          body: JSON.stringify({
-            refreshToken: tokens.refreshToken,
-          }),
-        }
-      );
+      // Use fetchWithAuth to handle token refresh if needed
+      try {
+        const response = await fetch(
+          `${API_CONFIG.BASE_URL}/cookinote/auth/logout`,
+          {
+            method: "POST",
+            headers: {
+              ...API_HEADERS,
+              Authorization: `Bearer ${tokens.accessToken}`,
+            },
+            body: JSON.stringify({
+              refreshToken: tokens.refreshToken,
+            }),
+          }
+        );
 
-      console.log("Logout API response status:", response.status);
-
-      // Even if API fails, we still clear local storage
-      await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
-
-      if (!response.ok) {
-        console.warn("Logout API failed, but local storage cleared");
+        console.log("Logout API response status:", response.status);
+      } catch (apiError) {
+        console.warn("Logout API call failed:", apiError);
+        // Continue with local logout even if API fails
       }
 
+      // Always clear local storage
+      await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
       return;
     } catch (error) {
       console.error("Logout error:", error);
 
-      // Clear local storage even if API call fails
       try {
         await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
       } catch (storageError) {
@@ -92,6 +106,54 @@ export const logoutUser = createAsyncThunk(
       }
 
       return rejectWithValue("Logout failed, but local data cleared");
+    }
+  }
+);
+
+// Async thunk for refresh token
+export const refreshTokens = createAsyncThunk(
+  "auth/refreshTokens",
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as { auth: AuthState };
+      const { tokens } = state.auth;
+
+      if (!tokens || !tokens.refreshToken) {
+        return rejectWithValue("No refresh token available");
+      }
+
+      console.log("Refreshing tokens...");
+
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}/cookinote/auth/refresh`,
+        {
+          method: "POST",
+          headers: API_HEADERS,
+          body: JSON.stringify({
+            refreshToken: tokens.refreshToken,
+          }),
+        }
+      );
+
+      const result = await response.json();
+      console.log("Refresh token response:", result);
+
+      if (!response.ok) {
+        // Refresh token is invalid or expired
+        return rejectWithValue(result.message || "Refresh token expired");
+      }
+
+      // Assuming the response structure is similar to login
+      const newTokens = result.data?.tokens || result.tokens;
+
+      if (!newTokens) {
+        return rejectWithValue("Invalid refresh response format");
+      }
+
+      return newTokens;
+    } catch (error) {
+      console.error("Refresh token error:", error);
+      return rejectWithValue("Network error during token refresh");
     }
   }
 );
@@ -204,6 +266,26 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.error = null;
         state.isLoading = false;
+      })
+      // Refresh token cases
+      .addCase(refreshTokens.pending, (state) => {
+        // Don't set loading to true for refresh, it's background operation
+        console.log("Refreshing tokens...");
+      })
+      .addCase(refreshTokens.fulfilled, (state, action) => {
+        const newTokens = action.payload;
+        state.tokens = newTokens;
+        state.error = null;
+
+        // Update AsyncStorage with new tokens
+        AsyncStorage.setItem(TOKEN_KEY, JSON.stringify(newTokens));
+
+        console.log("Tokens refreshed successfully");
+      })
+      .addCase(refreshTokens.rejected, (state, action) => {
+        console.error("Token refresh failed:", action.payload);
+        // Don't clear state here, let the calling function handle it
+        state.error = action.payload as string;
       });
   },
 });
