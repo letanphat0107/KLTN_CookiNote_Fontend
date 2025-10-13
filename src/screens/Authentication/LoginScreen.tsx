@@ -9,9 +9,16 @@ import {
   ScrollView,
 } from "react-native";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { loginUser, clearError } from "../../store/authSlice";
+import {
+  clearError,
+  setLoading,
+  loginSuccess,
+  loginFailure,
+} from "../../store/authSlice";
 import AuthHeader from "../../components/AuthHeader";
 import { authStyles } from "./styles";
+import { API_CONFIG, API_HEADERS } from "../../config/api";
+import { LoginResponse } from "../../types/user";
 
 interface LoginScreenProps {
   navigation?: any;
@@ -19,32 +26,95 @@ interface LoginScreenProps {
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const dispatch = useAppDispatch();
-  const { isLoading, error } = useAppSelector((state) => state.auth);
+  const { error, isLoading } = useAppSelector((state) => state.auth);
 
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
+    if (!username.trim() || !password.trim()) {
       Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin");
       return;
     }
 
+    dispatch(setLoading(true));
+    dispatch(clearError());
+
     try {
-      await dispatch(loginUser({ email, password })).unwrap();
-      // Navigation sẽ được handle tự động bởi RootNavigator
+      const loginData = {
+        username: username.trim(),
+        password: password,
+      };
+
+      console.log("Login data:", loginData);
+
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.LOGIN}`,
+        {
+          method: "POST",
+          headers: API_HEADERS,
+          body: JSON.stringify(loginData),
+        }
+      );
+
+      const result: LoginResponse = await response.json();
+      console.log("Login response:", result);
+
+      if (response.ok && result.code === 200) {
+        // Login successful
+        dispatch(loginSuccess(result.data));
+
+        Alert.alert(
+          "Đăng nhập thành công",
+          `Chào mừng ${result.data.displayName}!`,
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                // Navigate to main app
+                if (navigation) {
+                  navigation.reset({
+                    index: 0,
+                    routes: [{ name: "MainTabs" }],
+                  });
+                }
+              },
+            },
+          ]
+        );
+      } else {
+        // Handle login errors
+        const errorMessage = result.message || "Đăng nhập thất bại";
+        dispatch(loginFailure(errorMessage));
+
+        if (response.status === 401) {
+          Alert.alert(
+            "Lỗi đăng nhập",
+            "Tên đăng nhập hoặc mật khẩu không đúng"
+          );
+        } else if (response.status === 403) {
+          Alert.alert(
+            "Tài khoản bị khóa",
+            "Tài khoản của bạn đã bị vô hiệu hóa"
+          );
+        } else {
+          Alert.alert("Lỗi đăng nhập", errorMessage);
+        }
+      }
     } catch (error) {
-      Alert.alert("Đăng nhập thất bại", error as string);
+      console.error("Login error:", error);
+
+      const errorMessage =
+        error instanceof TypeError && error.message === "Network request failed"
+          ? "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng."
+          : `Lỗi không xác định`;
+
+      dispatch(loginFailure(errorMessage));
+      Alert.alert("Lỗi kết nối", errorMessage);
     }
   };
 
-  const handleRegister = () => {
-    if (navigation) {
-      navigation.navigate("Register");
-    }
-  };
-
-  // Clear error khi component unmount
+  // Clear error when component unmounts
   React.useEffect(() => {
     return () => {
       dispatch(clearError());
@@ -64,10 +134,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           <Text style={authStyles.inputLabel}>Tên đăng nhập</Text>
           <TextInput
             style={authStyles.roundedInput}
-            placeholder=""
+            placeholder="username"
             placeholderTextColor="#999"
-            value={email}
-            onChangeText={setEmail}
+            value={username}
+            onChangeText={setUsername}
             autoCapitalize="none"
             autoCorrect={false}
             editable={!isLoading}
@@ -78,7 +148,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           <Text style={authStyles.inputLabel}>Mật khẩu</Text>
           <TextInput
             style={authStyles.roundedInput}
-            placeholder=""
+            placeholder="Nhập mật khẩu"
             placeholderTextColor="#999"
             value={password}
             onChangeText={setPassword}
@@ -125,6 +195,23 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Test Login Buttons for Development */}
+        {__DEV__ && (
+          <View style={authStyles.testSection}>
+            <Text style={authStyles.testTitle}>🧪 Test Account</Text>
+            <TouchableOpacity
+              style={authStyles.testButton}
+              onPress={() => {
+                setUsername("adminadmin");
+                setPassword("baothong123");
+              }}
+              disabled={isLoading}
+            >
+              <Text style={authStyles.testButtonText}>Fill Admin Account</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </ScrollView>
   );

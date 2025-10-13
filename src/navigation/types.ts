@@ -10,7 +10,7 @@ export type RootStackParamList = {
   NewPassword: { email?: string };
 
   // Main App
-  MainTabs: undefined;
+  MainTabs: undefined; // Add this line
   HomeScreen: undefined;
   CulinaryStoryDetail: { storyId: string };
 

@@ -11,6 +11,7 @@ import LoginScreen from "../screens/Authentication/LoginScreen";
 import RegisterScreen from "../screens/Authentication/RegisterScreen";
 import ForgotPasswordScreen from "../screens/Authentication/ForgotPasswordScreen";
 import NewPasswordScreen from "../screens/Authentication/NewPasswordScreen";
+import OTPVerificationScreen from "../screens/Authentication/OTPVerificationScreen";
 
 import TabNavigator from "./TabNavigator";
 
@@ -24,7 +25,6 @@ import ManageDishesScreen from "../screens/Admin/ManageDishesScreen";
 import AddRecipeScreen from "../screens/Admin/AddRecipeScreen";
 
 import { RootStackParamList } from "./types";
-import OTPVerificationScreen from "../screens/Authentication/OTPVerificationScreen";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -39,20 +39,27 @@ const RootNavigator = () => {
     dispatch(checkAuthStatus());
   }, [dispatch]);
 
+  // Show loading screen while checking authentication
+  if (isLoading) {
+    return (
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Loading" component={LoadingScreen} />
+      </Stack.Navigator>
+    );
+  }
+
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
       }}
+      initialRouteName={isAuthenticated ? "MainTabs" : "MainTabs"}
     >
       {isAuthenticated ? (
         // Authenticated Stack
         <>
-          {/* Loading */}
-          <Stack.Screen name="Loading" component={LoadingScreen} />
-
           {/* Main App with Authenticated Tab Navigator */}
-          <Stack.Screen name="HomeScreen" component={TabNavigator} />
+          <Stack.Screen name="MainTabs" component={TabNavigator} />
 
           {/* Additional authenticated screens */}
           <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
@@ -61,10 +68,21 @@ const RootNavigator = () => {
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="NewPassword" component={NewPasswordScreen} />
           <Stack.Screen name="SharedAccount" component={SharedAccountScreen} />
-          <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
+          <Stack.Screen
+            name="OTPVerification"
+            component={OTPVerificationScreen}
+          />
+
+          {/* Authentication screens (for logout/re-login) */}
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen
+            name="ForgotPassword"
+            component={ForgotPasswordScreen}
+          />
 
           {/* Admin screens - conditional based on user role */}
-          {user?.role === "admin" && (
+          {user?.role === "ADMIN" && (
             <>
               <Stack.Screen
                 name="AdminDashboard"
@@ -74,7 +92,6 @@ const RootNavigator = () => {
                 name="ManageDishes"
                 component={ManageDishesScreen}
               />
-              {/* <Stack.Screen name="ManageUsers" component={ManageUsersScreen} /> */}
               <Stack.Screen name="AddRecipe" component={AddRecipeScreen} />
             </>
           )}
@@ -82,16 +99,16 @@ const RootNavigator = () => {
       ) : (
         // Unauthenticated Stack
         <>
-          {/* Loading */}
-          <Stack.Screen name="Loading" component={LoadingScreen} />
-
           {/* Unauthenticated Home with limited features */}
-          <Stack.Screen name="HomeScreen" component={TabNavigator} />
+          <Stack.Screen name="MainTabs" component={TabNavigator} />
 
           {/* Authentication */}
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
+          <Stack.Screen
+            name="OTPVerification"
+            component={OTPVerificationScreen}
+          />
           <Stack.Screen
             name="ForgotPassword"
             component={ForgotPasswordScreen}

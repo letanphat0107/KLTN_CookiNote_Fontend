@@ -2,32 +2,39 @@
 export interface User {
   userId: number;
   email: string;
-  password: string;
-  authProvider: string;
+  password?: string;
+  authProvider?: string;
   avatarUrl?: string;
-  createdAt: string;
+  createdAt?: string;
   displayName: string;
-  emailVerified: boolean;
-  enabled: boolean;
-  username: string;
+  emailVerified?: boolean;
+  enabled?: boolean;
+  username?: string;
   passwordChangedAt?: string;
-  role: string;
+  role?: string;
 }
 
-export interface EmailOtp {
-  id: number;
-  email_otp: string;
-  attempts: number;
-  code_hash: string;
-  created_at: string;
-  expires_at: string;
-  max_attempts: number;
-  purpose: string;
-  user_id: number;
+export interface Tokens {
+  accessToken: string;
+  refreshToken: string;
+  accessExpiresInSeconds: number;
+  refreshExpiresInSeconds: number;
+}
+
+export interface LoginResponse {
+  code: number;
+  message: string;
+  data: {
+    userId: number;
+    email: string;
+    displayName: string;
+    tokens: Tokens;
+  };
 }
 
 export interface AuthState {
   user: User | null;
+  tokens: Tokens | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;

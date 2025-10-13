@@ -344,4 +344,33 @@ export const authStyles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 16,
   },
+
+  // Test section styles
+  testSection: {
+    marginTop: 30,
+    padding: 15,
+    backgroundColor: "#F0F8FF",
+    borderRadius: 8,
+    borderStyle: "dashed",
+    borderWidth: 1,
+    borderColor: "#4A90E2",
+  },
+  testTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#4A90E2",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  testButton: {
+    backgroundColor: "#4A90E2",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  testButtonText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
 });
