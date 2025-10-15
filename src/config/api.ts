@@ -15,12 +15,12 @@ export const API_CONFIG = {
       CHANGE_PASSWORD: "/cookinote/user/password",
       PROFILE: "/cookinote/user/profile",
       UPDATE_PROFILE: "/cookinote/user/profile",
-      UPDATE_DISPLAY_NAME: "/cookinote/user/display-name", // Update display name
-      CHANGE_AVATAR: "/cookinote/user/avatar", // Change avatar
-      EMAIL_CHANGE_REQUEST: "/cookinote/user/email-change-request", // Request email change OTP
-      EMAIL_RESEND_OTP: "/cookinote/user/email-resend-otp", // Resend email change OTP
-      EMAIL_VERIFY_CHANGE: "/cookinote/user/email-verify-change", // Verify email change OTP
-      UPLOAD_AVATAR: "/cookinote/user/avatar", // Upload avatar (same as CHANGE_AVATAR)
+      UPDATE_DISPLAY_NAME: "/cookinote/user/display-name", 
+      CHANGE_AVATAR: "/cookinote/user/avatar", 
+      EMAIL_CHANGE_REQUEST: "/cookinote/user/email-change-request", 
+      EMAIL_RESEND_OTP: "/cookinote/user/email-resend-otp", 
+      EMAIL_VERIFY_CHANGE: "/cookinote/user/email-verify-change", 
+      UPLOAD_AVATAR: "/cookinote/user/avatar", 
     },
     RECIPE: {
       LIST: "/cookinote/recipes",
