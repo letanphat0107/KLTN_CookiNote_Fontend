@@ -46,7 +46,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   return (
     <View style={accountStyles.container}>
-      <AccountHeader title="Thông tin cá nhân" userName={user?.displayName || "Leslie Gilliams"} onBackPress={handleBack} />
+      <AccountHeader title="Thông tin cá nhân" userName={user?.displayName || "Leslie Gilliams"} userAvatar={user?.avatarUrl} onBackPress={handleBack} />
 
       <ScrollView style={accountStyles.content}>
         <View style={accountStyles.form}>

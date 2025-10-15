@@ -84,7 +84,7 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
         title="Tài khoản"
         userName={user?.displayName || "User"}
         userEmail={user?.email}
-        userAvatar={user?.avatarUrl} // Add avatar prop
+        userAvatar={user?.avatarUrl}
         onBackPress={handleBack}
       />
 
