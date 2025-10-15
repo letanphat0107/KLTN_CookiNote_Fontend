@@ -8,41 +8,46 @@ export const API_CONFIG = {
       RESEND_OTP: "/cookinote/auth/resend-otp",
       LOGIN: "/cookinote/auth/login",
       LOGOUT: "/cookinote/auth/logout",
-      REFRESH: "/cookinote/auth/refresh", // Refresh token API
+      REFRESH: "/cookinote/auth/refresh",
     },
     USER: {
-      ME: "/cookinote/user/me", // Validate token and get user info
-      CHANGE_PASSWORD: "/cookinote/user/password", // Change password
-      PROFILE: "/cookinote/user/profile", // User profile
-      UPDATE_PROFILE: "/cookinote/user/profile", // Update profile
-      UPLOAD_AVATAR: "/cookinote/user/avatar", // Upload avatar
+      ME: "/cookinote/user/me",
+      CHANGE_PASSWORD: "/cookinote/user/password",
+      PROFILE: "/cookinote/user/profile",
+      UPDATE_PROFILE: "/cookinote/user/profile",
+      UPDATE_DISPLAY_NAME: "/cookinote/user/display-name", // Update display name
+      CHANGE_AVATAR: "/cookinote/user/avatar", // Change avatar
+      EMAIL_CHANGE_REQUEST: "/cookinote/user/email-change-request", // Request email change OTP
+      EMAIL_RESEND_OTP: "/cookinote/user/email-resend-otp", // Resend email change OTP
+      EMAIL_VERIFY_CHANGE: "/cookinote/user/email-verify-change", // Verify email change OTP
+      UPLOAD_AVATAR: "/cookinote/user/avatar", // Upload avatar (same as CHANGE_AVATAR)
     },
     RECIPE: {
-      LIST: "/cookinote/recipes", // Get recipes list
-      DETAIL: "/cookinote/recipes", // Get recipe detail (+ /{id})
-      CREATE: "/cookinote/recipes", // Create new recipe
-      UPDATE: "/cookinote/recipes", // Update recipe (+ /{id})
-      DELETE: "/cookinote/recipes", // Delete recipe (+ /{id})
-      SEARCH: "/cookinote/recipes/search", // Search recipes
-      FAVORITE: "/cookinote/recipes/favorite", // User's favorite recipes
-      ADD_FAVORITE: "/cookinote/recipes/{id}/favorite", // Add to favorite
-      REMOVE_FAVORITE: "/cookinote/recipes/{id}/favorite", // Remove from favorite
+      LIST: "/cookinote/recipes",
+      DETAIL: "/cookinote/recipes",
+      CREATE: "/cookinote/recipes",
+      UPDATE: "/cookinote/recipes",
+      DELETE: "/cookinote/recipes",
+      SEARCH: "/cookinote/recipes/search",
+      FAVORITE: "/cookinote/recipes/favorite",
+      ADD_FAVORITE: "/cookinote/recipes/{id}/favorite",
+      REMOVE_FAVORITE: "/cookinote/recipes/{id}/favorite",
     },
     ADMIN: {
-      DASHBOARD: "/cookinote/admin/dashboard", // Admin dashboard stats
-      USERS: "/cookinote/admin/users", // Manage users
-      RECIPES: "/cookinote/admin/recipes", // Manage recipes
-      CATEGORIES: "/cookinote/admin/categories", // Manage categories
+      DASHBOARD: "/cookinote/admin/dashboard",
+      USERS: "/cookinote/admin/users",
+      RECIPES: "/cookinote/admin/recipes",
+      CATEGORIES: "/cookinote/admin/categories",
     },
     CATEGORY: {
-      LIST: "/cookinote/categories", // Get categories
-      CREATE: "/cookinote/categories", // Create category
-      UPDATE: "/cookinote/categories", // Update category (+ /{id})
-      DELETE: "/cookinote/categories", // Delete category (+ /{id})
+      LIST: "/cookinote/categories",
+      CREATE: "/cookinote/categories",
+      UPDATE: "/cookinote/categories",
+      DELETE: "/cookinote/categories",
     },
     UPLOAD: {
-      IMAGE: "/cookinote/upload/image", // Upload single image
-      IMAGES: "/cookinote/upload/images", // Upload multiple images
+      IMAGE: "/cookinote/upload/image",
+      IMAGES: "/cookinote/upload/images",
     },
   },
 };
@@ -86,6 +91,27 @@ export const createAuthHeaders = (
   return headers;
 };
 
+// Helper function to create FormData headers (for file uploads)
+export const createFormDataHeaders = (
+  accessToken?: string,
+  additionalHeaders?: Record<string, string>
+) => {
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    // Don't set Content-Type for FormData, browser will set it with boundary
+  };
+
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  }
+
+  if (additionalHeaders) {
+    Object.assign(headers, additionalHeaders);
+  }
+
+  return headers;
+};
+
 // Specific API URLs (for convenience)
 export const API_URLS = {
   // Auth
@@ -100,6 +126,17 @@ export const API_URLS = {
   USER_ME: buildApiUrl(API_CONFIG.ENDPOINTS.USER.ME),
   CHANGE_PASSWORD: buildApiUrl(API_CONFIG.ENDPOINTS.USER.CHANGE_PASSWORD),
   USER_PROFILE: buildApiUrl(API_CONFIG.ENDPOINTS.USER.PROFILE),
+  UPDATE_DISPLAY_NAME: buildApiUrl(
+    API_CONFIG.ENDPOINTS.USER.UPDATE_DISPLAY_NAME
+  ),
+  CHANGE_AVATAR: buildApiUrl(API_CONFIG.ENDPOINTS.USER.CHANGE_AVATAR),
+  EMAIL_CHANGE_REQUEST: buildApiUrl(
+    API_CONFIG.ENDPOINTS.USER.EMAIL_CHANGE_REQUEST
+  ),
+  EMAIL_RESEND_OTP: buildApiUrl(API_CONFIG.ENDPOINTS.USER.EMAIL_RESEND_OTP),
+  EMAIL_VERIFY_CHANGE: buildApiUrl(
+    API_CONFIG.ENDPOINTS.USER.EMAIL_VERIFY_CHANGE
+  ),
   UPLOAD_AVATAR: buildApiUrl(API_CONFIG.ENDPOINTS.USER.UPLOAD_AVATAR),
 
   // Recipe
