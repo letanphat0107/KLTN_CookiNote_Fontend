@@ -29,7 +29,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ navigation }) => {
     // Chuyển đến trang chủ chưa đăng nhập sau 3 giây
     const navigationTimer = setTimeout(() => {
       if (navigation) {
-        navigation.replace("MainTabs");
+        navigation.replace("HomeScreen");
       }
     }, 3000);
 

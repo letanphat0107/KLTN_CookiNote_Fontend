@@ -5,12 +5,13 @@ export type RootStackParamList = {
   // Authentication
   Login: undefined;
   Register: undefined;
-  OTPVerification: { email: string; purpose: "register" | "email_change" }; 
+  OTPVerification: { email: string; purpose: "register" | "email_change" }; // Add this
   ForgotPassword: undefined;
   NewPassword: { email?: string };
 
   // Main App
   MainTabs: undefined; // Add this line
+  HomeScreen: undefined;
   CulinaryStoryDetail: { storyId: string };
 
   // Recipe
@@ -30,9 +31,8 @@ export type RootStackParamList = {
   AddRecipe: undefined;
 };
 
-//Dành cho Tab Navigator
 export type TabParamList = {
-  HomeScreen: undefined;
+  Home: undefined;
   CulinaryStory: undefined;
   CulinaryStoryDetail: { storyId: string };
   Favorite: undefined;

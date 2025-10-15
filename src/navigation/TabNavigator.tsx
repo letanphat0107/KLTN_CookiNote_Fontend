@@ -43,7 +43,7 @@ const TabNavigator = () => {
     >
       {/* Home Tab - Always use the unified HomeScreen */}
       <Tab.Screen
-        name="HomeScreen"
+        name="Home"
         component={HomeScreen}
         options={{
           tabBarLabel: "Trang chủ",
