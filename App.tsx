@@ -1,17 +1,20 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { StatusBar } from "expo-status-bar";
 import { Provider } from "react-redux";
 import { store } from "./src/store";
 import RootNavigator from "./src/navigation/RootNavigator";
+import SessionManager from "./src/components/SessionManager";
 
-export default function App() {
+const App = () => {
   return (
     <Provider store={store}>
       <NavigationContainer>
-        <StatusBar style="auto" />
-        <RootNavigator />
+        <SessionManager>
+          <RootNavigator />
+        </SessionManager>
       </NavigationContainer>
     </Provider>
   );
-}
+};
+
+export default App;

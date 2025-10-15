@@ -22,38 +22,101 @@ export const checkAuthStatus = createAsyncThunk(
       }
 
       const tokens: Tokens = JSON.parse(tokensString);
-      const user: User = JSON.parse(userString);
+      const storedUser: User = JSON.parse(userString);
 
-      // Check if access token is expired (with 5 minute buffer)
-      const now = Math.floor(Date.now() / 1000);
-      const tokenExpiryTime = now + tokens.accessExpiresInSeconds;
-      const bufferTime = 5 * 60; // 5 minutes buffer
+      console.log("Validating access token with server...");
 
-      if (tokenExpiryTime <= now + bufferTime) {
-        console.log(
-          "Access token expired or expiring soon, attempting refresh..."
-        );
+      // Validate access token with server
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}/cookinote/user/me`,
+        {
+          method: "GET",
+          headers: {
+            ...API_HEADERS,
+            Authorization: `Bearer ${tokens.accessToken}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+      console.log("Token validation response:", result);
+
+      if (response.ok && result.code === 200) {
+        // Token is valid, update user data with server response
+        const serverUser: User = {
+          userId: result.data.userId,
+          email: result.data.email,
+          displayName: result.data.displayName,
+          role: result.data.role,
+          // Keep stored data for fields not returned by server
+          username: storedUser.username,
+          avatarUrl: storedUser.avatarUrl,
+        };
+
+        // Update stored user data with latest from server
+        await AsyncStorage.setItem(USER_KEY, JSON.stringify(serverUser));
+
+        return { user: serverUser, tokens };
+      } else if (response.status === 401 || result.code === 401) {
+        // Access token expired, try to refresh
+        console.log("Access token expired, attempting refresh...");
 
         try {
-          // Try to refresh the token
           const refreshResult = await dispatch(refreshTokens()).unwrap();
 
-          // Update tokens with new ones
-          const updatedTokens = refreshResult;
+          // Retry validation with new token
+          const retryResponse = await fetch(
+            `${API_CONFIG.BASE_URL}/cookinote/user/me`,
+            {
+              method: "GET",
+              headers: {
+                ...API_HEADERS,
+                Authorization: `Bearer ${refreshResult.accessToken}`,
+              },
+            }
+          );
 
-          return { user, tokens: updatedTokens };
+          const retryResult = await retryResponse.json();
+
+          if (retryResponse.ok && retryResult.code === 200) {
+            const serverUser: User = {
+              userId: retryResult.data.userId,
+              email: retryResult.data.email,
+              displayName: retryResult.data.displayName,
+              role: retryResult.data.role,
+              username: storedUser.username,
+              avatarUrl: storedUser.avatarUrl,
+            };
+
+            await AsyncStorage.setItem(USER_KEY, JSON.stringify(serverUser));
+            return { user: serverUser, tokens: refreshResult };
+          } else {
+            throw new Error("Token validation failed after refresh");
+          }
         } catch (refreshError) {
           console.error("Token refresh failed:", refreshError);
           // Clear expired data
           await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
-          return rejectWithValue("Token refresh failed");
+          return rejectWithValue("Token refresh failed - please login again");
         }
+      } else {
+        // Other server error
+        await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+        return rejectWithValue(
+          `Server error: ${result.message || "Unknown error"}`
+        );
       }
-
-      return { user, tokens };
     } catch (error) {
       console.error("Error checking auth status:", error);
-      return rejectWithValue("Error checking authentication status");
+
+      // Network error - clear stored data to be safe
+      try {
+        await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+      } catch (storageError) {
+        console.error("Error clearing storage:", storageError);
+      }
+
+      return rejectWithValue("Network error - please login again");
     }
   }
 );

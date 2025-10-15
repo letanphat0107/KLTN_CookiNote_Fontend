@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
+import { Alert } from "react-native";
 
 // Redux
 import { useAppDispatch, useAppSelector } from "../store/hooks";
@@ -30,13 +31,22 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 const RootNavigator = () => {
   const dispatch = useAppDispatch();
-  const { isAuthenticated, isLoading, user } = useAppSelector(
+  const { isAuthenticated, isLoading, user, error } = useAppSelector(
     (state) => state.auth
   );
 
   // Check authentication status when app starts
   useEffect(() => {
-    dispatch(checkAuthStatus());
+    const checkAuth = async () => {
+      try {
+        await dispatch(checkAuthStatus()).unwrap();
+      } catch (error) {
+        console.log("Auth check failed:", error);
+        // Error is already handled in the thunk
+      }
+    };
+
+    checkAuth();
   }, [dispatch]);
 
   // Show loading screen while checking authentication
@@ -53,7 +63,7 @@ const RootNavigator = () => {
       screenOptions={{
         headerShown: false,
       }}
-      initialRouteName={isAuthenticated ? "MainTabs" : "MainTabs"}
+      initialRouteName={isAuthenticated ? "MainTabs" : "Login"}
     >
       {isAuthenticated ? (
         // Authenticated Stack
@@ -99,9 +109,6 @@ const RootNavigator = () => {
       ) : (
         // Unauthenticated Stack
         <>
-          {/* Unauthenticated Home with limited features */}
-          <Stack.Screen name="MainTabs" component={TabNavigator} />
-
           {/* Authentication */}
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
@@ -114,6 +121,9 @@ const RootNavigator = () => {
             component={ForgotPasswordScreen}
           />
           <Stack.Screen name="NewPassword" component={NewPasswordScreen} />
+
+          {/* Unauthenticated Home with limited features */}
+          <Stack.Screen name="MainTabs" component={TabNavigator} />
 
           {/* Public recipe viewing */}
           <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
