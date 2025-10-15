@@ -11,7 +11,7 @@ import {
 import { useAppDispatch } from "../../store/hooks";
 import AuthHeader from "../../components/AuthHeader";
 import { authStyles } from "./styles";
-import { API_CONFIG, API_HEADERS } from "../../config/api";
+import { API_CONFIG, API_HEADERS, API_URLS } from "../../config/api";
 
 interface RegisterScreenProps {
   navigation: any;
@@ -108,26 +108,11 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
         displayName: username.trim(),
       };
 
-      // Add timeout to fetch request
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.REGISTER}`,
-        {
-          method: "POST",
-          headers: {
-            ...API_HEADERS,
-            // Add additional headers for better compatibility
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(registerData),
-          signal: controller.signal,
-        }
-      );
-
-      clearTimeout(timeoutId);
+      const response = await fetch(API_URLS.REGISTER, {
+        method: "POST",
+        headers: API_HEADERS,
+        body: JSON.stringify(registerData),
+      });
 
       const result = await response.json();
 

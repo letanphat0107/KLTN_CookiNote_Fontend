@@ -49,7 +49,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       console.log("Login data:", loginData);
 
       const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.LOGIN}`,
+        API_CONFIG.BASE_URL + API_CONFIG.ENDPOINTS.AUTH.LOGIN,
         {
           method: "POST",
           headers: API_HEADERS,
@@ -63,8 +63,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       if (response.ok && result.code === 200) {
         // Login successful
         dispatch(loginSuccess(result.data));
-
-        
       } else {
         // Handle login errors
         const errorMessage = result.message || "Đăng nhập thất bại";
