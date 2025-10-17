@@ -94,7 +94,6 @@ export const checkAuthStatus = createAsyncThunk(
             throw new Error("Token validation failed after refresh");
           }
         } catch (refreshError) {
-          console.error("Token refresh failed:", refreshError);
           // Clear expired data
           await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
           return rejectWithValue("Token refresh failed - please login again");

@@ -184,8 +184,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             <TouchableOpacity
               style={authStyles.testButton}
               onPress={() => {
-                setUsername("adminadmin");
-                setPassword("baothong123");
+                setUsername("uiooo");
+                setPassword("000000p");
               }}
               disabled={isLoading}
             >

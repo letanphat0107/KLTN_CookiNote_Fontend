@@ -23,6 +23,9 @@ export type RootStackParamList = {
   Profile: undefined;
   ChangePassword: undefined;
   SharedAccount: { userId?: string };
+  EmailChangeOTP: {
+    newEmail: string;
+  };
 
   // Admin
   AdminDashboard: undefined;
