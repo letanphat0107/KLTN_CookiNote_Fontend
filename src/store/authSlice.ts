@@ -236,7 +236,7 @@ const authSlice = createSlice({
       state.isLoading = action.payload;
     },
     loginSuccess: (state, action: PayloadAction<LoginResponse["data"]>) => {
-      const { userId, username, email, displayName, avatarUrl, tokens } =
+      const { userId, username, email, displayName, avatarUrl, tokens, role } =
         action.payload;
 
       state.user = {
@@ -245,6 +245,7 @@ const authSlice = createSlice({
         email,
         displayName,
         avatarUrl,
+        role,
       };
       state.tokens = tokens;
       state.isAuthenticated = true;
@@ -259,6 +260,7 @@ const authSlice = createSlice({
           userId,
           username,
           email,
+          role,
           displayName,
           avatarUrl,
         })

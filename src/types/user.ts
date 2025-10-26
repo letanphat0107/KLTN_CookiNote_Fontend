@@ -30,6 +30,7 @@ export interface LoginResponse {
     email: string;
     displayName: string;
     avatarUrl?: string;
+    role?: string;
     tokens: Tokens;
   };
 }

@@ -110,6 +110,7 @@ const RootNavigator = () => {
         // Unauthenticated Stack
         <>
           {/* Authentication */}
+          <Stack.Screen name="MainTabs" component={TabNavigator} />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen
@@ -121,9 +122,6 @@ const RootNavigator = () => {
             component={ForgotPasswordScreen}
           />
           <Stack.Screen name="NewPassword" component={NewPasswordScreen} />
-
-          {/* Unauthenticated Home with limited features */}
-          <Stack.Screen name="MainTabs" component={TabNavigator} />
 
           {/* Public recipe viewing */}
           <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
