@@ -32,6 +32,8 @@ export const API_CONFIG = {
       FAVORITE: "/cookinote/recipes/favorite",
       ADD_FAVORITE: "/cookinote/recipes/{id}/favorite",
       REMOVE_FAVORITE: "/cookinote/recipes/{id}/favorite",
+            POPULAR: "cookinote/recipes/popular",
+      EASYTOCOOK:"cookinote/recipes/easy-to-cook"
     },
     ADMIN: {
       DASHBOARD: "/cookinote/admin/dashboard",
@@ -45,6 +47,7 @@ export const API_CONFIG = {
       UPDATE: "/cookinote/categories",
       SEARCH: "/cookinote/categories/search",
       CHANGECATEGORY: "cookinote/categories/move-recipes",
+
     },
     UPLOAD: {
       IMAGE: "/cookinote/upload/image",

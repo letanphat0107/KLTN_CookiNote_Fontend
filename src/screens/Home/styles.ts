@@ -523,6 +523,7 @@ export const homeStyles = StyleSheet.create({
     justifyContent: "space-around",
   },
 
+
   closePromptButton: {
     position: "absolute",
     top: 10,
@@ -534,4 +535,63 @@ export const homeStyles = StyleSheet.create({
     fontSize: 18,
     color: "#999",
   },
+
+  easyRecipesContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    paddingHorizontal: 15,
+  },
+
+  easyRecipeCard: {
+    width: "48%",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    marginBottom: 15,
+    overflow: "hidden",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+
+  recipeCardInfo: {
+    padding: 10,
+  },
+
+  recipeMetaInfo: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 5,
+  },
+
+  recipeTimeText: {
+    fontSize: 11,
+    color: "#666666",
+    fontWeight: "500",
+  },
+
+  recipeDifficultyText: {
+    fontSize: 10,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+  },
+
+  easyBadge: {
+    backgroundColor: "#4CAF50",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+
+  easyBadgeText: {
+    fontSize: 8,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+
 });

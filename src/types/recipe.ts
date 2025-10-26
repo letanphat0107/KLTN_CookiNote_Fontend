@@ -12,6 +12,19 @@ export interface Recipe {
   user_id: number;
   created_at: string;
 }
+export interface RecipeWithDetails {
+  id: number;
+  title: string;
+  description: string;
+  image_url?: string;
+  prepare_time: number;
+  cook_time: number;
+  difficulty: string;
+  view: number;
+  category_id: number;
+  user_id: number;
+  created_at: string;
+}
 
 export interface RecipeStep {
   id: number;
