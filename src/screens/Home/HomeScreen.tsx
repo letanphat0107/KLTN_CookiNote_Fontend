@@ -296,13 +296,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
         {/* Categories Grid */}
         <View style={homeStyles.categoriesSection}>
-          <View style={homeStyles.sectionHeader}>
-            <Text style={homeStyles.sectionTitle}>Danh mục món ăn</Text>
-            {categoriesLoading && (
-              <ActivityIndicator size="small" color="#FF6B35" />
-            )}
-          </View>
-
           <View style={homeStyles.categoriesGrid}>
             {displayCategories.slice(0, 10).map((category, index) => (
               <TouchableOpacity
