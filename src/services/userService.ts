@@ -33,7 +33,7 @@ export class UserService {
     accessToken: string
   ): Promise<UserProfileResponse> {
     const response = await fetch(API_URLS.UPDATE_DISPLAY_NAME, {
-      method: "PUT",
+      method: "PATCH",
       headers: createAuthHeaders(accessToken),
       body: JSON.stringify({ displayName }),
     });

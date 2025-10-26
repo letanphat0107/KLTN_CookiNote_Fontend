@@ -85,6 +85,7 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
         userName={user?.displayName || "User"}
         userEmail={user?.email}
         userAvatar={user?.avatarUrl}
+        enableAvatarEdit={false}
         onBackPress={handleBack}
       />
 
