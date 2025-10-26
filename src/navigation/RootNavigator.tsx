@@ -51,11 +51,7 @@ const RootNavigator = () => {
 
   // Show loading screen while checking authentication
   if (isLoading) {
-    return (
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Loading" component={LoadingScreen} />
-      </Stack.Navigator>
-    );
+    return <LoadingScreen />;
   }
 
   return (
