@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,8 +8,11 @@ import {
   Image,
   Animated,
   Dimensions,
+  ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { useAppSelector } from "../../store/hooks";
+import { useCategory } from "../../hooks/useCategory";
 import { homeStyles } from "./styles";
 
 const { height } = Dimensions.get("window");
@@ -20,9 +23,15 @@ interface HomeScreenProps {
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const {
+    categories,
+    isLoading: categoriesLoading,
+    isRefreshing,
+    refreshCategories,
+  } = useCategory();
 
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const slideAnim = useRef(new Animated.Value(height)).current; // bắt đầu ở ngoài màn hình (bottom)
+  const slideAnim = useRef(new Animated.Value(height)).current;
 
   const openPrompt = () => {
     setShowLoginPrompt(true);
@@ -51,12 +60,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     if (navigation) {
       navigation.navigate("Login");
     }
+    closePrompt();
   };
 
   const handleRegister = () => {
     if (navigation) {
       navigation.navigate("Register");
     }
+    closePrompt();
   };
 
   const handleRecipePress = (recipe: any) => {
@@ -65,18 +76,36 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   };
 
-  const categories = [
-    { icon: "🍜", name: "Món Việt" },
-    { icon: "🍝", name: "Món Ý" },
-    { icon: "🍰", name: "Tráng miệng" },
-    { icon: "🥗", name: "Salad" },
-    { icon: "🍖", name: "Thịt nướng" },
-    { icon: "🐟", name: "Hải sản" },
-    { icon: "🥘", name: "Cà ri" },
-    { icon: "🍛", name: "Cơm" },
-    { icon: "🍲", name: "Lẩu" },
-    { icon: "🥤", name: "Đồ uống" },
+  const handleCategoryPress = (category: any) => {
+    if (navigation) {
+      if (isAuthenticated) {
+        navigation.navigate("CategoryRecipes", {
+          categoryId: category.id,
+          categoryName: category.name,
+        });
+      } else {
+        openPrompt();
+      }
+    }
+  };
+
+  // Default categories as fallback
+  const defaultCategories = [
+    { id: 1, name: "Món Việt", description: "", imageUrl: "🍜" },
+    { id: 2, name: "Món Ý", description: "", imageUrl: "🍝" },
+    { id: 3, name: "Tráng miệng", description: "", imageUrl: "🍰" },
+    { id: 4, name: "Salad", description: "", imageUrl: "🥗" },
+    { id: 5, name: "Thịt nướng", description: "", imageUrl: "🍖" },
+    { id: 6, name: "Hải sản", description: "", imageUrl: "🐟" },
+    { id: 7, name: "Cà ri", description: "", imageUrl: "🥘" },
+    { id: 8, name: "Cơm", description: "", imageUrl: "🍛" },
+    { id: 9, name: "Lẩu", description: "", imageUrl: "🍲" },
+    { id: 10, name: "Đồ uống", description: "", imageUrl: "🥤" },
   ];
+
+  // Use API categories or fallback to default
+  const displayCategories =
+    categories.length > 0 ? categories : defaultCategories;
 
   const popularRecipes = [
     {
@@ -183,6 +212,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     },
   ];
 
+  // Helper function to get category icon/image
+  const getCategoryIcon = (category: any) => {
+    // If imageUrl contains emoji, use it directly
+    if (category.imageUrl && /[\u{1f000}-\u{1f999}]/u.test(category.imageUrl)) {
+      return category.imageUrl;
+    }
+
+    // If imageUrl is a proper URL, you could use Image component
+    // For now, fallback to generic icon
+    return "🍽️";
+  };
+
   return (
     <View style={homeStyles.container}>
       {/* Header */}
@@ -221,12 +262,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       <ScrollView
         style={homeStyles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={refreshCategories}
+            colors={["#FF6B35"]}
+            tintColor="#FF6B35"
+          />
+        }
       >
         {/* Today's Suggestion Banner - Only for authenticated users */}
         {isAuthenticated && (
           <View style={homeStyles.suggestionBanner}>
             <View style={homeStyles.bannerContent}>
-              <View style = {homeStyles.bannerTextContainer}>
+              <View style={homeStyles.bannerTextContainer}>
                 <Text style={homeStyles.bannerTitle}>Hôm nay ăn gì?</Text>
                 <Text style={homeStyles.bannerSubtitle}>
                   Đã có CookiNote lo!
@@ -246,15 +295,32 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         )}
 
         {/* Categories Grid */}
-        <View style={homeStyles.categoriesGrid}>
-          {categories.map((category, index) => (
-            <TouchableOpacity key={index} style={homeStyles.categoryItem}>
-              <View style={homeStyles.categoryIconContainer}>
-                <Text style={homeStyles.categoryIcon}>{category.icon}</Text>
-              </View>
-              <Text style={homeStyles.categoryLabel}>{category.name}</Text>
-            </TouchableOpacity>
-          ))}
+        <View style={homeStyles.categoriesSection}>
+          <View style={homeStyles.sectionHeader}>
+            <Text style={homeStyles.sectionTitle}>Danh mục món ăn</Text>
+            {categoriesLoading && (
+              <ActivityIndicator size="small" color="#FF6B35" />
+            )}
+          </View>
+
+          <View style={homeStyles.categoriesGrid}>
+            {displayCategories.slice(0, 10).map((category, index) => (
+              <TouchableOpacity
+                key={category.id || index}
+                style={homeStyles.categoryItem}
+                onPress={() => handleCategoryPress(category)}
+              >
+                <View style={homeStyles.categoryIconContainer}>
+                  <Text style={homeStyles.categoryIcon}>
+                    {getCategoryIcon(category)}
+                  </Text>
+                </View>
+                <Text style={homeStyles.categoryLabel} numberOfLines={2}>
+                  {category.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
 
         {/* Popular Recipes Section */}
@@ -299,77 +365,46 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Create a touchable area for the entire content */}
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={() => {
-            if (!isAuthenticated) {
-            }
-          }}
-          style={{ flex: 1 }}
-        ></TouchableOpacity>
-
         {/* Add some bottom padding for tab navigator */}
         <View style={{ height: 60 }} />
       </ScrollView>
-      {/* Popup */}
+
+      {/* Login Popup */}
       {showLoginPrompt && (
         <Animated.View
-          style={{
-            position: "absolute",
-            zIndex: 10,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "#fff",
-            padding: 20,
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            elevation: 5,
-            transform: [{ translateY: slideAnim }],
-          }}
+          style={[
+            homeStyles.loginPrompt,
+            { transform: [{ translateY: slideAnim }] },
+          ]}
         >
-          <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
-            Xin chào bếp trưởng!
-          </Text>
-          <Text style={{ marginBottom: 20 }}>
+          <Text style={homeStyles.promptTitle}>Xin chào bếp trưởng!</Text>
+          <Text style={homeStyles.promptMessage}>
             Để lưu công thức và tạo thực đơn, bạn cần đăng nhập hoặc đăng ký tài
             khoản mới nhé.
           </Text>
 
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-around" }}
-          >
+          <View style={homeStyles.promptButtons}>
             <TouchableOpacity
-              style={{
-                backgroundColor: "#FFD54F",
-                paddingVertical: 10,
-                paddingHorizontal: 20,
-                borderRadius: 10,
-              }}
-              onPress={() => {
-                console.log("Đăng ký");
-                closePrompt();
-              }}
+              style={homeStyles.registerButton}
+              onPress={handleRegister}
             >
-              <Text style={{ color: "#000" }}>Đăng ký</Text>
+              <Text style={homeStyles.registerButtonText}>Đăng ký</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={{
-                backgroundColor: "#FF7043",
-                paddingVertical: 10,
-                paddingHorizontal: 20,
-                borderRadius: 10,
-              }}
-              onPress={() => {
-                console.log("Đăng nhập");
-                closePrompt();
-              }}
+              style={homeStyles.loginButton}
+              onPress={handleLogin}
             >
-              <Text style={{ color: "#fff" }}>Đăng nhập</Text>
+              <Text style={homeStyles.loginButtonText}>Đăng nhập</Text>
             </TouchableOpacity>
           </View>
+
+          <TouchableOpacity
+            style={homeStyles.closePromptButton}
+            onPress={closePrompt}
+          >
+            <Text style={homeStyles.closePromptText}>✕</Text>
+          </TouchableOpacity>
         </Animated.View>
       )}
     </View>

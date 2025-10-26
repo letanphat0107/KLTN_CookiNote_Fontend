@@ -474,4 +474,64 @@ export const homeStyles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Roboto-Bold",
   },
+
+  // New styles
+  categoriesSection: {
+    paddingHorizontal: 15,
+    marginBottom: 20,
+  },
+
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+
+  loginPrompt: {
+    position: "absolute",
+    zIndex: 10,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#fff",
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+
+  promptTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#333",
+  },
+
+  promptMessage: {
+    marginBottom: 20,
+    color: "#666",
+    lineHeight: 20,
+  },
+
+  promptButtons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+
+  closePromptButton: {
+    position: "absolute",
+    top: 10,
+    right: 15,
+    padding: 5,
+  },
+
+  closePromptText: {
+    fontSize: 18,
+    color: "#999",
+  },
 });

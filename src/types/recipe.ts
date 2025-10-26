@@ -32,8 +32,9 @@ export interface RecipeIngredient {
 
 export interface Category {
   id: number;
-  description: string;
   name: string;
+  description: string;
+  imageUrl: string;
 }
 
 export interface Favorite {
