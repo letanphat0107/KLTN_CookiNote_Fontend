@@ -93,10 +93,6 @@ export const homeStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E0E0E0",
   },
-  categoryIcon: {
-    fontSize: 32,
-    marginBottom: 8,
-  },
   categoryName: {
     fontSize: 14,
     fontWeight: "bold",
@@ -358,15 +354,24 @@ export const homeStyles = StyleSheet.create({
     marginBottom: 15,
     width: "18%",
   },
-  categoryIconContainer: {
-    width: 50,
-    height: 50,
-    backgroundColor: "#F8F8F8",
-    borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-  },
+ categoryIconContainer: {
+  width: 50,
+  height: 50,
+  backgroundColor: "#F8F8F8",
+  borderRadius: 25,
+  overflow: "hidden", // 🔥 quan trọng để bo tròn ảnh bên trong
+  justifyContent: "center",
+  alignItems: "center",
+  marginBottom: 8,
+},
+
+categoryIcon: {
+  width: "100%",   // phủ toàn container
+  height: "100%",
+  borderRadius: 25,
+},
+
+
   categoryLabel: {
     fontSize: 12,
     color: "#333333",
@@ -478,7 +483,6 @@ export const homeStyles = StyleSheet.create({
   // New styles
   categoriesSection: {
     paddingHorizontal: 15,
-    marginBottom: 20,
   },
 
   sectionHeader: {

@@ -215,7 +215,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   // Helper function to get category icon/image
   const getCategoryIcon = (category: any) => {
     // If imageUrl contains emoji, use it directly
-    if (category.imageUrl && /[\u{1f000}-\u{1f999}]/u.test(category.imageUrl)) {
+    if (category.imageUrl) {
       return category.imageUrl;
     }
 
@@ -304,10 +304,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 onPress={() => handleCategoryPress(category)}
               >
                 <View style={homeStyles.categoryIconContainer}>
-                  <Text style={homeStyles.categoryIcon}>
-                    {getCategoryIcon(category)}
-                  </Text>
+                  <Image
+                    source={{ uri: getCategoryIcon(category) }}
+                    style={homeStyles.categoryIcon}
+                    resizeMode="cover"
+                  />
                 </View>
+
                 <Text style={homeStyles.categoryLabel} numberOfLines={2}>
                   {category.name}
                 </Text>
