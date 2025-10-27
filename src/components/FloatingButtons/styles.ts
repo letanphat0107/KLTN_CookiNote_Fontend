@@ -28,7 +28,7 @@ export const floatingStyles = StyleSheet.create({
   },
 
   shoppingListButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#ffffff",
   },
 
   aiChatButton: {
@@ -43,7 +43,6 @@ export const floatingStyles = StyleSheet.create({
   // Modal Overlay
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "flex-end",
   },
 
@@ -89,10 +88,11 @@ export const floatingStyles = StyleSheet.create({
   },
 
   // Shopping List Content
-  shoppingListContent: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
+ shoppingListContent: {
+  paddingHorizontal: 20,
+  paddingVertical: 10,
+},
+
 
   loadingContainer: {
     flex: 1,
@@ -137,7 +137,6 @@ export const floatingStyles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#F8F9FA",
     marginHorizontal: 20,
-    marginTop: 15,
     borderRadius: 12,
   },
 
@@ -189,7 +188,6 @@ export const floatingStyles = StyleSheet.create({
   showAddFormButton: {
     backgroundColor: "#4CAF50",
     marginHorizontal: 20,
-    marginTop: 15,
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
@@ -199,42 +197,6 @@ export const floatingStyles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
-  },
-
-  // Shopping List Items
-  shoppingListItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    backgroundColor: "#F8F9FA",
-    borderRadius: 8,
-    marginTop: 10,
-  },
-
-  itemInfo: {
-    flex: 1,
-  },
-
-  itemName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333333",
-    marginBottom: 4,
-  },
-
-  itemQuantity: {
-    fontSize: 14,
-    color: "#666666",
-  },
-
-  removeItemButton: {
-    padding: 8,
-  },
-
-  removeItemText: {
-    fontSize: 18,
   },
 
   // Chat Content
@@ -339,4 +301,87 @@ export const floatingStyles = StyleSheet.create({
     fontSize: 18,
     color: "#FFFFFF",
   },
+
+  shoppingListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 8,
+    marginTop: 10,
+  },
+
+  // Checkbox
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#4CAF50',
+    backgroundColor: '#FFFFFF',
+    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  checkboxChecked: {
+    backgroundColor: '#4CAF50',
+    borderColor: '#4CAF50',
+  },
+
+  checkboxIcon: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+
+  // Item Info
+  itemInfo: {
+    flex: 1,
+  },
+
+  itemInfoChecked: {
+    opacity: 0.6,
+  },
+
+  itemName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333333',
+    marginBottom: 4,
+  },
+
+  itemNameChecked: {
+    textDecorationLine: 'line-through',
+    color: '#999999',
+  },
+
+  itemQuantity: {
+    fontSize: 14,
+    color: '#666666',
+  },
+
+  itemQuantityChecked: {
+    textDecorationLine: 'line-through',
+    color: '#999999',
+  },
+
+  recipeTag: {
+    fontSize: 12,
+    color: '#FF6B35',
+    fontStyle: 'italic',
+    marginTop: 2,
+  },
+
+  removeItemButton: {
+    padding: 8,
+  },
+
+  removeItemText: {
+    fontSize: 18,
+  },
+
+  
 });

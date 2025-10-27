@@ -36,7 +36,8 @@ interface ShoppingListItem {
   id: number;
   ingredient: string;
   quantity: string;
-  isCompleted?: boolean;
+  checked: boolean;
+  isFromRecipe: boolean;
 }
 
 interface AddItemRequest {
@@ -45,6 +46,9 @@ interface AddItemRequest {
 }
 
 // Get shopping list
+// src/services/shoppingListService.ts
+// Make sure this returns the correct format
+
 export const getShoppingList = async (): Promise<ShoppingListItem[]> => {
   try {
     const headers = await createAuthHeaders();
@@ -53,18 +57,14 @@ export const getShoppingList = async (): Promise<ShoppingListItem[]> => {
       {
         method: "GET",
         headers,
-        
       }
     );
 
     const result = await response.json();
+    console.log("API response:", result);
 
-    if (response.ok && result.code === 200) {
-      return result.data?.items || [];
-    } else {
-      console.error("Failed to get shopping list:", result.message);
-      return [];
-    }
+    return result.data?.[0]?.items || [];
+
   } catch (error) {
     console.error("Error getting shopping list:", error);
     return [];
@@ -83,7 +83,6 @@ export const addShoppingListItem = async (
         method: "POST",
         headers,
         body: JSON.stringify(item),
-        
       }
     );
 
@@ -112,7 +111,6 @@ export const removeShoppingListItem = async (
       {
         method: "DELETE",
         headers,
-        
       }
     );
 

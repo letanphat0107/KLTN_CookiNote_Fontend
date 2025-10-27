@@ -438,8 +438,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         <View style={{ height: 60 }} />
       </ScrollView>
 
-      {/* Floating Buttons */}
-    <FloatingButtonsContainer navigation={navigation} />
+      {/* Floating Buttons - Only show when authenticated */}
+      {isAuthenticated && (
+        <FloatingButtonsContainer navigation={navigation} />
+      )}
 
       {/* Login Popup */}
       {showLoginPrompt && (

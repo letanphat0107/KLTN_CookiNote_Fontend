@@ -29,7 +29,8 @@ interface ShoppingListItem {
   id: number;
   ingredient: string;
   quantity: string;
-  isCompleted?: boolean;
+  checked: boolean;
+  isFromRecipe: boolean;
 }
 
 const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
@@ -59,8 +60,9 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
   const loadShoppingList = async () => {
     setIsLoading(true);
     try {
-      const data = await getShoppingList();
-      setShoppingList(data);
+      const items = await getShoppingList(); // đã return mảng items
+      console.log("Shopping list items:", items);
+      setShoppingList(items);
     } catch (error) {
       console.error("Error loading shopping list:", error);
       Alert.alert("Lỗi", "Không thể tải danh sách mua sắm");
@@ -114,6 +116,38 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
     }
   };
 
+  const handleToggleItem = async (itemId: number, currentChecked: boolean) => {
+    try {
+      // Optimistically update UI
+      setShoppingList((prev) =>
+        prev.map((item) =>
+          item.id === itemId ? { ...item, checked: !currentChecked } : item
+        )
+      );
+
+      // Call API to update on server (if API exists)
+      // const success = await toggleShoppingListItem(itemId, !currentChecked);
+      // if (!success) {
+      //   // Revert on failure
+      //   setShoppingList(prev =>
+      //     prev.map(item =>
+      //       item.id === itemId
+      //         ? { ...item, checked: currentChecked }
+      //         : item
+      //     )
+      //   );
+      // }
+    } catch (error) {
+      console.error("Error toggling item:", error);
+      // Revert on error
+      setShoppingList((prev) =>
+        prev.map((item) =>
+          item.id === itemId ? { ...item, checked: currentChecked } : item
+        )
+      );
+    }
+  };
+
   const handleButtonPress = () => {
     if (!isAuthenticated) {
       Alert.alert(
@@ -161,6 +195,89 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
             </TouchableOpacity>
           </View>
 
+          {/* Shopping List Content */}
+          <ScrollView
+            style={floatingStyles.shoppingListContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {shoppingList.length === 0 ? (
+              <View style={floatingStyles.emptyContainer}>
+                <Text style={floatingStyles.emptyIcon}>🛒</Text>
+                <Text style={floatingStyles.emptyTitle}>Danh sách trống</Text>
+                <Text style={floatingStyles.emptyDescription}>
+                  Thêm nguyên liệu để bắt đầu mua sắm!
+                </Text>
+              </View>
+            ) : (
+              shoppingList.map((item) => (
+                <View key={item.id} style={floatingStyles.shoppingListItem}>
+                  {/* Checkbox */}
+                  <TouchableOpacity
+                    style={[
+                      floatingStyles.checkbox,
+                      item.checked && floatingStyles.checkboxChecked,
+                    ]}
+                    onPress={() => handleToggleItem(item.id, item.checked)}
+                  >
+                    {item.checked && (
+                      <Text style={floatingStyles.checkboxIcon}>✓</Text>
+                    )}
+                  </TouchableOpacity>
+
+                  {/* Item Info */}
+                  <View
+                    style={[
+                      floatingStyles.itemInfo,
+                      item.checked && floatingStyles.itemInfoChecked,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        floatingStyles.itemName,
+                        item.checked && floatingStyles.itemNameChecked,
+                      ]}
+                    >
+                      {item.ingredient}
+                    </Text>
+                    <Text
+                      style={[
+                        floatingStyles.itemQuantity,
+                        item.checked && floatingStyles.itemQuantityChecked,
+                      ]}
+                    >
+                      {item.quantity}
+                    </Text>
+                    {item.isFromRecipe && (
+                      <Text style={floatingStyles.recipeTag}>
+                        📝 Từ công thức
+                      </Text>
+                    )}
+                  </View>
+
+                  {/* Remove Button */}
+                  <TouchableOpacity
+                    style={floatingStyles.removeItemButton}
+                    onPress={() => handleRemoveItem(item.id)}
+                  >
+                    <Text style={floatingStyles.removeItemText}>🗑️</Text>
+                  </TouchableOpacity>
+                </View>
+              ))
+            )}
+          </ScrollView>
+          
+          {/* Add Button */}
+          {!showAddForm && (
+            <TouchableOpacity
+              style={floatingStyles.showAddFormButton}
+              onPress={() => setShowAddForm(true)}
+            >
+              <Text style={floatingStyles.showAddFormButtonText}>
+                + Thêm nguyên liệu
+              </Text>
+            </TouchableOpacity>
+          )}
+
           {/* Add Item Form */}
           {showAddForm && (
             <View style={floatingStyles.addFormContainer}>
@@ -204,57 +321,6 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
             </View>
           )}
 
-          {/* Add Button */}
-          {!showAddForm && (
-            <TouchableOpacity
-              style={floatingStyles.showAddFormButton}
-              onPress={() => setShowAddForm(true)}
-            >
-              <Text style={floatingStyles.showAddFormButtonText}>
-                + Thêm nguyên liệu
-              </Text>
-            </TouchableOpacity>
-          )}
-
-          {/* Shopping List Content */}
-          <ScrollView
-            style={floatingStyles.shoppingListContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {isLoading ? (
-              <View style={floatingStyles.loadingContainer}>
-                <ActivityIndicator size="large" color="#FF6B35" />
-                <Text style={floatingStyles.loadingText}>Đang tải...</Text>
-              </View>
-            ) : shoppingList.length === 0 ? (
-              <View style={floatingStyles.emptyContainer}>
-                <Text style={floatingStyles.emptyIcon}>🛒</Text>
-                <Text style={floatingStyles.emptyTitle}>Danh sách trống</Text>
-                <Text style={floatingStyles.emptyDescription}>
-                  Thêm nguyên liệu để bắt đầu mua sắm!
-                </Text>
-              </View>
-            ) : (
-              shoppingList.map((item) => (
-                <View key={item.id} style={floatingStyles.shoppingListItem}>
-                  <View style={floatingStyles.itemInfo}>
-                    <Text style={floatingStyles.itemName}>
-                      {item.ingredient}
-                    </Text>
-                    <Text style={floatingStyles.itemQuantity}>
-                      {item.quantity}
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    style={floatingStyles.removeItemButton}
-                    onPress={() => handleRemoveItem(item.id)}
-                  >
-                    <Text style={floatingStyles.removeItemText}>🗑️</Text>
-                  </TouchableOpacity>
-                </View>
-              ))
-            )}
-          </ScrollView>
         </View>
       </View>
     </Modal>
