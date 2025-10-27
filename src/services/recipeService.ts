@@ -67,7 +67,6 @@ export const getEasyToCookRecipes = async (limit = 7): Promise<Recipe[]> => {
     });
 
     const result: RecipeResponse = await response.json();
-    console.log("Latest recipes response:", result);
 
     if (response.ok && result.code === 200) {
       // Filter for easy recipes if needed, or return all latest

@@ -15,6 +15,7 @@ import { useAppSelector } from "../../store/hooks";
 import { useCategory } from "../../hooks/useCategory";
 import { useRecipe } from "../../hooks/useRecipe";
 import { homeStyles } from "./styles";
+import FloatingButtonsContainer from '../../components/FloatingButtons/FloatingButtonContainer';
 
 const { height } = Dimensions.get("window");
 
@@ -436,6 +437,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         {/* Add some bottom padding for tab navigator */}
         <View style={{ height: 60 }} />
       </ScrollView>
+
+      {/* Floating Buttons */}
+    <FloatingButtonsContainer navigation={navigation} />
 
       {/* Login Popup */}
       {showLoginPrompt && (

@@ -58,7 +58,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       );
 
       const result: LoginResponse = await response.json();
-      console.log("Login response:", result);
 
       if (response.ok && result.code === 200) {
         // Login successful
