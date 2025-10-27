@@ -19,7 +19,10 @@ import {
   checkFavoriteStatus,
 } from "../../services/favoriteService";
 import EditRecipeModal from "../../components/Recipe/EditRecipeModal";
-import { addRecipeToShoppingList, forkRecipe } from "../../services/recipeActionService";
+import {
+  addRecipeToShoppingList,
+  forkRecipe,
+} from "../../services/recipeActionService";
 
 interface RecipeDetailScreenProps {
   route?: {
@@ -287,10 +290,7 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
 
   const handleEditRecipe = () => {
     if (!isAuthenticated) {
-      showToastMessage(
-        "✏️ Vui lòng đăng nhập để chỉnh sửa công thức!",
-        3000
-      );
+      showToastMessage("✏️ Vui lòng đăng nhập để chỉnh sửa công thức!", 3000);
       setTimeout(() => {
         if (navigation) {
           navigation.navigate("Login");
