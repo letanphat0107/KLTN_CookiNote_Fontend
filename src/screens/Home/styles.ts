@@ -354,7 +354,7 @@ export const homeStyles = StyleSheet.create({
     marginBottom: 15,
     width: "18%",
   },
- categoryIconContainer: {
+  categoryIconContainer: {
   width: 50,
   height: 50,
   backgroundColor: "#F8F8F8",
@@ -370,7 +370,6 @@ categoryIcon: {
   height: "100%",
   borderRadius: 25,
 },
-
 
   categoryLabel: {
     fontSize: 12,
@@ -597,5 +596,24 @@ categoryIcon: {
     textAlign: "center",
   },
 
+
+  recipeStatsInfo: {
+    marginTop: 5,
+  },
+
+  recipeOwnerText: {
+    fontSize: 11,
+    color: "#666666",
+    fontWeight: "500",
+    flex: 1,
+  },
+
+
+
+  recipeViewText: {
+    fontSize: 10,
+    color: "#999999",
+    fontWeight: "400",
+  },
 
 });

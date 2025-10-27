@@ -15,12 +15,12 @@ export const API_CONFIG = {
       CHANGE_PASSWORD: "/cookinote/user/password",
       PROFILE: "/cookinote/user/profile",
       UPDATE_PROFILE: "/cookinote/user/profile",
-      UPDATE_DISPLAY_NAME: "/cookinote/user/display-name", 
-      CHANGE_AVATAR: "/cookinote/user/avatar", 
-      EMAIL_CHANGE_REQUEST: "/cookinote/user/email-change-request", 
-      EMAIL_RESEND_OTP: "/cookinote/user/email-resend-otp", 
-      EMAIL_VERIFY_CHANGE: "/cookinote/user/email-verify-change", 
-      UPLOAD_AVATAR: "/cookinote/user/avatar", 
+      UPDATE_DISPLAY_NAME: "/cookinote/user/display-name",
+      CHANGE_AVATAR: "/cookinote/user/avatar",
+      EMAIL_CHANGE_REQUEST: "/cookinote/user/email-change-request",
+      EMAIL_RESEND_OTP: "/cookinote/user/email-resend-otp",
+      EMAIL_VERIFY_CHANGE: "/cookinote/user/email-verify-change",
+      UPLOAD_AVATAR: "/cookinote/user/avatar",
     },
     RECIPE: {
       LIST: "/cookinote/recipes",
@@ -32,8 +32,8 @@ export const API_CONFIG = {
       FAVORITE: "/cookinote/recipes/favorite",
       ADD_FAVORITE: "/cookinote/recipes/{id}/favorite",
       REMOVE_FAVORITE: "/cookinote/recipes/{id}/favorite",
-            POPULAR: "cookinote/recipes/popular",
-      EASYTOCOOK:"cookinote/recipes/easy-to-cook"
+      POPULAR: "/cookinote/recipes/popular",
+      EASYTOCOOK: "/cookinote/recipes/easy-to-cook",
     },
     ADMIN: {
       DASHBOARD: "/cookinote/admin/dashboard",
@@ -47,7 +47,6 @@ export const API_CONFIG = {
       UPDATE: "/cookinote/categories",
       SEARCH: "/cookinote/categories/search",
       CHANGECATEGORY: "cookinote/categories/move-recipes",
-
     },
     UPLOAD: {
       IMAGE: "/cookinote/upload/image",
@@ -147,6 +146,8 @@ export const API_URLS = {
   RECIPES: buildApiUrl(API_CONFIG.ENDPOINTS.RECIPE.LIST),
   SEARCH_RECIPES: buildApiUrl(API_CONFIG.ENDPOINTS.RECIPE.SEARCH),
   FAVORITE_RECIPES: buildApiUrl(API_CONFIG.ENDPOINTS.RECIPE.FAVORITE),
+  POPULAR_RECIPES: buildApiUrl(API_CONFIG.ENDPOINTS.RECIPE.POPULAR),
+  EASYTOCOOK_RECIPES: buildApiUrl(API_CONFIG.ENDPOINTS.RECIPE.EASYTOCOOK),
 
   // Category
   CATEGORIES: buildApiUrl(API_CONFIG.ENDPOINTS.CATEGORY.LIST),

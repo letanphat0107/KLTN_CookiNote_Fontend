@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useAppSelector } from "../../store/hooks";
 import { useCategory } from "../../hooks/useCategory";
+import { useRecipe } from "../../hooks/useRecipe";
 import { homeStyles } from "./styles";
 
 const { height } = Dimensions.get("window");
@@ -26,11 +27,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const {
     categories,
     isLoading: categoriesLoading,
-    isRefreshing,
+    isRefreshing: categoriesRefreshing,
     refreshCategories,
   } = useCategory();
 
+  const {
+    popularRecipes,
+    easyToCookRecipes,
+    isLoadingPopular,
+    isLoadingEasy,
+    refreshRecipes,
+  } = useRecipe();
+
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const slideAnim = useRef(new Animated.Value(height)).current;
 
   const openPrompt = () => {
@@ -72,7 +82,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   const handleRecipePress = (recipe: any) => {
     if (navigation) {
-      navigation.navigate("RecipeDetail", { recipeId: recipe.id });
+      if (isAuthenticated) {
+        navigation.navigate("RecipeDetail", { recipeId: recipe.id });
+      } else {
+        openPrompt();
+      }
     }
   };
 
@@ -86,6 +100,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       } else {
         openPrompt();
       }
+    }
+  };
+
+  // Handle pull-to-refresh
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([refreshCategories(), refreshRecipes()]);
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -103,125 +129,115 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     { id: 10, name: "Đồ uống", description: "", imageUrl: "🥤" },
   ];
 
-  // Use API categories or fallback to default
+  // Default recipes as fallback
+  const defaultPopularRecipes = [
+    {
+      id: 1,
+      title: "Cách làm cơm tấm sườn bì chả",
+      imageUrl: null,
+      difficulty: "MEDIUM",
+      ownerName: "Chef Demo",
+      view: 0,
+    },
+    {
+      id: 2,
+      title: "Phở Bò Truyền Thống",
+      imageUrl: null,
+      difficulty: "HARD",
+      ownerName: "Chef Demo",
+      view: 0,
+    },
+  ];
+
+  const defaultEasyRecipes = [
+    {
+      id: 1,
+      title: "Trứng chiên đơn giản",
+      imageUrl: null,
+      difficulty: "EASY",
+      ownerName: "Chef Demo",
+      view: 0,
+    },
+    {
+      id: 2,
+      title: "Mì tôm trứng",
+      imageUrl: null,
+      difficulty: "EASY",
+      ownerName: "Chef Demo",
+      view: 0,
+    },
+  ];
+
+  // Use API data or fallback to default
   const displayCategories =
     categories.length > 0 ? categories : defaultCategories;
+  const displayPopularRecipes =
+    popularRecipes.length > 0 ? popularRecipes : defaultPopularRecipes;
+  const displayEasyRecipes =
+    easyToCookRecipes.length > 0 ? easyToCookRecipes : defaultEasyRecipes;
 
-  const popularRecipes = [
-    {
-      id: 1,
-      title: isAuthenticated
-        ? "Phở Bò Truyền Thống"
-        : "Cách làm cơm tấm sườn bì chả",
-      image: require("../../../assets/images/cachlamcomtam.jpg"),
-    },
-    {
-      id: 2,
-      title: isAuthenticated
-        ? "Bánh Flan Caramel"
-        : "Cách làm cơm tấm sườn bì chả",
-      image: require("../../../assets/images/cachlamcomtam.jpg"),
-    },
-    {
-      id: 3,
-      title: isAuthenticated
-        ? "Cơm Tấm Sườn Bì Chả 3"
-        : "Cách làm cơm tấm sườn bì chả 3",
-      image: require("../../../assets/images/cachlamcomtam.jpg"),
-    },
-    {
-      id: 4,
-      title: isAuthenticated
-        ? "Bánh Flan Caramel"
-        : "Cách làm cơm tấm sườn bì chả 4",
-      image: require("../../../assets/images/cachlamcomtam.jpg"),
-    },
-    {
-      id: 5,
-      title: isAuthenticated
-        ? "Cơm Tấm Sườn Bì Chả"
-        : "Cách làm cơm tấm sườn bì chả 5",
-      image: require("../../../assets/images/cachlamcomtam.jpg"),
-    },
-    {
-      id: 6,
-      title: isAuthenticated
-        ? "Cơm Tấm Sườn Bì Chả"
-        : "Cách làm cơm tấm sườn bì chả",
-      image: require("../../../assets/images/cachlamcomtam.jpg"),
-    },
-    {
-      id: 7,
-      title: isAuthenticated
-        ? "Bánh Flan Caramel"
-        : "Cách làm cơm tấm sườn bì chả",
-      image: require("../../../assets/images/cachlamcomtam.jpg"),
-    },
-    {
-      id: 8,
-      title: isAuthenticated
-        ? "Cơm Tấm Sườn Bì Chả"
-        : "Cách làm cơm tấm sườn bì chả",
-      image: require("../../../assets/images/cachlamcomtam.jpg"),
-    },
-  ];
-
-  const commonRecipes = [
-    {
-      id: 1,
-      title: isAuthenticated
-        ? "Canh Chua Cá Lóc"
-        : "Cách làm cơm tấm sườn bì chả",
-      image: require("../../../assets/images/cachlamcomtam.jpg"),
-    },
-    {
-      id: 2,
-      title: isAuthenticated ? "Thịt Kho Tàu" : "Cách làm cơm tấm sướn bì chả",
-      image: require("../../../assets/images/cachlamcomtam.jpg"),
-    },
-    {
-      id: 3,
-      title: isAuthenticated ? "Gà Xào Sả Ớt" : "Cách làm cơm tấm sướn bì chả",
-      image: require("../../../assets/images/cachlamcomtam.jpg"),
-    },
-    {
-      id: 4,
-      title: isAuthenticated ? "Chè Ba Màu" : "Cách làm cơm tấm sướn bì chả",
-      image: require("../../../assets/images/cachlamcomtam.jpg"),
-    },
-    {
-      id: 5,
-      title: isAuthenticated
-        ? "Cơm Tấm Sườn Bì Chả"
-        : "Cách làm cơm tấm sườn bì chả 5",
-      image: require("../../../assets/images/cachlamcomtam.jpg"),
-    },
-    {
-      id: 6,
-      title: isAuthenticated
-        ? "Cơm Tấm Sườn Bì Chả"
-        : "Cách làm cơm tấm sườn bì chả",
-      image: require("../../../assets/images/cachlamcomtam.jpg"),
-    },
-    {
-      id: 7,
-      title: isAuthenticated
-        ? "Bánh Flan Caramel"
-        : "Cách làm cơm tấm sườn bì chả",
-      image: require("../../../assets/images/cachlamcomtam.jpg"),
-    },
-  ];
-
-  // Helper function to get category icon/image
-  const getCategoryIcon = (category: any) => {
-    // If imageUrl contains emoji, use it directly
-    if (category.imageUrl) {
-      return category.imageUrl;
+  // Helper function to render category icon/image
+  const renderCategoryIcon = (category: any) => {
+    // Check if imageUrl is an emoji
+    if (category.imageUrl && /[\u{1f000}-\u{1f999}]/u.test(category.imageUrl)) {
+      return <Text style={homeStyles.categoryIcon}>{category.imageUrl}</Text>;
     }
 
-    // If imageUrl is a proper URL, you could use Image component
-    // For now, fallback to generic icon
-    return "🍽️";
+    // Check if imageUrl is a valid URL
+    if (
+      category.imageUrl &&
+      (category.imageUrl.startsWith("http://") ||
+        category.imageUrl.startsWith("https://"))
+    ) {
+      return (
+        <Image
+          source={{ uri: category.imageUrl }}
+          style={[
+            homeStyles.categoryIcon,
+            {
+              width: 32,
+              height: 32,
+              borderRadius: 16,
+            },
+          ]}
+          resizeMode="cover"
+        />
+      );
+    }
+
+    // Fallback to default icon
+    return <Text style={homeStyles.categoryIcon}>🍽️</Text>;
+  };
+
+  // Helper function to get recipe image
+  const getRecipeImage = (recipe: any) => {
+    if (recipe.imageUrl) {
+      return { uri: recipe.imageUrl };
+    }
+    // Fallback to local image
+    return require("../../../assets/images/cachlamcomtam.jpg");
+  };
+
+  // Helper function to format recipe title
+  const formatRecipeTitle = (recipe: any) => {
+    if (!isAuthenticated) {
+      return "Cách làm cơm tấm sườn bì chả";
+    }
+    return recipe.title || "Món ăn ngon";
+  };
+
+  // Helper function to format difficulty
+  const formatDifficulty = (difficulty: string) => {
+    switch (difficulty?.toUpperCase()) {
+      case "EASY":
+        return { text: "Dễ", color: "#4CAF50" };
+      case "MEDIUM":
+        return { text: "Trung bình", color: "#FF9800" };
+      case "HARD":
+        return { text: "Khó", color: "#F44336" };
+      default:
+        return { text: "Trung bình", color: "#FF9800" };
+    }
   };
 
   return (
@@ -265,7 +281,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
-            onRefresh={refreshCategories}
+            onRefresh={handleRefresh}
             colors={["#FF6B35"]}
             tintColor="#FF6B35"
           />
@@ -304,13 +320,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 onPress={() => handleCategoryPress(category)}
               >
                 <View style={homeStyles.categoryIconContainer}>
-                  <Image
-                    source={{ uri: getCategoryIcon(category) }}
-                    style={homeStyles.categoryIcon}
-                    resizeMode="cover"
-                  />
+                  {renderCategoryIcon(category)}
                 </View>
-
                 <Text style={homeStyles.categoryLabel} numberOfLines={2}>
                   {category.name}
                 </Text>
@@ -321,41 +332,102 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
         {/* Popular Recipes Section */}
         <View style={homeStyles.recipeSection}>
-          <Text style={homeStyles.sectionTitle}>Món ăn hấp dẫn</Text>
+          <View style={homeStyles.sectionHeader}>
+            <Text style={homeStyles.sectionTitle}>Món ăn hấp dẫn</Text>
+            {isLoadingPopular && (
+              <ActivityIndicator size="small" color="#FF6B35" />
+            )}
+          </View>
+
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={homeStyles.recipeRow}>
-              {popularRecipes.map((recipe) => (
+              {displayPopularRecipes.map((recipe, index) => (
                 <TouchableOpacity
-                  key={recipe.id}
+                  key={recipe.id || index}
                   style={homeStyles.recipeCardHorizontal}
                   onPress={() => handleRecipePress(recipe)}
                 >
                   <Image
-                    source={recipe.image}
+                    source={getRecipeImage(recipe)}
                     style={homeStyles.recipeCardImage}
                   />
-                  <Text style={homeStyles.recipeCardTitle}>{recipe.title}</Text>
+                  <View style={homeStyles.recipeCardInfo}>
+                    <Text style={homeStyles.recipeCardTitle} numberOfLines={2}>
+                      {formatRecipeTitle(recipe)}
+                    </Text>
+                    {isAuthenticated && (
+                      <View style={homeStyles.recipeMetaInfo}>
+                        <Text style={homeStyles.recipeOwnerText}>
+                          👨‍🍳 {recipe.ownerName || "Unknown Chef"}
+                        </Text>
+                        <Text
+                          style={[
+                            homeStyles.recipeDifficultyText,
+                            {
+                              color: formatDifficulty(recipe.difficulty).color,
+                            },
+                          ]}
+                        >
+                          {formatDifficulty(recipe.difficulty).text}
+                        </Text>
+                      </View>
+                    )}
+                    {isAuthenticated && (
+                      <View style={homeStyles.recipeStatsInfo}>
+                        <Text style={homeStyles.recipeViewText}>
+                          👁️ {recipe.view || 0} lượt xem
+                        </Text>
+                      </View>
+                    )}
+                  </View>
                 </TouchableOpacity>
               ))}
             </View>
           </ScrollView>
         </View>
 
-        {/* Common Recipes Section */}
+        {/* Easy-to-Cook Recipes Section (replacing Common Recipes) */}
         <View style={homeStyles.recipeSection}>
-          <Text style={homeStyles.sectionTitle}>Món ăn phổ biến</Text>
-          <View style={homeStyles.commonRecipesContainer}>
-            {commonRecipes.map((recipe) => (
+          <View style={homeStyles.sectionHeader}>
+            <Text style={homeStyles.sectionTitle}>Món ăn dễ nấu</Text>
+            {isLoadingEasy && (
+              <ActivityIndicator size="small" color="#FF6B35" />
+            )}
+          </View>
+
+          <View style={homeStyles.easyRecipesContainer}>
+            {displayEasyRecipes.map((recipe, index) => (
               <TouchableOpacity
-                key={recipe.id}
-                style={homeStyles.commonRecipeCard}
+                key={recipe.id || index}
+                style={homeStyles.easyRecipeCard}
                 onPress={() => handleRecipePress(recipe)}
               >
                 <Image
-                  source={recipe.image}
+                  source={getRecipeImage(recipe)}
                   style={homeStyles.recipeCardImage}
                 />
-                <Text style={homeStyles.recipeCardTitle}>{recipe.title}</Text>
+                <View style={homeStyles.recipeCardInfo}>
+                  <Text style={homeStyles.recipeCardTitle} numberOfLines={2}>
+                    {formatRecipeTitle(recipe)}
+                  </Text>
+                  {isAuthenticated && (
+                    <View style={homeStyles.recipeMetaInfo}>
+                      <Text style={homeStyles.recipeOwnerText}>
+                        👨‍🍳 {recipe.ownerName || "Unknown Chef"}
+                      </Text>
+                      <View style={homeStyles.easyBadge}>
+                        <Text style={homeStyles.easyBadgeText}>DỄ NẤU</Text>
+                      </View>
+                    </View>
+                  )}
+                  {isAuthenticated && (
+                    <View style={homeStyles.recipeStatsInfo}>
+                      <Text style={homeStyles.recipeViewText}>
+                        👁️ {recipe.view || 0} lượt xem
+                      </Text>
+                    </View>
+                  )}
+                </View>
               </TouchableOpacity>
             ))}
           </View>

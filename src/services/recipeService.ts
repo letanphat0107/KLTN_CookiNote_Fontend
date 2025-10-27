@@ -1,33 +1,22 @@
 // src/services/recipeService.ts
 import { fetchWithAuth } from "../utils/apiUtils";
 import { API_URLS, buildApiUrl, API_CONFIG } from "../config/api";
-import { Recipe, RecipeWithDetails } from "../types/recipe";
+import {
+  Recipe,
+  RecipeWithDetails,
+  RecipeResponse,
+  RecipeDetailResponse,
+  PaginatedRecipeResponse,
+} from "../types/recipe";
 import { RecipeSearchParams } from "../types/api";
 
-export interface RecipeResponse {
-  code: number;
-  message: string;
-  data: Recipe[];
-}
-
-export interface RecipeDetailResponse {
-  code: number;
-  message: string;
-  data: RecipeWithDetails;
-}
-
-// Get popular recipes (public access)
+// Get popular recipes (sorted by view count)
 export const getPopularRecipes = async (limit = 8): Promise<Recipe[]> => {
   try {
     console.log("Fetching popular recipes...");
 
-    const params = new URLSearchParams({
-      sort_by: "view",
-      sort_order: "desc",
-      limit: limit.toString(),
-    });
 
-    const response = await fetch(`${API_URLS.RECIPES}?${params}`, {
+    const response = await fetch(`${API_URLS.POPULAR_RECIPES}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -39,7 +28,7 @@ export const getPopularRecipes = async (limit = 8): Promise<Recipe[]> => {
     console.log("Popular recipes response:", result);
 
     if (response.ok && result.code === 200) {
-      return result.data || [];
+      return result.data.items || [];
     } else {
       console.error("Failed to fetch popular recipes:", result.message);
       return [];
@@ -50,19 +39,13 @@ export const getPopularRecipes = async (limit = 8): Promise<Recipe[]> => {
   }
 };
 
-// Get easy-to-cook recipes (difficulty = "easy")
+// Get latest recipes (easy-to-cook section - sorted by creation date)
 export const getEasyToCookRecipes = async (limit = 7): Promise<Recipe[]> => {
   try {
-    console.log("Fetching easy-to-cook recipes...");
+    console.log("Fetching latest recipes...");
 
-    const params = new URLSearchParams({
-      difficulty: "easy",
-      sort_by: "created_at",
-      sort_order: "desc",
-      limit: limit.toString(),
-    });
 
-    const response = await fetch(`${API_URLS.RECIPES}?${params}`, {
+    const response = await fetch(`${API_URLS.EASYTOCOOK_RECIPES}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -71,33 +54,52 @@ export const getEasyToCookRecipes = async (limit = 7): Promise<Recipe[]> => {
     });
 
     const result: RecipeResponse = await response.json();
-    console.log("Easy-to-cook recipes response:", result);
+    console.log("Latest recipes response:", result);
 
     if (response.ok && result.code === 200) {
-      return result.data || [];
+      // Filter for easy recipes if needed, or return all latest
+      const recipes = result.data.items || [];
+
+      // Option 1: Return all latest recipes
+      return recipes;
+
+      // Option 2: Filter for easy recipes only (uncomment if needed)
+      // return recipes.filter(recipe =>
+      //   recipe.difficulty?.toUpperCase() === "EASY"
+      // );
     } else {
-      console.error("Failed to fetch easy-to-cook recipes:", result.message);
+      console.error("Failed to fetch latest recipes:", result.message);
       return [];
     }
   } catch (error) {
-    console.error("Error fetching easy-to-cook recipes:", error);
+    console.error("Error fetching latest recipes:", error);
     return [];
   }
 };
 
-// Search recipes (public access)
+// Search recipes with pagination
 export const searchRecipes = async (
-  searchParams: RecipeSearchParams
-): Promise<Recipe[]> => {
+  searchParams: RecipeSearchParams & {
+    page?: number;
+    size?: number;
+    sort?: string;
+  }
+): Promise<PaginatedRecipeResponse> => {
   try {
     const params = new URLSearchParams();
 
+    // Add search parameters
     Object.entries(searchParams).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         params.append(key, value.toString());
       }
     });
 
+    // Default pagination
+    if (!searchParams.page) params.append("page", "0");
+    if (!searchParams.size) params.append("size", "20");
+    if (!searchParams.sort) params.append("sort", "createdAt,desc");
+
     const response = await fetch(`${API_URLS.RECIPES}?${params}`, {
       method: "GET",
       headers: {
@@ -109,14 +111,28 @@ export const searchRecipes = async (
     const result: RecipeResponse = await response.json();
 
     if (response.ok && result.code === 200) {
-      return result.data || [];
+      return result.data;
     } else {
       console.error("Failed to search recipes:", result.message);
-      return [];
+      return {
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasNext: false,
+        items: [],
+      };
     }
   } catch (error) {
     console.error("Error searching recipes:", error);
-    return [];
+    return {
+      page: 0,
+      size: 0,
+      totalElements: 0,
+      totalPages: 0,
+      hasNext: false,
+      items: [],
+    };
   }
 };
 
@@ -150,17 +166,18 @@ export const getRecipeDetails = async (
   }
 };
 
-// Get recipes by category (public access)
+// Get recipes by category with pagination
 export const getRecipesByCategory = async (
   categoryId: number,
-  limit = 20
-): Promise<Recipe[]> => {
+  page = 0,
+  size = 20
+): Promise<PaginatedRecipeResponse> => {
   try {
     const params = new URLSearchParams({
-      category_id: categoryId.toString(),
-      limit: limit.toString(),
-      sort_by: "created_at",
-      sort_order: "desc",
+      categoryId: categoryId.toString(),
+      page: page.toString(),
+      size: size.toString(),
+      sort: "createdAt,desc",
     });
 
     const response = await fetch(`${API_URLS.RECIPES}?${params}`, {
@@ -174,13 +191,64 @@ export const getRecipesByCategory = async (
     const result: RecipeResponse = await response.json();
 
     if (response.ok && result.code === 200) {
-      return result.data || [];
+      return result.data;
     } else {
       console.error("Failed to fetch recipes by category:", result.message);
-      return [];
+      return {
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasNext: false,
+        items: [],
+      };
     }
   } catch (error) {
     console.error("Error fetching recipes by category:", error);
+    return {
+      page: 0,
+      size: 0,
+      totalElements: 0,
+      totalPages: 0,
+      hasNext: false,
+      items: [],
+    };
+  }
+};
+
+// Get recipes by difficulty
+export const getRecipesByDifficulty = async (
+  difficulty: "EASY" | "MEDIUM" | "HARD",
+  limit = 20
+): Promise<Recipe[]> => {
+  try {
+    const params = new URLSearchParams({
+      page: "0",
+      size: limit.toString(),
+      sort: "createdAt,desc",
+    });
+
+    const response = await fetch(`${API_URLS.RECIPES}?${params}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    });
+
+    const result: RecipeResponse = await response.json();
+
+    if (response.ok && result.code === 200) {
+      // Filter by difficulty on client side
+      return result.data.items.filter(
+        (recipe) => recipe.difficulty?.toUpperCase() === difficulty
+      );
+    } else {
+      console.error("Failed to fetch recipes by difficulty:", result.message);
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching recipes by difficulty:", error);
     return [];
   }
 };

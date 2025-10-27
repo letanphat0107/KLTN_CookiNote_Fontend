@@ -2,28 +2,52 @@
 export interface Recipe {
   id: number;
   title: string;
-  description: string;
-  image_url?: string;
-  prepare_time: number;
-  cook_time: number;
+  description?: string;
+  imageUrl?: string;
+  ownerName?: string;
+  createdAt: string;
   difficulty: string;
   view: number;
-  category_id: number;
-  user_id: number;
-  created_at: string;
+  deleted: boolean;
+  // Legacy fields for backward compatibility
+  image_url?: string;
+  prepare_time?: number;
+  cook_time?: number;
+  category_id?: number;
+  user_id?: number;
+  created_at?: string;
 }
-export interface RecipeWithDetails {
-  id: number;
-  title: string;
+
+export interface RecipeWithDetails extends Recipe {
   description: string;
-  image_url?: string;
   prepare_time: number;
   cook_time: number;
-  difficulty: string;
-  view: number;
   category_id: number;
   user_id: number;
-  created_at: string;
+  steps?: RecipeStep[];
+  ingredients?: RecipeIngredient[];
+}
+
+// Paginated response for recipes
+export interface PaginatedRecipeResponse {
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  items: Recipe[];
+}
+
+export interface RecipeResponse {
+  code: number;
+  message: string;
+  data: PaginatedRecipeResponse;
+}
+
+export interface RecipeDetailResponse {
+  code: number;
+  message: string;
+  data: RecipeWithDetails;
 }
 
 export interface RecipeStep {
