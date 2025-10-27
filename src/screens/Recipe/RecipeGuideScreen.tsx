@@ -10,78 +10,28 @@ import {
   Animated,
 } from "react-native";
 import { recipeStyles } from "./styles";
+import { RecipeStep } from "../../types/recipe";
 
 interface RecipeGuideScreenProps {
   route?: {
     params?: {
-      recipeId?: string;
+      steps?: RecipeStep[];
+      recipeTitle?: string;
+      recipeId?: string | number;
     };
   };
   navigation?: any;
 }
 
-// Mock data with timer suggestions for each step
-const mockSteps = [
-  {
-    id: 1,
-    content:
-      "Rửa sạch xương bò, cho vào nồi nước sôi chần 5 phút để loại bỏ tạp chất",
-    step_no: 1,
-    recipe_id: 1,
-    image_url:
-      "https://www.vinmec.com/static/uploads/20210427_031826_543746_rua_rau_dung_cach_6_max_1800x1800_jpg_6b3b189b71.jpg",
-    suggested_time: 1, // minutes
-    tips: "Nước chần phải sôi thật mạnh để loại bỏ tạp chất hiệu quả",
-  },
-  {
-    id: 2,
-    content: "Nướng hành tây và gừng trên bếp gas cho thơm, sau đó rửa sạch",
-    step_no: 2,
-    recipe_id: 1,
-    image_url:
-      "https://www.vinmec.com/static/uploads/20210427_031826_543746_rua_rau_dung_cach_6_max_1800x1800_jpg_6b3b189b71.jpg",
-    suggested_time: 10,
-    tips: "Nướng đến khi có mùi thơm và hơi cháy nhẹ bề mặt",
-  },
-  {
-    id: 3,
-    content:
-      "Cho xương bò đã chần vào nồi nước lạnh, nấu trên lửa lớn đến khi sôi",
-    step_no: 3,
-    recipe_id: 1,
-    image_url:
-      "https://www.vinmec.com/static/uploads/20210427_031826_543746_rua_rau_dung_cach_6_max_1800x1800_jpg_6b3b189b71.jpg",
-    suggested_time: 15,
-    tips: "Dùng nước lạnh để nước dùng trong hơn",
-  },
-  {
-    id: 4,
-    content:
-      "Hạ lửa nhỏ, vớt bọt, thêm hành tây, gừng nướng và gia vị. Niêu 2-3 tiếng",
-    step_no: 4,
-    recipe_id: 1,
-    image_url:
-      "https://www.vinmec.com/static/uploads/20210427_031826_543746_rua_rau_dung_cach_6_max_1800x1800_jpg_6b3b189b71.jpg",
-    suggested_time: 120, // 2 hours
-    tips: "Vớt bọt thường xuyên trong 30 phút đầu",
-  },
-  {
-    id: 5,
-    content: "Chần bánh phở, thái thịt bò mỏng, chuẩn bị rau thơm và bày biện",
-    step_no: 5,
-    recipe_id: 1,
-    image_url:
-      "https://www.vinmec.com/static/uploads/20210427_031826_543746_rua_rau_dung_cach_6_max_1800x1800_jpg_6b3b189b71.jpg",
-    suggested_time: 10,
-    tips: "Thịt bò cắt ngược thớ sẽ mềm hơn",
-  },
-];
-
 const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
   route,
   navigation,
 }) => {
+  // Get steps and recipe info from navigation params
+  const steps = route?.params?.steps || [];
+  const recipeTitle = route?.params?.recipeTitle || "Hướng dẫn nấu ăn";
   const recipeId = route?.params?.recipeId;
+
   const [currentStep, setCurrentStep] = useState(0);
   const [timer, setTimer] = useState(0); // seconds
   const [isTimerRunning, setIsTimerRunning] = useState(false);
@@ -96,19 +46,19 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
   const toastOpacity = useState(new Animated.Value(0))[0];
   const toastTranslateY = useState(new Animated.Value(-100))[0];
 
-  const currentStepData = mockSteps[currentStep];
+  // Check if we have valid steps
+  const hasSteps = steps && steps.length > 0;
+  const currentStepData = hasSteps ? steps[currentStep] : null;
   const isFirstStep = currentStep === 0;
-  const isLastStep = currentStep === mockSteps.length - 1;
+  const isLastStep = currentStep === steps.length - 1;
 
   // Toast functions
   const showToastMessage = (message: string, duration: number = 3000) => {
-    // Hide any existing toast first
     hideToast();
 
     setToastMessage(message);
     setShowToast(true);
 
-    // Animate in
     Animated.parallel([
       Animated.timing(toastOpacity, {
         toValue: 1,
@@ -122,7 +72,6 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
       }),
     ]).start();
 
-    // Auto hide after duration
     setTimeout(() => {
       hideToast();
     }, duration);
@@ -150,18 +99,19 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
 
   // Set default timer when step changes and auto-start
   useEffect(() => {
-    // Close any existing toast when changing steps
     hideToast();
 
-    const suggestedTime = currentStepData?.suggested_time;
-    if (suggestedTime) {
-      setTimer(suggestedTime * 60); // convert minutes to seconds
-      setIsTimerRunning(true); // Auto-start timer
-    } else {
-      setTimer(0); // 00:00 if no suggested time
-      setIsTimerRunning(false);
+    if (currentStepData) {
+      const suggestedTime = currentStepData.suggestedTime;
+      if (suggestedTime) {
+        setTimer(suggestedTime * 60); // convert minutes to seconds
+        setIsTimerRunning(true); // Auto-start timer
+      } else {
+        setTimer(0);
+        setIsTimerRunning(false);
+      }
     }
-    setIsCountingDown(false); // Reset countdown when changing steps
+    setIsCountingDown(false);
     setCountdownTimer(0);
   }, [currentStep, currentStepData]);
 
@@ -176,7 +126,6 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
       setIsTimerRunning(false);
 
       if (!isLastStep) {
-        // Show toast and start countdown for next step
         showToastMessage(
           "⏰ Hết giờ! Thời gian cho bước này đã hoàn thành!\nBước tiếp theo sẽ diễn ra trong 5s nữa",
           5000
@@ -184,7 +133,6 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
         setIsCountingDown(true);
         setCountdownTimer(5);
       } else {
-        // Last step - just show completion toast
         showToastMessage(
           "⏰ Hết giờ! Thời gian cho bước này đã hoàn thành!",
           3000
@@ -203,13 +151,47 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
       }, 1000);
     } else if (countdownTimer === 0 && isCountingDown) {
       setIsCountingDown(false);
-      // Auto move to next step
       if (!isLastStep) {
         setCurrentStep(currentStep + 1);
       }
     }
     return () => clearInterval(interval);
   }, [isCountingDown, countdownTimer, isLastStep, currentStep]);
+
+  // Show error if no steps provided
+  if (!hasSteps) {
+    return (
+      <View style={recipeStyles.container}>
+        <View style={recipeStyles.guideHeader}>
+          <TouchableOpacity
+            onPress={() => navigation?.goBack()}
+            style={recipeStyles.backButton}
+          >
+            <Image
+              source={require("../../../assets/images/vector.png")}
+              style={recipeStyles.backIcon}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+          <Text style={recipeStyles.guideTitle}>Hướng dẫn nấu ăn</Text>
+          <View style={recipeStyles.stepIndicator} />
+        </View>
+
+        <View style={recipeStyles.errorContainer}>
+          <Text style={recipeStyles.errorTitle}>😔 Oops!</Text>
+          <Text style={recipeStyles.errorMessage}>
+            Không có hướng dẫn nấu ăn cho công thức này
+          </Text>
+          <TouchableOpacity
+            style={recipeStyles.retryButton}
+            onPress={() => navigation?.goBack()}
+          >
+            <Text style={recipeStyles.retryButtonText}>Quay lại</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -222,7 +204,7 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
   const startTimer = (minutes: number) => {
     setTimer(minutes * 60);
     setIsTimerRunning(true);
-    setIsCountingDown(false); // Stop any countdown
+    setIsCountingDown(false);
     setCountdownTimer(0);
   };
 
@@ -234,7 +216,7 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
     setIsTimerRunning(false);
     setIsCountingDown(false);
     setCountdownTimer(0);
-    const suggestedTime = currentStepData?.suggested_time;
+    const suggestedTime = currentStepData?.suggestedTime;
     if (suggestedTime) {
       setTimer(suggestedTime * 60);
     } else {
@@ -257,11 +239,10 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
     } else {
       if (timer > 0) {
         setIsTimerRunning(true);
-        setIsCountingDown(false); // Stop countdown if manually starting timer
+        setIsCountingDown(false);
         setCountdownTimer(0);
       } else {
-        // If timer is 0, start with suggested time
-        const suggestedTime = currentStepData?.suggested_time;
+        const suggestedTime = currentStepData?.suggestedTime;
         if (suggestedTime) {
           setTimer(suggestedTime * 60);
           setIsTimerRunning(true);
@@ -284,14 +265,12 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
 
   const handleComplete = () => {
     showToastMessage(
-      "🎉 Hoàn thành! Chúc mừng bạn đã hoàn thành món Phở Bò Truyền Thống!",
+      `🎉 Hoàn thành! Chúc mừng bạn đã hoàn thành món ${recipeTitle}!`,
       4000
     );
 
-    // Navigate after toast and reset navigation stack
     setTimeout(() => {
       if (navigation) {
-        // Replace current stack with RecipeDetail (remove RecipeGuide from stack)
         navigation.reset({
           index: 0,
           routes: [
@@ -310,6 +289,55 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
       navigation.goBack();
     }
   };
+
+  // Render step images with horizontal scroll
+// src/screens/Recipe/RecipeGuideScreen.tsx
+// Cập nhật renderStepImages function
+
+const renderStepImages = (images?: string[]) => {
+  if (!images || images.length === 0) return null;
+
+  return (
+    <View style={recipeStyles.stepImagesWrapper}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={recipeStyles.stepImagesContainer}
+        contentContainerStyle={{ paddingRight: 15 }}
+      >
+        {images.map((imageUrl, index) => (
+          <View
+            key={index}
+            style={[
+              recipeStyles.stepImageContainer,
+              index === 0 && { marginLeft: 0 },
+            ]}
+          >
+            <Image
+              source={{ uri: imageUrl }}
+              style={recipeStyles.stepImage} // Changed from stepGuideImage to stepImage
+              resizeMode="cover"
+            />
+            
+            {/* Image counter */}
+            <View style={recipeStyles.imageCounter}>
+              <Text style={recipeStyles.imageCounterText}>
+                {index + 1}/{images.length}
+              </Text>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+
+      {/* Instructions for multiple images */}
+      {images.length > 1 && (
+        <Text style={recipeStyles.scrollHint}>
+          📸 Lướt để xem {images.length} ảnh hướng dẫn
+        </Text>
+      )}
+    </View>
+  );
+};
 
   return (
     <View style={recipeStyles.container}>
@@ -345,10 +373,12 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
             resizeMode="contain"
           />
         </TouchableOpacity>
-        <Text style={recipeStyles.guideTitle}>Hướng dẫn nấu ăn</Text>
+        <Text style={recipeStyles.guideTitle} numberOfLines={1}>
+          {recipeTitle}
+        </Text>
         <View style={recipeStyles.stepIndicator}>
           <Text style={recipeStyles.stepIndicatorText}>
-            {currentStep + 1}/{mockSteps.length}
+            {currentStep + 1}/{steps.length}
           </Text>
         </View>
       </View>
@@ -366,7 +396,6 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
           </Text>
         </View>
 
-        {/* Countdown indicator when auto-transitioning */}
         {isCountingDown && (
           <View style={recipeStyles.countdownContainer}>
             <Text style={recipeStyles.countdownText}>
@@ -375,7 +404,6 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
           </View>
         )}
 
-        {/* Main Start/Stop Button */}
         <View style={recipeStyles.mainTimerControl}>
           <TouchableOpacity
             style={[
@@ -385,7 +413,7 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
                 : recipeStyles.startMainButton,
             ]}
             onPress={toggleTimer}
-            disabled={isCountingDown} // Disable during countdown
+            disabled={isCountingDown}
           >
             <Text style={recipeStyles.mainTimerButtonText}>
               {isTimerRunning ? "⏸️ Dừng" : "▶️ Bắt đầu"}
@@ -393,7 +421,6 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
           </TouchableOpacity>
         </View>
 
-        {/* Timer Controls */}
         <View style={recipeStyles.timerControls}>
           <TouchableOpacity
             style={recipeStyles.timerButton}
@@ -418,7 +445,7 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
           </TouchableOpacity>
           <TouchableOpacity
             style={recipeStyles.timerButton}
-            onPress={() => startTimer(currentStepData?.suggested_time || 5)}
+            onPress={() => startTimer(currentStepData?.suggestedTime || 5)}
             disabled={isCountingDown}
           >
             <Text style={recipeStyles.timerButtonText}>Gợi ý</Text>
@@ -448,29 +475,25 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
       >
         <View style={recipeStyles.currentStep}>
           <Text style={recipeStyles.currentStepNumber}>
-            Bước {currentStepData.step_no}
+            Bước {currentStepData?.stepNo || currentStep + 1}
           </Text>
 
-          {currentStepData.image_url && (
-            <Image
-              source={{ uri: currentStepData.image_url }}
-              style={recipeStyles.stepGuideImage}
-            />
-          )}
+          {/* Step Images */}
+          {renderStepImages(currentStepData?.images)}
 
           <Text style={recipeStyles.currentStepContent}>
-            {currentStepData.content}
+            {currentStepData?.content}
           </Text>
 
-          {currentStepData.suggested_time && (
+          {currentStepData?.suggestedTime && (
             <View style={recipeStyles.suggestedTimeContainer}>
               <Text style={recipeStyles.suggestedTimeText}>
-                ⏱️ Thời gian gợi ý: {currentStepData.suggested_time} phút
+                ⏱️ Thời gian gợi ý: {currentStepData.suggestedTime} phút
               </Text>
             </View>
           )}
 
-          {currentStepData.tips && (
+          {currentStepData?.tips && (
             <View style={recipeStyles.tipsContainer}>
               <Text style={recipeStyles.tipsTitle}>💡 Mẹo nhỏ:</Text>
               <Text style={recipeStyles.tipsText}>{currentStepData.tips}</Text>

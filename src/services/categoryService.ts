@@ -49,7 +49,6 @@ export const getCategories = async (): Promise<Category[]> => {
       return [];
     }
   } catch (error) {
-    console.error("Error fetching categories:", error);
     return [];
   }
 };

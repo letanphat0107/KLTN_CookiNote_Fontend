@@ -31,7 +31,6 @@ export const useRecipe = () => {
       const recipes = await getPopularRecipes(limit);
       setPopularRecipes(recipes);
     } catch (error) {
-      console.error("Error fetching popular recipes:", error);
       setError("Không thể tải món ăn hấp dẫn");
     } finally {
       setIsLoadingPopular(false);
@@ -47,7 +46,6 @@ export const useRecipe = () => {
       const recipes = await getEasyToCookRecipes(limit);
       setEasyToCookRecipes(recipes);
     } catch (error) {
-      console.error("Error fetching latest recipes:", error);
       setError("Không thể tải món ăn mới nhất");
     } finally {
       setIsLoadingEasy(false);

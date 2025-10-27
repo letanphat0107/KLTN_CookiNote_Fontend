@@ -49,7 +49,6 @@ export const getPopularRecipes = async (limit = 8): Promise<Recipe[]> => {
       return [];
     }
   } catch (error) {
-    console.error("Error fetching popular recipes:", error);
     return [];
   }
 };
@@ -86,7 +85,6 @@ export const getEasyToCookRecipes = async (limit = 7): Promise<Recipe[]> => {
       return [];
     }
   } catch (error) {
-    console.error("Error fetching latest recipes:", error);
     return [];
   }
 };
@@ -193,7 +191,7 @@ export const getRecipeDetails = async (
       return null;
     }
   } catch (error) {
-    console.error("Error fetching recipe details s:", error);
+
     return null;
   }
 };
@@ -238,7 +236,7 @@ export const getRecipesByCategory = async (
       };
     }
   } catch (error) {
-    console.error("Error fetching recipes by category:", error);
+
     return {
       page: 0,
       size: 0,
@@ -282,7 +280,7 @@ export const getRecipesByDifficulty = async (
       return [];
     }
   } catch (error) {
-    console.error("Error fetching recipes by difficulty:", error);
+
     return [];
   }
 };

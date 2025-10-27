@@ -36,7 +36,6 @@ export const useCategory = () => {
       const categoryList = await getCategories();
       setCategories(categoryList);
     } catch (error) {
-      console.error("Error fetching categories:", error);
       setError("Không thể tải danh sách danh mục");
     } finally {
       setIsLoading(false);

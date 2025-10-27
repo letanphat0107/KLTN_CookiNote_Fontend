@@ -67,7 +67,6 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
         setError("Vui lòng đăng nhập để xem chi tiết công thức");
       }
     } catch (error) {
-      console.error("Error fetching recipe details screen:", error);
       setError("Đã xảy ra lỗi khi tải công thức");
     } finally {
       setIsLoading(false);
@@ -119,25 +118,42 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
     }
   };
 
-  const handleStartCooking = () => {
-    if (!isAuthenticated) {
-      showToastMessage(
-        "🔐 Vui lòng đăng nhập để sử dụng chế độ hướng dẫn nấu ăn!",
-        4000
-      );
+  // src/screens/Recipe/RecipeDetailScreen.tsx
+// Cập nhật handleStartCooking function
 
-      setTimeout(() => {
-        if (navigation) {
-          navigation.navigate("Login");
-        }
-      }, 2000);
-      return;
-    }
+const handleStartCooking = () => {
+  if (!isAuthenticated) {
+    showToastMessage(
+      "🔐 Vui lòng đăng nhập để sử dụng chế độ hướng dẫn nấu ăn!",
+      4000
+    );
 
-    if (navigation) {
-      navigation.navigate("RecipeGuide", { recipeId });
-    }
-  };
+    setTimeout(() => {
+      if (navigation) {
+        navigation.navigate("Login");
+      }
+    }, 2000);
+    return;
+  }
+
+  // Check if recipe has steps
+  if (!recipe?.steps || recipe.steps.length === 0) {
+    showToastMessage(
+      "😔 Công thức này chưa có hướng dẫn từng bước!",
+      3000
+    );
+    return;
+  }
+
+  // Navigate to RecipeGuide with steps data
+  if (navigation) {
+    navigation.navigate("RecipeGuide", {
+      steps: recipe.steps,
+      recipeTitle: recipe.title,
+      recipeId: recipe.id,
+    });
+  }
+};
 
   const handleAddToFavorite = () => {
     if (!isAuthenticated) {
