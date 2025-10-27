@@ -296,7 +296,7 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
           index: 0,
           routes: [
             {
-              name: "HomeScreen",
+              name: "MainTabs",
               params: { recipeId },
             },
           ],

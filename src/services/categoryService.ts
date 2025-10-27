@@ -41,7 +41,6 @@ export const getCategories = async (): Promise<Category[]> => {
     });
 
     const result: CategoryResponse = await response.json();
-    console.log("Categories response:", result);
 
     if (response.ok && result.code === 200) {
       return result.data || [];

@@ -9,12 +9,28 @@ import {
   PaginatedRecipeResponse,
 } from "../types/recipe";
 import { RecipeSearchParams } from "../types/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// Helper function to get access token
+const getAccessToken = async (): Promise<string | null> => {
+  try {
+    return await AsyncStorage.getItem("auth_tokens").then((tokens) => {
+      if (tokens) {
+        const parsedTokens = JSON.parse(tokens);
+        return parsedTokens.accessToken;
+      } else {
+        return null;
+      }    }     )
+  } catch (error) {
+    console.error("Error getting access token:", error);
+    return null;
+  }
+};
 
 // Get popular recipes (sorted by view count)
 export const getPopularRecipes = async (limit = 8): Promise<Recipe[]> => {
   try {
     console.log("Fetching popular recipes...");
-
 
     const response = await fetch(`${API_URLS.POPULAR_RECIPES}`, {
       method: "GET",
@@ -25,7 +41,6 @@ export const getPopularRecipes = async (limit = 8): Promise<Recipe[]> => {
     });
 
     const result: RecipeResponse = await response.json();
-    console.log("Popular recipes response:", result);
 
     if (response.ok && result.code === 200) {
       return result.data.items || [];
@@ -43,7 +58,6 @@ export const getPopularRecipes = async (limit = 8): Promise<Recipe[]> => {
 export const getEasyToCookRecipes = async (limit = 7): Promise<Recipe[]> => {
   try {
     console.log("Fetching latest recipes...");
-
 
     const response = await fetch(`${API_URLS.EASYTOCOOK_RECIPES}`, {
       method: "GET",
@@ -136,35 +150,55 @@ export const searchRecipes = async (
   }
 };
 
-// Get recipe details (requires authentication for some features)
+// Get recipe details with authentication
 export const getRecipeDetails = async (
   recipeId: number
 ): Promise<RecipeWithDetails | null> => {
   try {
     console.log("Fetching recipe details for ID:", recipeId);
 
+    // Get access token
+    const accessToken = await getAccessToken();
+
+    // Prepare headers
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+
+    // Add authorization header if token exists
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    console.log(accessToken);
+    
+
     const response = await fetch(`${API_URLS.RECIPES}/${recipeId}`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers,
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
 
     const result: RecipeDetailResponse = await response.json();
     console.log("Recipe details response:", result);
 
-    if (response.ok && result.code === 200) {
+    if (result.code === 200) {
       return result.data;
     } else {
       console.error("Failed to fetch recipe details:", result.message);
       return null;
     }
   } catch (error) {
-    console.error("Error fetching recipe details:", error);
+    console.error("Error fetching recipe details s:", error);
     return null;
   }
 };
+
+// Alternative: Using fetchWithAuth utility
 
 // Get recipes by category with pagination
 export const getRecipesByCategory = async (

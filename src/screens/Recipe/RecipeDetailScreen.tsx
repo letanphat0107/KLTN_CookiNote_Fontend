@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,68 +6,22 @@ import {
   Image,
   TouchableOpacity,
   Animated,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { recipeStyles } from "./styles";
 import { useAppSelector } from "../../store/hooks";
+import { useRecipe } from "../../hooks/useRecipe";
+import { RecipeWithDetails } from "../../types/recipe";
 
 interface RecipeDetailScreenProps {
   route?: {
     params?: {
-      recipeId?: string;
+      recipeId?: string | number;
     };
   };
   navigation?: any;
 }
-
-// Mock data for ingredients and steps
-const mockIngredients = [
-  { id: 1, name: "Xương bò", quantity: "1kg", recipe_id: 1 },
-  { id: 2, name: "Bánh phở khô", quantity: "400g", recipe_id: 1 },
-  { id: 3, name: "Thịt bò tái", quantity: "200g", recipe_id: 1 },
-  { id: 4, name: "Hành tây", quantity: "1 củ", recipe_id: 1 },
-  { id: 5, name: "Gừng", quantity: "50g", recipe_id: 1 },
-  { id: 6, name: "Hạt tiêu", quantity: "1 thìa cà phê", recipe_id: 1 },
-  { id: 7, name: "Muối", quantity: "1 thìa cà phê", recipe_id: 1 },
-  { id: 8, name: "Đường phèn", quantity: "1 thìa canh", recipe_id: 1 },
-];
-
-const mockSteps = [
-  {
-    id: 1,
-    content:
-      "Rửa sạch xương bò, cho vào nồi nước sôi chần 5 phút để loại bỏ tạp chất",
-    step_no: 1,
-    recipe_id: 1,
-    image_url:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
-  },
-  {
-    id: 2,
-    content: "Nướng hành tây và gừng trên bếp gas cho thơm, sau đó rửa sạch",
-    step_no: 2,
-    recipe_id: 1,
-    image_url:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
-  },
-  {
-    id: 3,
-    content:
-      "Cho xương bò đã chần vào nồi nước lạnh, nấu trên lửa lớn đến khi sôi",
-    step_no: 3,
-    recipe_id: 1,
-    image_url:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
-  },
-  {
-    id: 4,
-    content:
-      "Hạ lửa nhỏ, vớt bọt, thêm hành tây, gừng nướng và gia vị. Niêu 2-3 tiếng",
-    step_no: 4,
-    recipe_id: 1,
-    image_url:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
-  },
-];
 
 const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
   route,
@@ -75,6 +29,12 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
 }) => {
   const recipeId = route?.params?.recipeId;
   const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { getRecipeDetails } = useRecipe();
+
+  // State for recipe data
+  const [recipe, setRecipe] = useState<RecipeWithDetails | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Toast message state
   const [toastMessage, setToastMessage] = useState("");
@@ -82,15 +42,45 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
   const toastOpacity = useState(new Animated.Value(0))[0];
   const toastTranslateY = useState(new Animated.Value(-100))[0];
 
+  // Fetch recipe details when component mounts
+  useEffect(() => {
+    if (recipeId) {
+      fetchRecipeDetails();
+    } else {
+      setError("Recipe ID not found");
+      setIsLoading(false);
+    }
+  }, [recipeId]);
+
+  const fetchRecipeDetails = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      console.log("Fetching recipe details for ID:", recipeId);
+      const recipeData = await getRecipeDetails(Number(recipeId));
+
+      if (recipeData) {
+        setRecipe(recipeData);
+        console.log("Recipe details loaded:", recipeData.title);
+      } else {
+        setError("Vui lòng đăng nhập để xem chi tiết công thức");
+      }
+    } catch (error) {
+      console.error("Error fetching recipe details screen:", error);
+      setError("Đã xảy ra lỗi khi tải công thức");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Toast functions
   const showToastMessage = (message: string, duration: number = 3000) => {
-    // Hide any existing toast first
     hideToast();
 
     setToastMessage(message);
     setShowToast(true);
 
-    // Animate in
     Animated.parallel([
       Animated.timing(toastOpacity, {
         toValue: 1,
@@ -104,7 +94,6 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
       }),
     ]).start();
 
-    // Auto hide after duration
     setTimeout(() => {
       hideToast();
     }, duration);
@@ -137,7 +126,6 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
         4000
       );
 
-      // Navigate to login after showing toast
       setTimeout(() => {
         if (navigation) {
           navigation.navigate("Login");
@@ -160,16 +148,137 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
       return;
     }
 
-    // TODO: Implement add to favorite logic
     showToastMessage("❤️ Đã thêm vào danh sách yêu thích!", 2000);
     console.log("Added to favorites");
   };
 
   const handleShare = () => {
-    // TODO: Implement share logic
     showToastMessage("📤 Đang chia sẻ công thức...", 2000);
     console.log("Share recipe");
   };
+
+  const handleRetry = () => {
+    fetchRecipeDetails();
+  };
+
+  // Helper functions
+  const formatDifficulty = (difficulty: string) => {
+    switch (difficulty?.toUpperCase()) {
+      case "EASY":
+        return "Dễ";
+      case "MEDIUM":
+        return "Trung bình";
+      case "HARD":
+        return "Khó";
+      default:
+        return "Trung bình";
+    }
+  };
+
+  const formatTime = (prepareTime: number, cookTime: number) => {
+    const totalTime = prepareTime + cookTime;
+    if (totalTime < 60) {
+      return `${totalTime} phút`;
+    } else {
+      const hours = Math.floor(totalTime / 60);
+      const minutes = totalTime % 60;
+      return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+    }
+  };
+
+  const getRecipeImage = () => {
+    if (recipe?.imageUrl) {
+      return { uri: recipe.imageUrl };
+    }
+    // Fallback image
+    return {
+      uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
+    };
+  };
+
+  // Render step images
+// src/screens/Recipe/RecipeDetailScreen.tsx
+// Simple version of renderStepImages
+
+const renderStepImages = (images?: string[]) => {
+  if (!images || images.length === 0) return null;
+
+  return (
+    <View style={recipeStyles.stepImagesWrapper}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={recipeStyles.stepImagesContainer}
+        contentContainerStyle={{ paddingRight: 15 }}
+      >
+        {images.map((imageUrl, index) => (
+          <View
+            key={index}
+            style={[
+              recipeStyles.stepImageContainer,
+              index === 0 && { marginLeft: 0 },
+            ]}
+          >
+            <Image
+              source={{ uri: imageUrl }}
+              style={recipeStyles.stepImage}
+              resizeMode="cover"
+            />
+            
+            {/* Image counter */}
+            <View style={recipeStyles.imageCounter}>
+              <Text style={recipeStyles.imageCounterText}>
+                {index + 1}/{images.length}
+              </Text>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+
+      {/* Instructions for multiple images */}
+      {images.length > 1 && (
+        <Text style={recipeStyles.scrollHint}>
+          📸 Lướt để xem {images.length} ảnh hướng dẫn
+        </Text>
+      )}
+    </View>
+  );
+};
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <View style={recipeStyles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FF6B35" />
+        <Text style={recipeStyles.loadingText}>Đang tải công thức...</Text>
+      </View>
+    );
+  }
+
+  // Error state
+  if (error || !recipe) {
+    return (
+      <View style={recipeStyles.errorContainer}>
+        <Text style={recipeStyles.errorTitle}>😔 Oops!</Text>
+        <Text style={recipeStyles.errorMessage}>
+          {error || "Vui longf thử lại sau vài phút."}
+        </Text>
+        <TouchableOpacity
+          style={recipeStyles.retryButton}
+          onPress={handleRetry}
+        >
+          <Text style={recipeStyles.retryButtonText}>Thử lại</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={recipeStyles.backButton}
+          onPress={() => navigation?.goBack()}
+        >
+          <Text style={recipeStyles.backButtonText}>Quay lại</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={recipeStyles.container}>
@@ -203,86 +312,77 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
       >
         {/* Recipe Image */}
         <View style={recipeStyles.imageContainer}>
-          <Image
-            source={{
-              uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
-            }}
-            style={recipeStyles.recipeImage}
-          />
+          <Image source={getRecipeImage()} style={recipeStyles.recipeImage} />
         </View>
 
         {/* Recipe Title */}
-        <Text style={recipeStyles.title}>Phở Bò Truyền Thống</Text>
+        <Text style={recipeStyles.title}>{recipe.title}</Text>
+
+        {/* Owner Info */}
+        <View style={recipeStyles.ownerSection}>
+          <Text style={recipeStyles.ownerText}>
+            👨‍🍳 Bởi: {recipe.ownerName || "Ẩn danh"}
+          </Text>
+          <Text style={recipeStyles.viewText}>👁️ {recipe.view} lượt xem</Text>
+        </View>
 
         {/* Recipe Info Section */}
         <View style={recipeStyles.infoSection}>
           <View style={recipeStyles.infoRow}>
-            <Text style={recipeStyles.infoLabel}>Thời gian:</Text>
-            <Text style={recipeStyles.infoValue}>2 giờ</Text>
+            <Text style={recipeStyles.infoLabel}>Thời gian chuẩn bị:</Text>
+            <Text style={recipeStyles.infoValue}>
+              {recipe.prepareTime} phút
+            </Text>
+          </View>
+          <View style={recipeStyles.infoRow}>
+            <Text style={recipeStyles.infoLabel}>Thời gian nấu:</Text>
+            <Text style={recipeStyles.infoValue}>{recipe.cookTime} phút</Text>
+          </View>
+          <View style={recipeStyles.infoRow}>
+            <Text style={recipeStyles.infoLabel}>Tổng thời gian:</Text>
+            <Text style={recipeStyles.infoValue}>
+              {formatTime(recipe.prepareTime, recipe.cookTime)}
+            </Text>
           </View>
           <View style={recipeStyles.infoRow}>
             <Text style={recipeStyles.infoLabel}>Độ khó:</Text>
-            <Text style={recipeStyles.infoValue}>Trung bình</Text>
-          </View>
-          <View style={recipeStyles.infoRow}>
-            <Text style={recipeStyles.infoLabel}>Phục vụ:</Text>
-            <Text style={recipeStyles.infoValue}>4 người</Text>
+            <Text style={recipeStyles.infoValue}>
+              {formatDifficulty(recipe.difficulty)}
+            </Text>
           </View>
         </View>
 
-        {/* Rating and Tags */}
-        <View style={recipeStyles.ratingContainer}>
-          <Text style={recipeStyles.ratingText}>⭐⭐⭐⭐⭐ (4.8/5)</Text>
-          <View style={recipeStyles.difficultyBadge}>
-            <Text style={recipeStyles.difficultyText}>Trung bình</Text>
+        {/* Difficulty Badge */}
+        {/* <View style={recipeStyles.ratingContainer}>
+          <View
+            style={[
+              recipeStyles.difficultyBadge,
+              {
+                backgroundColor:
+                  recipe.difficulty === "EASY"
+                    ? "#4CAF50"
+                    : recipe.difficulty === "MEDIUM"
+                    ? "#FF9800"
+                    : "#F44336",
+              },
+            ]}
+          >
+            <Text style={recipeStyles.difficultyText}>
+              {formatDifficulty(recipe.difficulty)}
+            </Text>
           </View>
-        </View>
-
-        {/* Tags */}
-        <View style={recipeStyles.tagsContainer}>
-          <View style={recipeStyles.tag}>
-            <Text style={recipeStyles.tagText}>Phở</Text>
-          </View>
-          <View style={recipeStyles.tag}>
-            <Text style={recipeStyles.tagText}>Việt Nam</Text>
-          </View>
-          <View style={recipeStyles.tag}>
-            <Text style={recipeStyles.tagText}>Thịt bò</Text>
-          </View>
-        </View>
-
-        {/* Nutrition Info */}
-        <View style={recipeStyles.nutritionContainer}>
-          <View style={recipeStyles.nutritionItem}>
-            <Text style={recipeStyles.nutritionValue}>450</Text>
-            <Text style={recipeStyles.nutritionLabel}>Calo</Text>
-          </View>
-          <View style={recipeStyles.nutritionItem}>
-            <Text style={recipeStyles.nutritionValue}>25g</Text>
-            <Text style={recipeStyles.nutritionLabel}>Protein</Text>
-          </View>
-          <View style={recipeStyles.nutritionItem}>
-            <Text style={recipeStyles.nutritionValue}>60g</Text>
-            <Text style={recipeStyles.nutritionLabel}>Carbs</Text>
-          </View>
-          <View style={recipeStyles.nutritionItem}>
-            <Text style={recipeStyles.nutritionValue}>12g</Text>
-            <Text style={recipeStyles.nutritionLabel}>Fat</Text>
-          </View>
-        </View>
+        </View> */}
 
         {/* Description */}
-        <Text style={recipeStyles.description}>
-          Phở bò là món ăn truyền thống của Việt Nam, được chế biến từ bánh phở,
-          nước dùng trong và ngọt từ xương bò, cùng với thịt bò tái hoặc chín.
-          Đây là món ăn đặc trưng và được yêu thích nhất của ẩm thực Việt Nam.
-        </Text>
+        {recipe.description && (
+          <Text style={recipeStyles.description}>{recipe.description}</Text>
+        )}
 
         {/* Ingredients Section */}
         <View style={recipeStyles.section}>
           <Text style={recipeStyles.sectionTitle}>🥄 Nguyên liệu</Text>
           <View style={recipeStyles.ingredientsContainer}>
-            {mockIngredients.map((ingredient) => (
+            {recipe.ingredients?.map((ingredient) => (
               <View key={ingredient.id} style={recipeStyles.ingredientItem}>
                 <View style={recipeStyles.ingredientBullet} />
                 <Text style={recipeStyles.ingredientName}>
@@ -292,7 +392,11 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
                   {ingredient.quantity}
                 </Text>
               </View>
-            ))}
+            )) || (
+              <Text style={recipeStyles.noDataText}>
+                Chưa có thông tin nguyên liệu
+              </Text>
+            )}
           </View>
         </View>
 
@@ -300,24 +404,40 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
         <View style={recipeStyles.section}>
           <Text style={recipeStyles.sectionTitle}>📝 Các bước thực hiện</Text>
           <View style={recipeStyles.stepsContainer}>
-            {mockSteps.map((step) => (
+            {recipe.steps?.map((step) => (
               <View key={step.id} style={recipeStyles.stepItem}>
                 <View style={recipeStyles.stepNumber}>
-                  <Text style={recipeStyles.stepNumberText}>
-                    {step.step_no}
-                  </Text>
+                  <Text style={recipeStyles.stepNumberText}>{step.stepNo}</Text>
                 </View>
                 <View style={recipeStyles.stepContent}>
                   <Text style={recipeStyles.stepText}>{step.content}</Text>
-                  {step.image_url && (
-                    <Image
-                      source={{ uri: step.image_url }}
-                      style={recipeStyles.stepImage}
-                    />
+
+                  {/* Step Images */}
+                  {renderStepImages(step.images)}
+
+                  {/* Suggested Time */}
+                  {step.suggestedTime && (
+                    <View style={recipeStyles.stepTimeContainer}>
+                      <Text style={recipeStyles.stepTimeText}>
+                        ⏱️ Thời gian gợi ý: {step.suggestedTime} phút
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Tips */}
+                  {step.tips && (
+                    <View style={recipeStyles.stepTipsContainer}>
+                      <Text style={recipeStyles.stepTipsTitle}>💡 Mẹo:</Text>
+                      <Text style={recipeStyles.stepTipsText}>{step.tips}</Text>
+                    </View>
                   )}
                 </View>
               </View>
-            ))}
+            )) || (
+              <Text style={recipeStyles.noDataText}>
+                Chưa có hướng dẫn thực hiện
+              </Text>
+            )}
           </View>
         </View>
 
@@ -354,7 +474,7 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
               !isAuthenticated && recipeStyles.disabledCookingButtonText,
             ]}
           >
-            {!isAuthenticated ? "👨‍🍳 Bắt đầu nấu" : "👨‍🍳 Bắt đầu nấu"}
+            👨‍🍳 Bắt đầu nấu
           </Text>
         </TouchableOpacity>
       </View>

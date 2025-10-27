@@ -20,10 +20,10 @@ export interface Recipe {
 
 export interface RecipeWithDetails extends Recipe {
   description: string;
-  prepare_time: number;
-  cook_time: number;
-  category_id: number;
-  user_id: number;
+  prepareTime: number;
+  cookTime: number;
+  categoryId: number;
+  ownerId: number;
   steps?: RecipeStep[];
   ingredients?: RecipeIngredient[];
 }
@@ -53,11 +53,14 @@ export interface RecipeDetailResponse {
 export interface RecipeStep {
   id: number;
   content: string;
-  image_url?: string;
-  step_no: number;
-  recipe_id: number;
-  suggested_time?: number;
+  stepNo: number;
+  recipe_id?: number;
+  suggestedTime?: number;
   tips?: string;
+  images?: string[]; // Support multiple images from API
+  // Legacy field for backward compatibility
+  image_url?: string;
+  step_no?: number;
 }
 
 export interface RecipeIngredient {

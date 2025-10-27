@@ -155,12 +155,6 @@ export const recipeStyles = StyleSheet.create({
     marginBottom: 8,
     fontFamily: "Roboto",
   },
-  stepImage: {
-    width: "100%",
-    height: 150,
-    borderRadius: 8,
-    marginTop: 8,
-  },
 
   // Tips
   tip: {
@@ -672,6 +666,172 @@ export const recipeStyles = StyleSheet.create({
   },
   disabledCookingButtonText: {
     color: "#666666",
+  },
+    loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F8F9FA",
+  },
+
+  loadingText: {
+    marginTop: 15,
+    fontSize: 16,
+    color: "#666666",
+    fontWeight: "500",
+  },
+
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F8F9FA",
+    paddingHorizontal: 30,
+  },
+
+  errorTitle: {
+    fontSize: 48,
+    marginBottom: 15,
+  },
+
+  errorMessage: {
+    fontSize: 16,
+    color: "#666666",
+    textAlign: "center",
+    marginBottom: 30,
+    lineHeight: 22,
+  },
+
+  retryButton: {
+    backgroundColor: "#FF6B35",
+    paddingHorizontal: 30,
+    paddingVertical: 12,
+    borderRadius: 25,
+    marginBottom: 15,
+  },
+
+  retryButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  backButtonText: {
+    color: "#666666",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  // Owner Section
+  ownerSection: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    marginBottom: 15,
+  },
+
+  ownerText: {
+    fontSize: 14,
+    color: "#666666",
+    fontWeight: "500",
+  },
+
+  viewText: {
+    fontSize: 12,
+    color: "#999999",
+    fontWeight: "400",
+  },
+
+  stepTimeContainer: {
+    backgroundColor: "#F0F8FF",
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: "#4CAF50",
+  },
+
+  stepTimeText: {
+    fontSize: 13,
+    color: "#2E7D32",
+    fontWeight: "500",
+  },
+
+  stepTipsContainer: {
+    backgroundColor: "#FFF8E1",
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 10,
+    borderLeftWidth: 3,
+    borderLeftColor: "#FF9800",
+  },
+
+  stepTipsTitle: {
+    fontSize: 13,
+    fontWeight: "bold",
+    color: "#E65100",
+    marginBottom: 4,
+  },
+
+  stepTipsText: {
+    fontSize: 13,
+    color: "#BF360C",
+    lineHeight: 18,
+    fontStyle: "italic",
+  },
+
+  noDataText: {
+    fontSize: 14,
+    color: "#999999",
+    fontStyle: "italic",
+    textAlign: "center",
+    paddingVertical: 20,
+  },
+  stepImagesWrapper: {
+    marginTop: 10,
+    marginBottom: 8,
+  },
+
+  stepImagesContainer: {
+    marginTop: 8,
+  },
+
+  stepImageContainer: {
+    position: "relative",
+    marginRight: 12,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+
+  stepImage: {
+    width: 120,
+    height: 90,
+    borderRadius: 10,
+    backgroundColor: "#F5F5F5",
+  },
+
+  imageCounter: {
+    position: "absolute",
+    top: 5,
+    right: 5,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+
+  imageCounterText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "bold",
+  },
+
+  scrollHint: {
+    fontSize: 12,
+    color: "#666666",
+    fontStyle: "italic",
+    marginTop: 6,
+    textAlign: "center",
   },
 });
 
