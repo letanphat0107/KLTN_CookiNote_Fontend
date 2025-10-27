@@ -167,38 +167,6 @@ export const recipeStyles = StyleSheet.create({
     borderRadius: 8,
   },
 
-  // Updated action buttons
-  actionButtons: {
-    flexDirection: "row",
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderTopWidth: 1,
-    borderTopColor: "#E0E0E0",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  favoriteButton: {
-    flex: 1,
-    backgroundColor: "#FF6B6B",
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: "center",
-    marginRight: 8,
-  },
-  favoriteButtonText: {
-    fontSize: 14,
-    color: "#FFFFFF",
-    fontWeight: "bold",
-    fontFamily: "Roboto",
-  },
   shareButton: {
     flex: 1,
     backgroundColor: "#4CAF50",
@@ -832,6 +800,52 @@ export const recipeStyles = StyleSheet.create({
     fontStyle: "italic",
     marginTop: 6,
     textAlign: "center",
+  },
+  
+  // Enhanced Favorite Button Styles
+  favoriteButton: {
+    backgroundColor: "#E0E0E0",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    minWidth: 110,
+    alignItems: "center",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+
+  favoriteActiveButton: {
+    backgroundColor: "#FF6B35",
+  },
+
+  favoriteButtonText: {
+    color: "#666666",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  favoriteActiveButtonText: {
+    color: "#FFFFFF",
+  },
+
+  // Action buttons container
+  actionButtons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: "#FFFFFF",
+    borderTopWidth: 1,
+    borderTopColor: "#F0F0F0",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
 });
 

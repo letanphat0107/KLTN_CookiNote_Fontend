@@ -13,6 +13,11 @@ import { recipeStyles } from "./styles";
 import { useAppSelector } from "../../store/hooks";
 import { useRecipe } from "../../hooks/useRecipe";
 import { RecipeWithDetails } from "../../types/recipe";
+import {
+  addToFavorites,
+  removeFromFavorites,
+  checkFavoriteStatus,
+} from "../../services/favoriteService";
 
 interface RecipeDetailScreenProps {
   route?: {
@@ -36,6 +41,10 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Favorite state
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
+
   // Toast message state
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
@@ -51,6 +60,13 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
       setIsLoading(false);
     }
   }, [recipeId]);
+
+  // Check favorite status when recipe loads and user is authenticated
+  useEffect(() => {
+    if (recipe && isAuthenticated) {
+      checkRecipeFavoriteStatus();
+    }
+  }, [recipe, isAuthenticated]);
 
   const fetchRecipeDetails = async () => {
     try {
@@ -70,6 +86,17 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
       setError("Đã xảy ra lỗi khi tải công thức");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const checkRecipeFavoriteStatus = async () => {
+    if (!recipe?.id) return;
+
+    try {
+      const favoriteStatus = await checkFavoriteStatus(recipe.id);
+      setIsFavorite(favoriteStatus);
+    } catch (error) {
+      console.error("Error checking favorite status:", error);
     }
   };
 
@@ -118,54 +145,93 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
     }
   };
 
-  // src/screens/Recipe/RecipeDetailScreen.tsx
-// Cập nhật handleStartCooking function
+  const handleStartCooking = () => {
+    if (!isAuthenticated) {
+      showToastMessage(
+        "🔐 Vui lòng đăng nhập để sử dụng chế độ hướng dẫn nấu ăn!",
+        4000
+      );
 
-const handleStartCooking = () => {
-  if (!isAuthenticated) {
-    showToastMessage(
-      "🔐 Vui lòng đăng nhập để sử dụng chế độ hướng dẫn nấu ăn!",
-      4000
-    );
+      setTimeout(() => {
+        if (navigation) {
+          navigation.navigate("Login");
+        }
+      }, 2000);
+      return;
+    }
 
-    setTimeout(() => {
-      if (navigation) {
-        navigation.navigate("Login");
-      }
-    }, 2000);
-    return;
-  }
+    // Check if recipe has steps
+    if (!recipe?.steps || recipe.steps.length === 0) {
+      showToastMessage("😔 Công thức này chưa có hướng dẫn từng bước!", 3000);
+      return;
+    }
 
-  // Check if recipe has steps
-  if (!recipe?.steps || recipe.steps.length === 0) {
-    showToastMessage(
-      "😔 Công thức này chưa có hướng dẫn từng bước!",
-      3000
-    );
-    return;
-  }
+    // Navigate to RecipeGuide with steps data
+    if (navigation) {
+      navigation.navigate("RecipeGuide", {
+        steps: recipe.steps,
+        recipeTitle: recipe.title,
+        recipeId: recipe.id,
+      });
+    }
+  };
 
-  // Navigate to RecipeGuide with steps data
-  if (navigation) {
-    navigation.navigate("RecipeGuide", {
-      steps: recipe.steps,
-      recipeTitle: recipe.title,
-      recipeId: recipe.id,
-    });
-  }
-};
-
-  const handleAddToFavorite = () => {
+  const handleAddToFavorite = async () => {
     if (!isAuthenticated) {
       showToastMessage(
         "❤️ Vui lòng đăng nhập để lưu công thức yêu thích!",
         3000
       );
+
+      setTimeout(() => {
+        if (navigation) {
+          navigation.navigate("Login");
+        }
+      }, 2000);
       return;
     }
 
-    showToastMessage("❤️ Đã thêm vào danh sách yêu thích!", 2000);
-    console.log("Added to favorites");
+    if (!recipe?.id) {
+      showToastMessage("❌ Không thể thực hiện thao tác này!", 2000);
+      return;
+    }
+
+    setIsFavoriteLoading(true);
+
+    try {
+      if (isFavorite) {
+        // Remove from favorites
+        const success = await removeFromFavorites(recipe.id);
+
+        if (success) {
+          setIsFavorite(false);
+          showToastMessage("💔 Đã xóa khỏi danh sách yêu thích!", 2000);
+        } else {
+          showToastMessage(
+            "❌ Không thể xóa khỏi yêu thích. Thử lại sau!",
+            3000
+          );
+        }
+      } else {
+        // Add to favorites
+        const success = await addToFavorites(recipe.id);
+
+        if (success) {
+          setIsFavorite(true);
+          showToastMessage("❤️ Đã thêm vào danh sách yêu thích!", 2000);
+        } else {
+          showToastMessage(
+            "❌ Không thể thêm vào yêu thích. Thử lại sau!",
+            3000
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error handling favorite:", error);
+      showToastMessage("❌ Đã xảy ra lỗi. Vui lòng thử lại!", 3000);
+    } finally {
+      setIsFavoriteLoading(false);
+    }
   };
 
   const handleShare = () => {
@@ -213,53 +279,50 @@ const handleStartCooking = () => {
   };
 
   // Render step images
-// src/screens/Recipe/RecipeDetailScreen.tsx
-// Simple version of renderStepImages
+  const renderStepImages = (images?: string[]) => {
+    if (!images || images.length === 0) return null;
 
-const renderStepImages = (images?: string[]) => {
-  if (!images || images.length === 0) return null;
+    return (
+      <View style={recipeStyles.stepImagesWrapper}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={recipeStyles.stepImagesContainer}
+          contentContainerStyle={{ paddingRight: 15 }}
+        >
+          {images.map((imageUrl, index) => (
+            <View
+              key={index}
+              style={[
+                recipeStyles.stepImageContainer,
+                index === 0 && { marginLeft: 0 },
+              ]}
+            >
+              <Image
+                source={{ uri: imageUrl }}
+                style={recipeStyles.stepImage}
+                resizeMode="cover"
+              />
 
-  return (
-    <View style={recipeStyles.stepImagesWrapper}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={recipeStyles.stepImagesContainer}
-        contentContainerStyle={{ paddingRight: 15 }}
-      >
-        {images.map((imageUrl, index) => (
-          <View
-            key={index}
-            style={[
-              recipeStyles.stepImageContainer,
-              index === 0 && { marginLeft: 0 },
-            ]}
-          >
-            <Image
-              source={{ uri: imageUrl }}
-              style={recipeStyles.stepImage}
-              resizeMode="cover"
-            />
-            
-            {/* Image counter */}
-            <View style={recipeStyles.imageCounter}>
-              <Text style={recipeStyles.imageCounterText}>
-                {index + 1}/{images.length}
-              </Text>
+              {/* Image counter */}
+              <View style={recipeStyles.imageCounter}>
+                <Text style={recipeStyles.imageCounterText}>
+                  {index + 1}/{images.length}
+                </Text>
+              </View>
             </View>
-          </View>
-        ))}
-      </ScrollView>
+          ))}
+        </ScrollView>
 
-      {/* Instructions for multiple images */}
-      {images.length > 1 && (
-        <Text style={recipeStyles.scrollHint}>
-          📸 Lướt để xem {images.length} ảnh hướng dẫn
-        </Text>
-      )}
-    </View>
-  );
-};
+        {/* Instructions for multiple images */}
+        {images.length > 1 && (
+          <Text style={recipeStyles.scrollHint}>
+            📸 Lướt để xem {images.length} ảnh hướng dẫn
+          </Text>
+        )}
+      </View>
+    );
+  };
 
   // Loading state
   if (isLoading) {
@@ -277,7 +340,7 @@ const renderStepImages = (images?: string[]) => {
       <View style={recipeStyles.errorContainer}>
         <Text style={recipeStyles.errorTitle}>😔 Oops!</Text>
         <Text style={recipeStyles.errorMessage}>
-          {error || "Vui longf thử lại sau vài phút."}
+          {error || "Vui lòng thử lại sau vài phút."}
         </Text>
         <TouchableOpacity
           style={recipeStyles.retryButton}
@@ -368,27 +431,6 @@ const renderStepImages = (images?: string[]) => {
           </View>
         </View>
 
-        {/* Difficulty Badge */}
-        {/* <View style={recipeStyles.ratingContainer}>
-          <View
-            style={[
-              recipeStyles.difficultyBadge,
-              {
-                backgroundColor:
-                  recipe.difficulty === "EASY"
-                    ? "#4CAF50"
-                    : recipe.difficulty === "MEDIUM"
-                    ? "#FF9800"
-                    : "#F44336",
-              },
-            ]}
-          >
-            <Text style={recipeStyles.difficultyText}>
-              {formatDifficulty(recipe.difficulty)}
-            </Text>
-          </View>
-        </View> */}
-
         {/* Description */}
         {recipe.description && (
           <Text style={recipeStyles.description}>{recipe.description}</Text>
@@ -464,10 +506,25 @@ const renderStepImages = (images?: string[]) => {
       {/* Action Buttons */}
       <View style={recipeStyles.actionButtons}>
         <TouchableOpacity
-          style={recipeStyles.favoriteButton}
+          style={[
+            recipeStyles.favoriteButton,
+            isFavorite && recipeStyles.favoriteActiveButton,
+          ]}
           onPress={handleAddToFavorite}
+          disabled={isFavoriteLoading || !isAuthenticated}
         >
-          <Text style={recipeStyles.favoriteButtonText}>❤️ Yêu thích</Text>
+          {isFavoriteLoading ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <Text
+              style={[
+                recipeStyles.favoriteButtonText,
+                isFavorite && recipeStyles.favoriteActiveButtonText,
+              ]}
+            >
+              {isFavorite ? "💖 Đã yêu thích" : "❤️ Yêu thích"}
+            </Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity

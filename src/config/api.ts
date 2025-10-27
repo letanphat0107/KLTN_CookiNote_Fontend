@@ -29,7 +29,7 @@ export const API_CONFIG = {
       UPDATE: "/cookinote/recipes",
       DELETE: "/cookinote/recipes",
       SEARCH: "/cookinote/recipes/search",
-      FAVORITE: "/cookinote/recipes/favorite",
+      FAVORITE: "/cookinote/recipes/me/favorites",
       ADD_FAVORITE: "/cookinote/recipes/{id}/favorite",
       REMOVE_FAVORITE: "/cookinote/recipes/{id}/favorite",
       POPULAR: "/cookinote/recipes/popular",
