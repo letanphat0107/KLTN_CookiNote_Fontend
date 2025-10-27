@@ -18,6 +18,8 @@ import {
   removeFromFavorites,
   checkFavoriteStatus,
 } from "../../services/favoriteService";
+import EditRecipeModal from "../../components/Recipe/EditRecipeModal";
+import { addRecipeToShoppingList, forkRecipe } from "../../services/recipeActionService";
 
 interface RecipeDetailScreenProps {
   route?: {
@@ -50,6 +52,10 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
   const [showToast, setShowToast] = useState(false);
   const toastOpacity = useState(new Animated.Value(0))[0];
   const toastTranslateY = useState(new Animated.Value(-100))[0];
+
+  // Edit modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   // Fetch recipe details when component mounts
   useEffect(() => {
@@ -243,6 +249,71 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
     fetchRecipeDetails();
   };
 
+  const handleAddToShoppingCart = async () => {
+    if (!isAuthenticated) {
+      showToastMessage(
+        "🛒 Vui lòng đăng nhập để sử dụng danh sách mua sắm!",
+        3000
+      );
+      setTimeout(() => {
+        if (navigation) {
+          navigation.navigate("Login");
+        }
+      }, 2000);
+      return;
+    }
+
+    if (!recipe?.id) {
+      showToastMessage("❌ Không thể thực hiện thao tác này!", 2000);
+      return;
+    }
+
+    setIsAddingToCart(true);
+    try {
+      const success = await addRecipeToShoppingList(recipe.id);
+
+      if (success) {
+        showToastMessage("🛒 Đã thêm nguyên liệu vào danh sách mua sắm!", 3000);
+      } else {
+        showToastMessage("❌ Không thể thêm vào danh sách mua sắm!", 3000);
+      }
+    } catch (error) {
+      console.error("Error adding to shopping cart:", error);
+      showToastMessage("❌ Đã xảy ra lỗi. Vui lòng thử lại!", 3000);
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
+
+  const handleEditRecipe = () => {
+    if (!isAuthenticated) {
+      showToastMessage(
+        "✏️ Vui lòng đăng nhập để chỉnh sửa công thức!",
+        3000
+      );
+      setTimeout(() => {
+        if (navigation) {
+          navigation.navigate("Login");
+        }
+      }, 2000);
+      return;
+    }
+
+    setShowEditModal(true);
+  };
+
+  const handleSaveEditedRecipe = async (formData: any) => {
+    if (!recipe?.id) return false;
+
+    try {
+      const success = await forkRecipe(recipe.id, formData);
+      return success;
+    } catch (error) {
+      console.error("Error saving edited recipe:", error);
+      return false;
+    }
+  };
+
   // Helper functions
   const formatDifficulty = (difficulty: string) => {
     switch (difficulty?.toUpperCase()) {
@@ -431,6 +502,49 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
           </View>
         </View>
 
+        {/* Button Chỉnh sửa va Button Thêm vào Shopping Cart */}
+        <View style={recipeStyles.actionButtonsTop}>
+          <TouchableOpacity
+            style={[
+              recipeStyles.editButton,
+              !isAuthenticated && recipeStyles.disabledButton,
+            ]}
+            onPress={handleEditRecipe}
+            disabled={!isAuthenticated}
+          >
+            <Text
+              style={[
+                recipeStyles.editButtonText,
+                !isAuthenticated && recipeStyles.disabledButtonText,
+              ]}
+            >
+              ✏️ Chỉnh sửa
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              recipeStyles.addToCartButton,
+              !isAuthenticated && recipeStyles.disabledButton,
+            ]}
+            onPress={handleAddToShoppingCart}
+            disabled={!isAuthenticated || isAddingToCart}
+          >
+            {isAddingToCart ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text
+                style={[
+                  recipeStyles.addToCartButtonText,
+                  !isAuthenticated && recipeStyles.disabledButtonText,
+                ]}
+              >
+                🛒 Thêm vào giỏ
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+
         {/* Description */}
         {recipe.description && (
           <Text style={recipeStyles.description}>{recipe.description}</Text>
@@ -551,6 +665,16 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Edit Recipe Modal */}
+      {recipe && (
+        <EditRecipeModal
+          visible={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          recipe={recipe}
+          onSave={handleSaveEditedRecipe}
+        />
+      )}
     </View>
   );
 };

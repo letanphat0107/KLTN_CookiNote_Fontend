@@ -47,7 +47,6 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
 
         return retryResponse;
       } catch (refreshError) {
-        console.error("Token refresh failed, logging out:", refreshError);
 
         // Refresh failed, logout user
         store.dispatch(localLogout());

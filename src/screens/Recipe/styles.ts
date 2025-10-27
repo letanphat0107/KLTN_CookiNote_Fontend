@@ -495,17 +495,12 @@ export const recipeStyles = StyleSheet.create({
   completeButton: {
     backgroundColor: "#4CAF50",
   },
-  disabledButton: {
-    backgroundColor: "#E0E0E0",
-  },
+
   navButtonText: {
     fontSize: 16,
     color: "#FFFFFF",
     fontWeight: "bold",
     fontFamily: "Roboto",
-  },
-  disabledButtonText: {
-    color: "#BDBDBD",
   },
 
   // Modal styles
@@ -846,6 +841,62 @@ export const recipeStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+  },
+
+    actionButtonsTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: 20,
+    marginVertical: 15,
+    gap: 15,
+  },
+
+  editButton: {
+    flex: 1,
+    backgroundColor: '#4CAF50',
+    paddingVertical: 12,
+    borderRadius: 25,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#4CAF50',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+
+  editButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  addToCartButton: {
+    flex: 1,
+    backgroundColor: '#FF9800',
+    paddingVertical: 12,
+    borderRadius: 25,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#FF9800',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+
+  addToCartButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  disabledButton: {
+    backgroundColor: '#CCCCCC',
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+
+  disabledButtonText: {
+    color: '#666666',
   },
 });
 
