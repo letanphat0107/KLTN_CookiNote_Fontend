@@ -1,6 +1,8 @@
-import { StyleSheet } from "react-native";
 import { COLORS } from "../../constants/colors";
 import { FONT_FAMILIES, FONT_SIZES, FONT_WEIGHTS } from "../../constants/fonts";
+import { StyleSheet, Dimensions } from "react-native";
+
+const { width } = Dimensions.get("window");
 
 export const favoriteStyles = StyleSheet.create({
   container: {
@@ -99,58 +101,6 @@ export const favoriteStyles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 12,
   },
-  recipeInfo: {
-    flexDirection: "row",
-    marginBottom: 12,
-  },
-  infoItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginRight: 16,
-  },
-  infoText: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.text.light,
-    fontFamily: FONT_FAMILIES.regular,
-    marginLeft: 4,
-  },
-
-  // Card actions
-  cardActions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  viewButton: {
-    flex: 1,
-    backgroundColor: COLORS.primary,
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  viewButtonText: {
-    color: COLORS.background,
-    fontSize: FONT_SIZES.sm,
-    fontWeight: FONT_WEIGHTS.bold,
-    fontFamily: FONT_FAMILIES.bold,
-  },
-  removeButton: {
-    flex: 1,
-    backgroundColor: "transparent",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: COLORS.error,
-  },
-  removeButtonText: {
-    color: COLORS.error,
-    fontSize: FONT_SIZES.sm,
-    fontWeight: FONT_WEIGHTS.bold,
-    fontFamily: FONT_FAMILIES.bold,
-  },
 
   // Search and filter
   searchContainer: {
@@ -209,6 +159,165 @@ export const favoriteStyles = StyleSheet.create({
     fontSize: FONT_SIZES.xs,
     color: COLORS.text.light,
     fontFamily: FONT_FAMILIES.regular,
+  },
+  tabContainer: {
+    flexDirection: "row",
+    backgroundColor: "#F8F9FA",
+    marginHorizontal: 20,
+    marginBottom: 15,
+    borderRadius: 25,
+    padding: 4,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+
+  tabButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 20,
+    backgroundColor: "transparent",
+  },
+
+  tabButtonActive: {
+    backgroundColor: "#FF6B35",
+    elevation: 2,
+    shadowColor: "#FF6B35",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+
+  tabIcon: {
+    fontSize: 16,
+    marginRight: 6,
+  },
+
+  tabButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#666666",
+  },
+
+  tabButtonTextActive: {
+    color: "#FFFFFF",
+  },
+
+  // Loading States
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 100,
+  },
+
+  loadingText: {
+    marginTop: 15,
+    fontSize: 16,
+    color: "#666666",
+    fontWeight: "500",
+  },
+
+  loadMoreContainer: {
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+
+  loadMoreText: {
+    fontSize: 14,
+    color: "#999999",
+    fontStyle: "italic",
+  },
+
+  // Recipe Card Updates
+  recipeInfo: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginVertical: 8,
+    gap: 8,
+  },
+
+  infoItem: {
+    backgroundColor: "#F8F9FA",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+
+  infoText: {
+    fontSize: 12,
+    color: "#666666",
+    fontWeight: "500",
+  },
+
+  favoriteActionButton: {
+    backgroundColor: "#FF6B35",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    minWidth: 100,
+    alignItems: "center",
+    elevation: 2,
+    shadowColor: "#FF6B35",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+
+  favoriteActionButtonText: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+
+  removeButton: {
+    backgroundColor: "#E0E0E0",
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+
+  removeButtonText: {
+    color: "#666666",
+  },
+
+  // Loading state for cards
+  cardLoading: {
+    opacity: 0.7,
+  },
+
+  // Enhanced card actions
+  cardActions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 12,
+    gap: 10,
+  },
+
+  viewButton: {
+    flex: 1,
+    backgroundColor: "#F8F9FA",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+
+  viewButtonText: {
+    color: "#333333",
+    fontSize: 13,
+    fontWeight: "600",
   },
 });
 

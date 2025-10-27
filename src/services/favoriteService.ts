@@ -1,6 +1,7 @@
 // src/services/favoriteService.ts
 import { API_CONFIG, buildApiUrl } from "../config/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Recipe } from "../types/recipe";
 
 // Helper function to get access token
 const getAccessToken = async (): Promise<string | null> => {
@@ -41,6 +42,15 @@ interface FavoriteResponse {
   path: string;
 }
 
+interface PaginatedFavoriteResponse {
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  items: Recipe[];
+}
+
 // Add recipe to favorites
 export const addToFavorites = async (recipeId: number): Promise<boolean> => {
   try {
@@ -54,6 +64,7 @@ export const addToFavorites = async (recipeId: number): Promise<boolean> => {
     const response = await fetch(url, {
       method: "POST",
       headers,
+      
     });
 
     const result: FavoriteResponse = await response.json();
@@ -86,6 +97,7 @@ export const removeFromFavorites = async (
     const response = await fetch(url, {
       method: "DELETE",
       headers,
+      
     });
 
     const result: FavoriteResponse = await response.json();
@@ -118,13 +130,12 @@ export const checkFavoriteStatus = async (
     const response = await fetch(url, {
       method: "GET",
       headers,
+      
     });
 
     const result: FavoriteResponse = await response.json();
     console.log("Check favorite status response:", result);
 
-    // Assuming the API returns the favorite status in the response
-    // Adjust this based on your actual API response structure
     return response.ok && result.code === 200;
   } catch (error) {
     console.error("Error checking favorite status:", error);
@@ -133,10 +144,14 @@ export const checkFavoriteStatus = async (
 };
 
 // Get user's favorite recipes
+// src/services/favoriteService.ts
+// Fix getFavoriteRecipes response structure
+
+// Get user's favorite recipes
 export const getFavoriteRecipes = async (
   page = 0,
   size = 20
-): Promise<{ recipes: any[]; hasNext: boolean }> => {
+): Promise<PaginatedFavoriteResponse> => {
   try {
     console.log("Fetching favorite recipes...");
 
@@ -159,16 +174,162 @@ export const getFavoriteRecipes = async (
     console.log("Get favorite recipes response:", result);
 
     if (response.ok && result.code === 200) {
+      // Fix: Handle different response structures
+      const items = Array.isArray(result.data) 
+        ? result.data 
+        : result.data?.items || [];
+
       return {
-        recipes: result.data?.items || [],
+        page: result.data?.page || 0,
+        size: result.data?.size || items.length,
+        totalElements: result.data?.totalElements || items.length,
+        totalPages: result.data?.totalPages || (items.length > 0 ? 1 : 0),
         hasNext: result.data?.hasNext || false,
+        items: items,
       };
     } else {
       console.error("Failed to get favorite recipes:", result.message);
-      return { recipes: [], hasNext: false };
+      return {
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasNext: false,
+        items: [],
+      };
     }
   } catch (error) {
     console.error("Error getting favorite recipes:", error);
-    return { recipes: [], hasNext: false };
+    return {
+      page: 0,
+      size: 0,
+      totalElements: 0,
+      totalPages: 0,
+      hasNext: false,
+      items: [],
+    };
+  }
+};
+
+// Get user's own recipes
+export const getMyRecipes = async (
+  page = 0,
+  size = 20
+): Promise<PaginatedFavoriteResponse> => {
+  try {
+    console.log("Fetching my recipes...");
+
+    const headers = await createAuthHeaders();
+    const params = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString(),
+      sort: "createdAt,desc",
+      owner: "me", // Filter for user's own recipes
+    });
+
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.RECIPE.MYRECIPE}?${params}`,
+      {
+        method: "GET",
+        headers,
+        
+      }
+    );
+
+    const result: FavoriteResponse = await response.json();
+    console.log("Get my recipes response:", result);
+
+    if (response.ok && result.code === 200) {
+      return {
+        page: result.data?.page || 0,
+        size: result.data?.size || 0,
+        totalElements: result.data?.totalElements || 0,
+        totalPages: result.data?.totalPages || 0,
+        hasNext: result.data?.hasNext || false,
+        items: result.data?.items || [],
+      };
+    } else {
+      console.error("Failed to get my recipes:", result.message);
+      return {
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasNext: false,
+        items: [],
+      };
+    }
+  } catch (error) {
+    console.error("Error getting my recipes:", error);
+    return {
+      page: 0,
+      size: 0,
+      totalElements: 0,
+      totalPages: 0,
+      hasNext: false,
+      items: [],
+    };
+  }
+};
+
+// Get user's deleted recipes
+export const getDeletedRecipes = async (
+  userId: number,
+  page = 0,
+  size = 20
+): Promise<PaginatedFavoriteResponse> => {
+  try {
+    console.log("Fetching deleted recipes...");
+
+    const headers = await createAuthHeaders();
+    const params = new URLSearchParams({
+      userId: userId.toString(),
+      page: page.toString(),
+      size: size.toString(),
+      sort: "deletedAt,desc",
+    });
+
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/cookinote/recipes/deleted?${params}`,
+      {
+        method: "GET",
+        headers,
+        
+      }
+    );
+
+    const result: FavoriteResponse = await response.json();
+    console.log("Get deleted recipes response:", result);
+
+    if (response.ok && result.code === 200) {
+      return {
+        page: result.data?.page || 0,
+        size: result.data?.size || 0,
+        totalElements: result.data?.totalElements || 0,
+        totalPages: result.data?.totalPages || 0,
+        hasNext: result.data?.hasNext || false,
+        items: result.data?.items || [],
+      };
+    } else {
+      console.error("Failed to get deleted recipes:", result.message);
+      return {
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasNext: false,
+        items: [],
+      };
+    }
+  } catch (error) {
+    console.error("Error getting deleted recipes:", error);
+    return {
+      page: 0,
+      size: 0,
+      totalElements: 0,
+      totalPages: 0,
+      hasNext: false,
+      items: [],
+    };
   }
 };

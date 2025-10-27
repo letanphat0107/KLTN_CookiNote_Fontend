@@ -34,6 +34,7 @@ export const API_CONFIG = {
       REMOVE_FAVORITE: "/cookinote/recipes/{id}/favorite",
       POPULAR: "/cookinote/recipes/popular",
       EASYTOCOOK: "/cookinote/recipes/easy-to-cook",
+      MYRECIPE: "/cookinote/recipes/me",
     },
     ADMIN: {
       DASHBOARD: "/cookinote/admin/dashboard",
