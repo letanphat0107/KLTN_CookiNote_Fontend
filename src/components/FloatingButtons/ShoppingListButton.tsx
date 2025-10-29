@@ -211,7 +211,7 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
         </Text>
       </View>
       <Text style={floatingStyles.groupItemCount}>
-        {group.items.length} món
+        {group.items.length} nguyên liệu
       </Text>
     </View>
   );

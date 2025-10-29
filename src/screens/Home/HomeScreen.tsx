@@ -193,14 +193,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       return (
         <Image
           source={{ uri: category.imageUrl }}
-          style={[
-            homeStyles.categoryIcon,
-            {
-              width: 32,
-              height: 32,
-              borderRadius: 16,
-            },
-          ]}
+          style={homeStyles.categoryIcon}
           resizeMode="cover"
         />
       );

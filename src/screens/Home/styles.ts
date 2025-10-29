@@ -355,21 +355,29 @@ export const homeStyles = StyleSheet.create({
     width: "18%",
   },
   categoryIconContainer: {
-  width: 50,
-  height: 50,
-  backgroundColor: "#F8F8F8",
-  borderRadius: 25,
-  overflow: "hidden", // 🔥 quan trọng để bo tròn ảnh bên trong
-  justifyContent: "center",
-  alignItems: "center",
-  marginBottom: 8,
-},
+    width: 50,
+    height: 50,
+    backgroundColor: "#F8F8F8",
+    borderRadius: 25,
+    overflow: "hidden", // 🔥 quan trọng để bo tròn ảnh bên trong
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
 
-categoryIcon: {
-  width: "100%",   // phủ toàn container
-  height: "100%",
-  borderRadius: 25,
-},
+    // 🌟 Thêm shadow (hiệu ứng nổi)
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4, // Android
+  },
+
+  categoryIcon: {
+    width: "100%", // phủ toàn container
+    height: "100%",
+    borderRadius: 25,
+    resizeMode: "cover",
+  },
 
   categoryLabel: {
     fontSize: 12,
@@ -526,7 +534,6 @@ categoryIcon: {
     justifyContent: "space-around",
   },
 
-
   closePromptButton: {
     position: "absolute",
     top: 10,
@@ -596,7 +603,6 @@ categoryIcon: {
     textAlign: "center",
   },
 
-
   recipeStatsInfo: {
     marginTop: 5,
   },
@@ -608,12 +614,9 @@ categoryIcon: {
     flex: 1,
   },
 
-
-
   recipeViewText: {
     fontSize: 10,
     color: "#999999",
     fontWeight: "400",
   },
-
 });
