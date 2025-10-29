@@ -32,7 +32,7 @@ export const floatingStyles = StyleSheet.create({
   },
 
   aiChatButton: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "#ffffff",
   },
 
   buttonIcon: {

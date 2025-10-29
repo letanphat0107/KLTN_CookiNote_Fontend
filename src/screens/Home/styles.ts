@@ -619,4 +619,200 @@ export const homeStyles = StyleSheet.create({
     color: "#999999",
     fontWeight: "400",
   },
+
+  // Search & Navigation
+  searchLoading: {
+    position: 'absolute',
+    right: 15,
+    top: 12,
+  },
+
+  backButton: {
+    backgroundColor: '#c640105e',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginTop: 30,
+  },
+
+  backButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  // Search Results
+  searchResultsContainer: {
+    padding: 20,
+  },
+
+  searchResultsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 20,
+  },
+
+  searchLoadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
+  },
+
+  searchLoadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666666',
+  },
+
+  noResultsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
+  },
+
+  noResultsIcon: {
+    fontSize: 48,
+    marginBottom: 15,
+  },
+
+  noResultsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 8,
+  },
+
+  noResultsText: {
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
+  },
+
+  searchResultsList: {
+    gap: 15,
+  },
+
+  searchResultCard: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    marginBottom: 10,
+  },
+
+  searchResultImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+
+  searchResultInfo: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+
+  searchResultTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333333',
+    marginBottom: 4,
+  },
+
+  searchResultOwner: {
+    fontSize: 13,
+    color: '#666666',
+    marginBottom: 8,
+  },
+
+  searchResultMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  searchResultDifficulty: {
+    fontSize: 12,
+    fontWeight: '600',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: '#F0F0F0',
+  },
+
+  searchResultViews: {
+    fontSize: 12,
+    color: '#666666',
+  },
+
+  // Category Results
+  categoryResultsContainer: {
+    padding: 20,
+  },
+
+  categoryResultsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 20,
+  },
+
+  categoryLoadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
+  },
+
+  categoryLoadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666666',
+  },
+
+  categoryResultsList: {
+    gap: 15,
+  },
+
+  // Grid layout for category results (optional)
+  categoryResultsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 15,
+  },
+
+  categoryResultGridItem: {
+    width: '48%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  categoryResultGridImage: {
+    width: '100%',
+    height: 120,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+
+  categoryResultGridTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333333',
+    textAlign: 'center',
+  },
 });

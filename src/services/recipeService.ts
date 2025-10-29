@@ -283,3 +283,111 @@ export const getRecipesByDifficulty = async (
     return [];
   }
 };
+
+export const getRecipesByCategoryEndpoint = async (
+  categoryId: number,
+  page = 0,
+  size = 12
+): Promise<PaginatedRecipeResponse> => {
+  try {
+    console.log(`Fetching recipes for category ${categoryId}...`);
+    
+    const params = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString(),
+    });
+
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/cookinote/recipes/categories/${categoryId}?${params}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      }
+    );
+
+    const result: RecipeResponse = await response.json();
+    console.log("Category recipes response:", result);
+
+    if (response.ok && result.code === 200) {
+      return result.data;
+    } else {
+      console.error("Failed to fetch recipes by category:", result.message);
+      return {
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasNext: false,
+        items: [],
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching recipes by category:", error);
+    return {
+      page: 0,
+      size: 0,
+      totalElements: 0,
+      totalPages: 0,
+      hasNext: false,
+      items: [],
+    };
+  }
+};
+
+// Search recipes with query
+export const searchRecipesByQuery = async (
+  query: string,
+  page = 0,
+  size = 20
+): Promise<PaginatedRecipeResponse> => {
+  try {
+    console.log(`Searching recipes with query: ${query}`);
+    
+    const params = new URLSearchParams({
+      query: query.trim(),
+      page: page.toString(),
+      size: size.toString(),
+    });
+
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/cookinote/recipes/search?${params}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      }
+    );
+
+    const result: RecipeResponse = await response.json();
+    console.log("Search recipes response:", result);
+
+    if (response.ok && result.code === 200) {
+      return result.data;
+    } else {
+      console.error("Failed to search recipes:", result.message);
+      return {
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasNext: false,
+        items: [],
+      };
+    }
+  } catch (error) {
+    console.error("Error searching recipes:", error);
+    return {
+      page: 0,
+      size: 0,
+      totalElements: 0,
+      totalPages: 0,
+      hasNext: false,
+      items: [],
+    };
+  }
+};
