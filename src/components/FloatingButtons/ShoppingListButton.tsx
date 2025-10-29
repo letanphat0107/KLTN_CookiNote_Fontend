@@ -17,6 +17,9 @@ import {
   getShoppingList,
   addShoppingListItem,
   removeShoppingListItem,
+  toggleShoppingListItemCheck,
+  removeShoppingListItemsByRecipe,
+  removeCheckedItems,
 } from "../../services/shoppingListService";
 
 interface ShoppingListButtonProps {
@@ -53,6 +56,9 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [processingItems, setProcessingItems] = useState<Set<number>>(
+    new Set()
+  );
 
   // Form state
   const [newIngredient, setNewIngredient] = useState("");
@@ -114,22 +120,13 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
     }
   };
 
-  const handleRemoveItem = async (itemId: number) => {
-    try {
-      const success = await removeShoppingListItem(itemId);
-      if (success) {
-        await loadShoppingList();
-        Alert.alert("Thành công", "Đã xóa khỏi danh sách");
-      } else {
-        Alert.alert("Lỗi", "Không thể xóa món đồ");
-      }
-    } catch (error) {
-      console.error("Error removing item:", error);
-      Alert.alert("Lỗi", "Đã xảy ra lỗi khi xóa");
-    }
-  };
-
+  // Updated handleToggleItem with API call
   const handleToggleItem = async (itemId: number, currentChecked: boolean) => {
+    if (processingItems.has(itemId)) return; // Prevent multiple calls
+
+    // Add to processing set
+    setProcessingItems((prev) => new Set(prev).add(itemId));
+
     try {
       // Optimistically update UI
       setShoppingListGroups((prev) =>
@@ -141,21 +138,24 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
         }))
       );
 
-      // Call API to update on server (if API exists)
-      // const success = await toggleShoppingListItem(itemId, !currentChecked);
-      // if (!success) {
-      //   // Revert on failure
-      //   setShoppingListGroups(prev =>
-      //     prev.map(group => ({
-      //       ...group,
-      //       items: group.items.map(item =>
-      //         item.id === itemId
-      //           ? { ...item, checked: currentChecked }
-      //           : item
-      //       )
-      //     }))
-      //   );
-      // }
+      // Call API to update on server
+      const success = await toggleShoppingListItemCheck(
+        itemId,
+        !currentChecked
+      );
+
+      if (!success) {
+        // Revert on failure
+        setShoppingListGroups((prev) =>
+          prev.map((group) => ({
+            ...group,
+            items: group.items.map((item) =>
+              item.id === itemId ? { ...item, checked: currentChecked } : item
+            ),
+          }))
+        );
+        Alert.alert("Lỗi", "Không thể cập nhật trạng thái mục");
+      }
     } catch (error) {
       console.error("Error toggling item:", error);
       // Revert on error
@@ -167,7 +167,109 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
           ),
         }))
       );
+      Alert.alert("Lỗi", "Đã xảy ra lỗi khi cập nhật");
+    } finally {
+      // Remove from processing set
+      setProcessingItems((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(itemId);
+        return newSet;
+      });
     }
+  };
+
+  // Updated handleRemoveItem to handle both single item and recipe group
+  const handleRemoveItem = async (itemId: number, recipeId?: number | null) => {
+    if (recipeId) {
+      // If item belongs to a recipe, show option to remove entire recipe group
+      Alert.alert("Xóa nguyên liệu", "Bạn có chắc chắc không muốn mua món này!", [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Có",
+          onPress: () => removeSingleItem(itemId),
+        }
+      ]);
+    } else {
+      // Single item removal
+      Alert.alert("Xóa nguyên liệu", "Bạn có chắc muốn xóa nguyên liệu này?", [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: () => removeSingleItem(itemId),
+        },
+      ]);
+    }
+  };
+
+  const removeSingleItem = async (itemId: number) => {
+    try {
+      const success = await removeShoppingListItem([itemId]); // truyền mảng có 1 phần tử
+
+      if (success) {
+        await loadShoppingList();
+        // Toast-style alert instead of blocking alert
+        setTimeout(() => {
+          Alert.alert("", "Đã xóa nguyên liệu")});
+      } else {
+        Alert.alert("Lỗi", "Không thể xóa nguyên liệu");
+      }
+    } catch (error) {
+      console.error("Error removing item:", error);
+      Alert.alert("Lỗi", "Đã xảy ra lỗi khi xóa");
+    }
+  };
+
+  const removeRecipeGroup = async (recipeId: number) => {
+    try {
+      const success = await removeShoppingListItemsByRecipe(recipeId);
+      if (success) {
+        await loadShoppingList();
+        Alert.alert("Thành công", "Đã xóa toàn bộ nguyên liệu của công thức");
+      } else {
+        Alert.alert("Lỗi", "Không thể xóa nguyên liệu của công thức");
+      }
+    } catch (error) {
+      console.error("Error removing recipe items:", error);
+      Alert.alert("Lỗi", "Đã xảy ra lỗi khi xóa");
+    }
+  };
+
+  const handleClearCheckedItems = () => {
+    const checkedCount = shoppingListGroups.reduce((count, group) => {
+      return count + group.items.filter((item) => item.checked).length;
+    }, 0);
+
+    if (checkedCount === 0) {
+      Alert.alert("Thông báo", "Không có nguyên liệu nào đã được chọn");
+      return;
+    }
+
+    Alert.alert(
+      "Xóa nguyên liệu đã mua",
+      `Bạn có chắc muốn xóa ${checkedCount} nguyên liệu đã được chọn?`,
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const success = await removeCheckedItems();
+              if (success) {
+                await loadShoppingList();
+                Alert.alert("Thành công", "Đã xóa các nguyên liệu đã mua");
+              } else {
+                Alert.alert("Lỗi", "Không thể xóa nguyên liệu đã chọn");
+              }
+            } catch (error) {
+              console.error("Error removing checked items:", error);
+              Alert.alert("Lỗi", "Đã xảy ra lỗi khi xóa");
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleButtonPress = () => {
@@ -200,186 +302,234 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
     onToggle();
   };
 
-  const renderGroupHeader = (group: ShoppingListGroup) => (
-    <View style={floatingStyles.groupHeader}>
-      <View style={floatingStyles.groupTitleContainer}>
-        <Text style={floatingStyles.groupIcon}>
-          {group.recipeId ? "📝" : "🛒"}
-        </Text>
-        <Text style={floatingStyles.groupTitle} numberOfLines={2}>
-          {group.recipeTitle}
-        </Text>
-      </View>
-      <Text style={floatingStyles.groupItemCount}>
-        {group.items.length} nguyên liệu
-      </Text>
-    </View>
-  );
+  const renderGroupHeader = (group: ShoppingListGroup) => {
+    const checkedCount = group.items.filter((item) => item.checked).length;
+    const totalCount = group.items.length;
 
-  const renderShoppingItem = (item: ShoppingListItem) => (
-    <View key={item.id} style={floatingStyles.shoppingListItem}>
-      {/* Checkbox */}
-      <TouchableOpacity
-        style={[
-          floatingStyles.checkbox,
-          item.checked && floatingStyles.checkboxChecked,
-        ]}
-        onPress={() => handleToggleItem(item.id, item.checked)}
-      >
-        {item.checked && <Text style={floatingStyles.checkboxIcon}>✓</Text>}
-      </TouchableOpacity>
-
-      {/* Item Info */}
-      <View
-        style={[
-          floatingStyles.itemInfo,
-          item.checked && floatingStyles.itemInfoChecked,
-        ]}
-      >
-        <Text
-          style={[
-            floatingStyles.itemName,
-            item.checked && floatingStyles.itemNameChecked,
-          ]}
-        >
-          {item.ingredient}
-        </Text>
-        <Text
-          style={[
-            floatingStyles.itemQuantity,
-            item.checked && floatingStyles.itemQuantityChecked,
-          ]}
-        >
-          {item.quantity}
-        </Text>
-        {item.isFromRecipe && (
-          <Text style={floatingStyles.recipeTag}>📝 Từ công thức</Text>
-        )}
-      </View>
-
-      {/* Remove Button */}
-      <TouchableOpacity
-        style={floatingStyles.removeItemButton}
-        onPress={() => handleRemoveItem(item.id)}
-      >
-        <Text style={floatingStyles.removeItemText}>🗑️</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  const renderShoppingListModal = () => (
-    <Modal
-      visible={isOpen}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={onToggle}
-    >
-      <View style={floatingStyles.modalOverlay}>
-        <View style={floatingStyles.shoppingListModal}>
-          {/* Header */}
-          <View style={floatingStyles.modalHeader}>
-            <Text style={floatingStyles.modalTitle}>
-              🛒 Danh sách mua sắm ({totalItems})
-            </Text>
-            <TouchableOpacity onPress={onToggle}>
-              <Text style={floatingStyles.closeButton}>✕</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Shopping List Content */}
-          <ScrollView
-            style={floatingStyles.shoppingListContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {isLoading ? (
-              <View style={floatingStyles.loadingContainer}>
-                <ActivityIndicator size="large" color="#FF6B35" />
-                <Text style={floatingStyles.loadingText}>Đang tải...</Text>
-              </View>
-            ) : totalItems === 0 ? (
-              <View style={floatingStyles.emptyContainer}>
-                <Text style={floatingStyles.emptyIcon}>🛒</Text>
-                <Text style={floatingStyles.emptyTitle}>Danh sách trống</Text>
-                <Text style={floatingStyles.emptyDescription}>
-                  Thêm nguyên liệu để bắt đầu mua sắm!
-                </Text>
-              </View>
-            ) : (
-              shoppingListGroups.map((group, groupIndex) => (
-                <View
-                  key={`group-${groupIndex}`}
-                  style={floatingStyles.shoppingGroup}
-                >
-                  {/* Group Header */}
-                  {renderGroupHeader(group)}
-
-                  {/* Group Items */}
-                  <View style={floatingStyles.groupItems}>
-                    {group.items.map(renderShoppingItem)}
-                  </View>
-                </View>
-              ))
-            )}
-          </ScrollView>
-
-          {/* Add Button */}
-          {!showAddForm && (
+    return (
+      <View style={floatingStyles.groupHeader}>
+        <View style={floatingStyles.groupTitleContainer}>
+          <Text style={floatingStyles.groupIcon}>
+            {group.recipeId ? "📝" : "🛒"}
+          </Text>
+          <Text style={floatingStyles.groupTitle} numberOfLines={2}>
+            {group.recipeTitle}
+          </Text>
+        </View>
+        <View style={floatingStyles.groupActions}>
+          <Text style={floatingStyles.groupItemCount}>
+            {checkedCount}/{totalCount} nguyên liệu
+          </Text>
+          {group.recipeId && (
             <TouchableOpacity
-              style={floatingStyles.showAddFormButton}
-              onPress={() => setShowAddForm(true)}
+              style={floatingStyles.removeGroupButton}
+              onPress={() => removeRecipeGroup(group.recipeId!)}
             >
-              <Text style={floatingStyles.showAddFormButtonText}>
-                + Thêm nguyên liệu
-              </Text>
+              <Text style={floatingStyles.removeGroupText}>🗑️</Text>
             </TouchableOpacity>
-          )}
-
-          {/* Add Item Form */}
-          {showAddForm && (
-            <View style={floatingStyles.addFormContainer}>
-              <TextInput
-                style={floatingStyles.input}
-                placeholder="Nguyên liệu (VD: Nước cốt dừa)"
-                value={newIngredient}
-                onChangeText={setNewIngredient}
-                placeholderTextColor="#999"
-              />
-              <TextInput
-                style={floatingStyles.input}
-                placeholder="Số lượng (VD: 90 ml)"
-                value={newQuantity}
-                onChangeText={setNewQuantity}
-                placeholderTextColor="#999"
-              />
-              <View style={floatingStyles.formButtons}>
-                <TouchableOpacity
-                  style={floatingStyles.cancelButton}
-                  onPress={() => {
-                    setShowAddForm(false);
-                    setNewIngredient("");
-                    setNewQuantity("");
-                  }}
-                >
-                  <Text style={floatingStyles.cancelButtonText}>Hủy</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={floatingStyles.addButton}
-                  onPress={handleAddItem}
-                  disabled={isAdding}
-                >
-                  {isAdding ? (
-                    <ActivityIndicator size="small" color="#FFFFFF" />
-                  ) : (
-                    <Text style={floatingStyles.addButtonText}>Thêm</Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-            </View>
           )}
         </View>
       </View>
-    </Modal>
-  );
+    );
+  };
+
+  const renderShoppingItem = (
+    item: ShoppingListItem,
+    group: ShoppingListGroup
+  ) => {
+    const isProcessing = processingItems.has(item.id);
+
+    return (
+      <View key={item.id} style={floatingStyles.shoppingListItem}>
+        {/* Checkbox */}
+        <TouchableOpacity
+          style={[
+            floatingStyles.checkbox,
+            item.checked && floatingStyles.checkboxChecked,
+            isProcessing && floatingStyles.checkboxProcessing,
+          ]}
+          onPress={() => handleToggleItem(item.id, item.checked)}
+          disabled={isProcessing}
+        >
+          {isProcessing ? (
+            <ActivityIndicator size="small" color="#FF6B35" />
+          ) : (
+            item.checked && <Text style={floatingStyles.checkboxIcon}>✓</Text>
+          )}
+        </TouchableOpacity>
+
+        {/* Item Info */}
+        <View
+          style={[
+            floatingStyles.itemInfo,
+            item.checked && floatingStyles.itemInfoChecked,
+          ]}
+        >
+          <Text
+            style={[
+              floatingStyles.itemName,
+              item.checked && floatingStyles.itemNameChecked,
+            ]}
+          >
+            {item.ingredient}
+          </Text>
+          <Text
+            style={[
+              floatingStyles.itemQuantity,
+              item.checked && floatingStyles.itemQuantityChecked,
+            ]}
+          >
+            {item.quantity}
+          </Text>
+          {item.isFromRecipe && (
+            <Text style={floatingStyles.recipeTag}>📝 Từ công thức</Text>
+          )}
+        </View>
+
+        {/* Remove Button */}
+        <TouchableOpacity
+          style={floatingStyles.removeItemButton}
+          onPress={() => handleRemoveItem(item.id, group.recipeId)}
+        >
+          <Text style={floatingStyles.removeItemText}>🗑️</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  const renderShoppingListModal = () => {
+    const checkedItemsCount = shoppingListGroups.reduce((count, group) => {
+      return count + group.items.filter((item) => item.checked).length;
+    }, 0);
+
+    return (
+      <Modal
+        visible={isOpen}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={onToggle}
+      >
+        <View style={floatingStyles.modalOverlay}>
+          <View style={floatingStyles.shoppingListModal}>
+            {/* Header */}
+            <View style={floatingStyles.modalHeader}>
+              <Text style={floatingStyles.modalTitle}>
+                🛒 Danh sách mua sắm ({totalItems})
+              </Text>
+              <View style={floatingStyles.headerActions}>
+                {checkedItemsCount > 0 && (
+                  <TouchableOpacity
+                    style={floatingStyles.clearCheckedButton}
+                    onPress={handleClearCheckedItems}
+                  >
+                    <Text style={floatingStyles.clearCheckedText}>
+                      Xóa đã mua ({checkedItemsCount})
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity onPress={onToggle}>
+                  <Text style={floatingStyles.closeButton}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Shopping List Content */}
+            <ScrollView
+              style={floatingStyles.shoppingListContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {isLoading ? (
+                <View style={floatingStyles.loadingContainer}>
+                  <ActivityIndicator size="large" color="#FF6B35" />
+                  <Text style={floatingStyles.loadingText}>Đang tải...</Text>
+                </View>
+              ) : totalItems === 0 ? (
+                <View style={floatingStyles.emptyContainer}>
+                  <Text style={floatingStyles.emptyIcon}>🛒</Text>
+                  <Text style={floatingStyles.emptyTitle}>Danh sách trống</Text>
+                  <Text style={floatingStyles.emptyDescription}>
+                    Thêm nguyên liệu để bắt đầu mua sắm!
+                  </Text>
+                </View>
+              ) : (
+                shoppingListGroups.map((group, groupIndex) => (
+                  <View
+                    key={`group-${groupIndex}`}
+                    style={floatingStyles.shoppingGroup}
+                  >
+                    {/* Group Header */}
+                    {renderGroupHeader(group)}
+
+                    {/* Group Items */}
+                    <View style={floatingStyles.groupItems}>
+                      {group.items.map((item) =>
+                        renderShoppingItem(item, group)
+                      )}
+                    </View>
+                  </View>
+                ))
+              )}
+            </ScrollView>
+
+            {/* Add Button */}
+            {!showAddForm && (
+              <TouchableOpacity
+                style={floatingStyles.showAddFormButton}
+                onPress={() => setShowAddForm(true)}
+              >
+                <Text style={floatingStyles.showAddFormButtonText}>
+                  + Thêm nguyên liệu
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            {/* Add Item Form */}
+            {showAddForm && (
+              <View style={floatingStyles.addFormContainer}>
+                <TextInput
+                  style={floatingStyles.input}
+                  placeholder="Nguyên liệu (VD: Nước cốt dừa)"
+                  value={newIngredient}
+                  onChangeText={setNewIngredient}
+                  placeholderTextColor="#999"
+                />
+                <TextInput
+                  style={floatingStyles.input}
+                  placeholder="Số lượng (VD: 90 ml)"
+                  value={newQuantity}
+                  onChangeText={setNewQuantity}
+                  placeholderTextColor="#999"
+                />
+                <View style={floatingStyles.formButtons}>
+                  <TouchableOpacity
+                    style={floatingStyles.cancelButton}
+                    onPress={() => {
+                      setShowAddForm(false);
+                      setNewIngredient("");
+                      setNewQuantity("");
+                    }}
+                  >
+                    <Text style={floatingStyles.cancelButtonText}>Hủy</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={floatingStyles.addButton}
+                    onPress={handleAddItem}
+                    disabled={isAdding}
+                  >
+                    {isAdding ? (
+                      <ActivityIndicator size="small" color="#FFFFFF" />
+                    ) : (
+                      <Text style={floatingStyles.addButtonText}>Thêm</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   return (
     <>

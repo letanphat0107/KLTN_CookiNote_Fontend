@@ -78,9 +78,12 @@ export const getShoppingList = async (): Promise<ShoppingListResponse> => {
 
     if (response.ok && result.code === 200) {
       const groups = result.data || [];
-      const totalItems = groups.reduce((total: number, group: ShoppingListGroup) => {
-        return total + (group.items?.length || 0);
-      }, 0);
+      const totalItems = groups.reduce(
+        (total: number, group: ShoppingListGroup) => {
+          return total + (group.items?.length || 0);
+        },
+        0
+      );
 
       return {
         groups,
@@ -125,17 +128,18 @@ export const addShoppingListItem = async (
   }
 };
 
-// Remove item from shopping list
 export const removeShoppingListItem = async (
-  itemId: number
+  itemIds: number[] // ⬅️ giờ là mảng
 ): Promise<boolean> => {
   try {
     const headers = await createAuthHeaders();
+
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/items/${itemId}`,
+      `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/items-by-ids`, // ⬅️ không còn /${itemId}
       {
         method: "DELETE",
         headers,
+        body: JSON.stringify({ itemIds }), // ⬅️ gửi mảng trong body
       }
     );
 
@@ -144,11 +148,104 @@ export const removeShoppingListItem = async (
     if (response.ok && result.code === 200) {
       return true;
     } else {
-      console.error("Failed to remove shopping list item:", result.message);
+      console.error("Failed to remove shopping list items:", result.message);
       return false;
     }
   } catch (error) {
-    console.error("Error removing shopping list item:", error);
+    console.error("Error removing shopping list items:", error);
+    return false;
+  }
+};
+
+// Toggle item checked status
+export const toggleShoppingListItemCheck = async (
+  itemId: number,
+  checked: boolean
+): Promise<boolean> => {
+  try {
+    console.log(`Toggling item ${itemId} check status to:`, checked);
+
+    const headers = await createAuthHeaders();
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/items/${itemId}/check`,
+      {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify({ checked }),
+      }
+    );
+
+    const result = await response.json();
+    console.log("Toggle check response:", result);
+
+    if (response.ok && result.code === 200) {
+      return true;
+    } else {
+      console.error("Failed to toggle item check:", result.message);
+      return false;
+    }
+  } catch (error) {
+    console.error("Error toggling item check:", error);
+    return false;
+  }
+};
+
+// Remove items by filter (recipe)
+export const removeShoppingListItemsByRecipe = async (
+  recipeId: number
+): Promise<boolean> => {
+  try {
+    console.log(`Removing items for recipe ${recipeId}`);
+
+    const headers = await createAuthHeaders();
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/items-by-filter?filter=recipe&recipeId=${recipeId}`,
+      {
+        method: "DELETE",
+        headers,
+      }
+    );
+
+    const result = await response.json();
+    console.log("Remove by recipe response:", result);
+
+    if (response.ok && result.code === 200) {
+      return true;
+    } else {
+      console.error("Failed to remove items by recipe:", result.message);
+      return false;
+    }
+  } catch (error) {
+    console.error("Error removing items by recipe:", error);
+    return false;
+  }
+};
+
+// Remove checked items
+export const removeCheckedItems = async (): Promise<boolean> => {
+  try {
+    console.log("Removing all checked items");
+
+    const headers = await createAuthHeaders();
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/items-by-filter?filter=checked`,
+      {
+        method: "DELETE",
+        headers,
+      }
+    );
+
+    const result = await response.json();
+    console.log("Remove checked items response:", result);
+
+    if (response.ok && result.code === 200) {
+      return true;
+    } else {
+      console.error("Failed to remove checked items:", result.message);
+      return false;
+    }
+  } catch (error) {
+    console.error("Error removing checked items:", error);
     return false;
   }
 };

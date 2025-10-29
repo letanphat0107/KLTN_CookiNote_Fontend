@@ -298,15 +298,6 @@ export const floatingStyles = StyleSheet.create({
     flex: 1,
   },
 
-  groupItemCount: {
-    fontSize: 12,
-    color: '#666666',
-    backgroundColor: '#E3F2FD',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    fontWeight: '500',
-  },
 
   groupItems: {
     paddingLeft: 10,
@@ -650,12 +641,6 @@ export const floatingStyles = StyleSheet.create({
     backgroundColor: '#CCCCCC',
   },
 
-    // Header actions
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 15,
-  },
 
   clearHistoryButton: {
     padding: 5,
@@ -677,6 +662,59 @@ export const floatingStyles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: '#666666',
+    textAlign: 'center',
+  },
+
+   headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+
+  clearCheckedButton: {
+    backgroundColor: '#FF4444',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+
+  clearCheckedText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+
+  // Group actions
+  groupActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+
+  removeGroupButton: {
+    padding: 4,
+  },
+
+  removeGroupText: {
+    fontSize: 16,
+  },
+
+  // Checkbox processing state
+  checkboxProcessing: {
+    backgroundColor: '#F0F0F0',
+    borderColor: '#CCCCCC',
+  },
+
+  // Updated group item count to show checked/total
+  groupItemCount: {
+    fontSize: 12,
+    color: '#666666',
+    backgroundColor: '#E3F2FD',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    fontWeight: '500',
+    minWidth: 80,
     textAlign: 'center',
   },
 });
