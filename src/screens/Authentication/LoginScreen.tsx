@@ -188,6 +188,17 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               }}
               disabled={isLoading}
             >
+              <Text style={authStyles.testButtonText}>Fill User Account</Text>
+            </TouchableOpacity>
+            <Text style={authStyles.testTitle}>🧪 Test Account</Text>
+            <TouchableOpacity
+              style={authStyles.testButton}
+              onPress={() => {
+                setUsername("adminadmin");
+                setPassword("newPassword123");
+              }}
+              disabled={isLoading}
+            >
               <Text style={authStyles.testButtonText}>Fill Admin Account</Text>
             </TouchableOpacity>
           </View>
