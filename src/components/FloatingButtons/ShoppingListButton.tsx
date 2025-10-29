@@ -33,13 +33,24 @@ interface ShoppingListItem {
   isFromRecipe: boolean;
 }
 
+interface ShoppingListGroup {
+  recipeId: number | null;
+  recipeTitle: string;
+  recipeImageUrl: string | null;
+  isRecipeDeleted: boolean | null;
+  items: ShoppingListItem[];
+}
+
 const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
   isOpen,
   onToggle,
   navigation,
 }) => {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([]);
+  const [shoppingListGroups, setShoppingListGroups] = useState<
+    ShoppingListGroup[]
+  >([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -60,9 +71,11 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
   const loadShoppingList = async () => {
     setIsLoading(true);
     try {
-      const items = await getShoppingList(); // đã return mảng items
-      console.log("Shopping list items:", items);
-      setShoppingList(items);
+      const response = await getShoppingList();
+      console.log("Shopping list response:", response);
+
+      setShoppingListGroups(response.groups);
+      setTotalItems(response.totalItems);
     } catch (error) {
       console.error("Error loading shopping list:", error);
       Alert.alert("Lỗi", "Không thể tải danh sách mua sắm");
@@ -119,31 +132,40 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
   const handleToggleItem = async (itemId: number, currentChecked: boolean) => {
     try {
       // Optimistically update UI
-      setShoppingList((prev) =>
-        prev.map((item) =>
-          item.id === itemId ? { ...item, checked: !currentChecked } : item
-        )
+      setShoppingListGroups((prev) =>
+        prev.map((group) => ({
+          ...group,
+          items: group.items.map((item) =>
+            item.id === itemId ? { ...item, checked: !currentChecked } : item
+          ),
+        }))
       );
 
       // Call API to update on server (if API exists)
       // const success = await toggleShoppingListItem(itemId, !currentChecked);
       // if (!success) {
       //   // Revert on failure
-      //   setShoppingList(prev =>
-      //     prev.map(item =>
-      //       item.id === itemId
-      //         ? { ...item, checked: currentChecked }
-      //         : item
-      //     )
+      //   setShoppingListGroups(prev =>
+      //     prev.map(group => ({
+      //       ...group,
+      //       items: group.items.map(item =>
+      //         item.id === itemId
+      //           ? { ...item, checked: currentChecked }
+      //           : item
+      //       )
+      //     }))
       //   );
       // }
     } catch (error) {
       console.error("Error toggling item:", error);
       // Revert on error
-      setShoppingList((prev) =>
-        prev.map((item) =>
-          item.id === itemId ? { ...item, checked: currentChecked } : item
-        )
+      setShoppingListGroups((prev) =>
+        prev.map((group) => ({
+          ...group,
+          items: group.items.map((item) =>
+            item.id === itemId ? { ...item, checked: currentChecked } : item
+          ),
+        }))
       );
     }
   };
@@ -178,6 +200,73 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
     onToggle();
   };
 
+  const renderGroupHeader = (group: ShoppingListGroup) => (
+    <View style={floatingStyles.groupHeader}>
+      <View style={floatingStyles.groupTitleContainer}>
+        <Text style={floatingStyles.groupIcon}>
+          {group.recipeId ? "📝" : "🛒"}
+        </Text>
+        <Text style={floatingStyles.groupTitle} numberOfLines={2}>
+          {group.recipeTitle}
+        </Text>
+      </View>
+      <Text style={floatingStyles.groupItemCount}>
+        {group.items.length} món
+      </Text>
+    </View>
+  );
+
+  const renderShoppingItem = (item: ShoppingListItem) => (
+    <View key={item.id} style={floatingStyles.shoppingListItem}>
+      {/* Checkbox */}
+      <TouchableOpacity
+        style={[
+          floatingStyles.checkbox,
+          item.checked && floatingStyles.checkboxChecked,
+        ]}
+        onPress={() => handleToggleItem(item.id, item.checked)}
+      >
+        {item.checked && <Text style={floatingStyles.checkboxIcon}>✓</Text>}
+      </TouchableOpacity>
+
+      {/* Item Info */}
+      <View
+        style={[
+          floatingStyles.itemInfo,
+          item.checked && floatingStyles.itemInfoChecked,
+        ]}
+      >
+        <Text
+          style={[
+            floatingStyles.itemName,
+            item.checked && floatingStyles.itemNameChecked,
+          ]}
+        >
+          {item.ingredient}
+        </Text>
+        <Text
+          style={[
+            floatingStyles.itemQuantity,
+            item.checked && floatingStyles.itemQuantityChecked,
+          ]}
+        >
+          {item.quantity}
+        </Text>
+        {item.isFromRecipe && (
+          <Text style={floatingStyles.recipeTag}>📝 Từ công thức</Text>
+        )}
+      </View>
+
+      {/* Remove Button */}
+      <TouchableOpacity
+        style={floatingStyles.removeItemButton}
+        onPress={() => handleRemoveItem(item.id)}
+      >
+        <Text style={floatingStyles.removeItemText}>🗑️</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   const renderShoppingListModal = () => (
     <Modal
       visible={isOpen}
@@ -189,7 +278,9 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
         <View style={floatingStyles.shoppingListModal}>
           {/* Header */}
           <View style={floatingStyles.modalHeader}>
-            <Text style={floatingStyles.modalTitle}>🛒 Danh sách mua sắm</Text>
+            <Text style={floatingStyles.modalTitle}>
+              🛒 Danh sách mua sắm ({totalItems})
+            </Text>
             <TouchableOpacity onPress={onToggle}>
               <Text style={floatingStyles.closeButton}>✕</Text>
             </TouchableOpacity>
@@ -200,7 +291,12 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
             style={floatingStyles.shoppingListContent}
             showsVerticalScrollIndicator={false}
           >
-            {shoppingList.length === 0 ? (
+            {isLoading ? (
+              <View style={floatingStyles.loadingContainer}>
+                <ActivityIndicator size="large" color="#FF6B35" />
+                <Text style={floatingStyles.loadingText}>Đang tải...</Text>
+              </View>
+            ) : totalItems === 0 ? (
               <View style={floatingStyles.emptyContainer}>
                 <Text style={floatingStyles.emptyIcon}>🛒</Text>
                 <Text style={floatingStyles.emptyTitle}>Danh sách trống</Text>
@@ -209,63 +305,23 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
                 </Text>
               </View>
             ) : (
-              shoppingList.map((item) => (
-                <View key={item.id} style={floatingStyles.shoppingListItem}>
-                  {/* Checkbox */}
-                  <TouchableOpacity
-                    style={[
-                      floatingStyles.checkbox,
-                      item.checked && floatingStyles.checkboxChecked,
-                    ]}
-                    onPress={() => handleToggleItem(item.id, item.checked)}
-                  >
-                    {item.checked && (
-                      <Text style={floatingStyles.checkboxIcon}>✓</Text>
-                    )}
-                  </TouchableOpacity>
+              shoppingListGroups.map((group, groupIndex) => (
+                <View
+                  key={`group-${groupIndex}`}
+                  style={floatingStyles.shoppingGroup}
+                >
+                  {/* Group Header */}
+                  {renderGroupHeader(group)}
 
-                  {/* Item Info */}
-                  <View
-                    style={[
-                      floatingStyles.itemInfo,
-                      item.checked && floatingStyles.itemInfoChecked,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        floatingStyles.itemName,
-                        item.checked && floatingStyles.itemNameChecked,
-                      ]}
-                    >
-                      {item.ingredient}
-                    </Text>
-                    <Text
-                      style={[
-                        floatingStyles.itemQuantity,
-                        item.checked && floatingStyles.itemQuantityChecked,
-                      ]}
-                    >
-                      {item.quantity}
-                    </Text>
-                    {item.isFromRecipe && (
-                      <Text style={floatingStyles.recipeTag}>
-                        📝 Từ công thức
-                      </Text>
-                    )}
+                  {/* Group Items */}
+                  <View style={floatingStyles.groupItems}>
+                    {group.items.map(renderShoppingItem)}
                   </View>
-
-                  {/* Remove Button */}
-                  <TouchableOpacity
-                    style={floatingStyles.removeItemButton}
-                    onPress={() => handleRemoveItem(item.id)}
-                  >
-                    <Text style={floatingStyles.removeItemText}>🗑️</Text>
-                  </TouchableOpacity>
                 </View>
               ))
             )}
           </ScrollView>
-          
+
           {/* Add Button */}
           {!showAddForm && (
             <TouchableOpacity
@@ -320,7 +376,6 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
               </View>
             </View>
           )}
-
         </View>
       </View>
     </Modal>
@@ -337,6 +392,13 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
       >
         <TouchableOpacity onPress={handleButtonPress}>
           <Text style={floatingStyles.buttonIcon}>🛒</Text>
+          {totalItems > 0 && (
+            <View style={floatingStyles.badge}>
+              <Text style={floatingStyles.badgeText}>
+                {totalItems > 99 ? "99+" : totalItems}
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
       </Animated.View>
       {renderShoppingListModal()}

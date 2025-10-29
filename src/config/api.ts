@@ -1,6 +1,6 @@
 // src/config/api.ts
 export const API_CONFIG = {
-  BASE_URL: "http://192.168.1.8:8386",
+  BASE_URL: "http://192.168.180.110:8386",
   ENDPOINTS: {
     AUTH: {
       REGISTER: "/cookinote/auth/register",

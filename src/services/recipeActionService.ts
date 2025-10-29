@@ -107,7 +107,7 @@ export const forkRecipe = async (
     if (response.ok && result.code === 200) {
       return true;
     } else {
-      console.error("Failed to fork recipe:", result.message);
+      // Khoong the tao ban sao cong thuc cua chinh minh
       return false;
     }
   } catch (error) {

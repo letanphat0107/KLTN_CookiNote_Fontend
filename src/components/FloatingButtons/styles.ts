@@ -94,44 +94,6 @@ export const floatingStyles = StyleSheet.create({
 },
 
 
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 50,
-  },
-
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: "#666666",
-  },
-
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 50,
-  },
-
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 15,
-  },
-
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333333",
-    marginBottom: 8,
-  },
-
-  emptyDescription: {
-    fontSize: 14,
-    color: "#666666",
-    textAlign: "center",
-  },
-
   // Add Form
   addFormContainer: {
     padding: 20,
@@ -313,7 +275,121 @@ export const floatingStyles = StyleSheet.create({
     marginTop: 10,
   },
 
-  // Checkbox
+   // Shopping Group Styles
+  shoppingGroup: {
+    marginBottom: 20,
+  },
+
+  groupHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    backgroundColor: '#F0F8FF',
+    borderRadius: 12,
+    marginBottom: 10,
+    borderLeftWidth: 4,
+    borderLeftColor: '#2196F3',
+  },
+
+  groupTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+
+  groupIcon: {
+    fontSize: 20,
+    marginRight: 12,
+  },
+
+  groupTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1976D2',
+    flex: 1,
+  },
+
+  groupItemCount: {
+    fontSize: 12,
+    color: '#666666',
+    backgroundColor: '#E3F2FD',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    fontWeight: '500',
+  },
+
+  groupItems: {
+    paddingLeft: 10,
+  },
+
+  // Badge for floating button
+  badge: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: '#FF4444',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+
+  badgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+
+
+  // Loading container
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
+    minHeight: 200,
+  },
+
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666666',
+  },
+
+  // Empty container
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
+    minHeight: 200,
+  },
+
+  emptyIcon: {
+    fontSize: 48,
+    marginBottom: 15,
+  },
+
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 8,
+  },
+
+  emptyDescription: {
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
+  },
+
+  // Checkbox styles
   checkbox: {
     width: 24,
     height: 24,
@@ -337,7 +413,7 @@ export const floatingStyles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  // Item Info
+  // Item info
   itemInfo: {
     flex: 1,
   },
@@ -347,7 +423,7 @@ export const floatingStyles = StyleSheet.create({
   },
 
   itemName: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     color: '#333333',
     marginBottom: 4,
@@ -359,7 +435,7 @@ export const floatingStyles = StyleSheet.create({
   },
 
   itemQuantity: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#666666',
   },
 
@@ -369,7 +445,7 @@ export const floatingStyles = StyleSheet.create({
   },
 
   recipeTag: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#FF6B35',
     fontStyle: 'italic',
     marginTop: 2,
@@ -380,8 +456,6 @@ export const floatingStyles = StyleSheet.create({
   },
 
   removeItemText: {
-    fontSize: 18,
+    fontSize: 16,
   },
-
-  
 });

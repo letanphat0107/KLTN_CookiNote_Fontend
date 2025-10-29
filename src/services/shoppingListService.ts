@@ -40,6 +40,19 @@ interface ShoppingListItem {
   isFromRecipe: boolean;
 }
 
+interface ShoppingListGroup {
+  recipeId: number | null;
+  recipeTitle: string;
+  recipeImageUrl: string | null;
+  isRecipeDeleted: boolean | null;
+  items: ShoppingListItem[];
+}
+
+interface ShoppingListResponse {
+  groups: ShoppingListGroup[];
+  totalItems: number;
+}
+
 interface AddItemRequest {
   ingredient: string;
   quantity: string;
@@ -49,7 +62,7 @@ interface AddItemRequest {
 // src/services/shoppingListService.ts
 // Make sure this returns the correct format
 
-export const getShoppingList = async (): Promise<ShoppingListItem[]> => {
+export const getShoppingList = async (): Promise<ShoppingListResponse> => {
   try {
     const headers = await createAuthHeaders();
     const response = await fetch(
@@ -63,11 +76,23 @@ export const getShoppingList = async (): Promise<ShoppingListItem[]> => {
     const result = await response.json();
     console.log("API response:", result);
 
-    return result.data?.[0]?.items || [];
+    if (response.ok && result.code === 200) {
+      const groups = result.data || [];
+      const totalItems = groups.reduce((total: number, group: ShoppingListGroup) => {
+        return total + (group.items?.length || 0);
+      }, 0);
 
+      return {
+        groups,
+        totalItems,
+      };
+    } else {
+      console.error("Failed to get shopping list:", result.message);
+      return { groups: [], totalItems: 0 };
+    }
   } catch (error) {
     console.error("Error getting shopping list:", error);
-    return [];
+    return { groups: [], totalItems: 0 };
   }
 };
 
