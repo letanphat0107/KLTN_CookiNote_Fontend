@@ -23,7 +23,6 @@ import ProfileScreen from "../screens/Account/ProfileScreen";
 import SharedAccountScreen from "../screens/Account/SharedAccountScreen";
 import AdminDashboardScreen from "../screens/Admin/AdminDashboardScreen";
 import ManageDishesScreen from "../screens/Admin/ManageDishesScreen";
-import AddRecipeScreen from "../screens/Admin/AddRecipeScreen";
 
 import { RootStackParamList } from "./types";
 
@@ -98,7 +97,7 @@ const RootNavigator = () => {
                 name="ManageDishes"
                 component={ManageDishesScreen}
               />
-              <Stack.Screen name="AddRecipe" component={AddRecipeScreen} />
+        
             </>
           )}
         </>
