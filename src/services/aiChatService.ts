@@ -47,7 +47,6 @@ export const sendAIChatMessage = async (message: string): Promise<string> => {
       method: "POST",
       headers,
       body: JSON.stringify({ message }),
-      
     });
 
     const result = await response.json();
@@ -75,7 +74,6 @@ export const getChatHistory = async (): Promise<ChatMessage[]> => {
       {
         method: "GET",
         headers,
-        
       }
     );
 
@@ -84,11 +82,87 @@ export const getChatHistory = async (): Promise<ChatMessage[]> => {
     if (response.ok && result.code === 200) {
       return result.data?.messages || [];
     } else {
-      console.error("Failed to get chat history:", result.message);
       return [];
     }
   } catch (error) {
-    console.error("Error getting chat history:", error);
     return [];
   }
 };
+
+// Add new function for recipe suggestions
+
+interface RecipeSuggestion {
+  recipe: {
+    id: number;
+    title: string;
+    imageUrl: string;
+    ownerName: string;
+    createdAt: string;
+    difficulty: string;
+    view: number;
+    prepareTime: number;
+    cookTime: number;
+    deleted: boolean;
+  };
+  mainIngredientMatchScore: number;
+  overallMatchScore: number;
+  justification: string;
+}
+
+interface RecipeSuggestionResponse {
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  items: RecipeSuggestion[];
+}
+
+// Get recipe suggestions based on available ingredients
+export const getRecipeSuggestions = async (
+  ingredientNames: string[]
+): Promise<RecipeSuggestionResponse> => {
+  try {
+    console.log("Getting recipe suggestions for ingredients:", ingredientNames);
+
+    const headers = await createAuthHeaders();
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/suggest-recipes`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ ingredientNames }),
+      }
+    );
+
+    const result = await response.json();
+    console.log("Recipe suggestions response:", result);
+
+    if (response.ok && result.code === 200) {
+      return result.data;
+    } else {
+      console.error("Failed to get recipe suggestions:", result.message);
+      return {
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasNext: false,
+        items: [],
+      };
+    }
+  } catch (error) {
+    console.error("Error getting recipe suggestions:", error);
+    return {
+      page: 0,
+      size: 0,
+      totalElements: 0,
+      totalPages: 0,
+      hasNext: false,
+      items: [],
+    };
+  }
+};
+
+// Export interfaces for use in components
+export type { RecipeSuggestion, RecipeSuggestionResponse };

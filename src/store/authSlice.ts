@@ -184,7 +184,7 @@ export const refreshTokens = createAsyncThunk(
         return rejectWithValue("No refresh token available");
       }
 
-      console.log("Refreshing tokens...");
+      console.log("Refreshing tokens...: ", tokens.refreshToken);
 
       const response = await fetch(
         `${API_CONFIG.BASE_URL}/cookinote/auth/refresh`,

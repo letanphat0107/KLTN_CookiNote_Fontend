@@ -120,20 +120,6 @@ export const floatingStyles = StyleSheet.create({
     gap: 10,
   },
 
-  cancelButton: {
-    flex: 1,
-    backgroundColor: "#E0E0E0",
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-
-  cancelButtonText: {
-    color: "#666666",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-
   addButton: {
     flex: 1,
     backgroundColor: "#4CAF50",
@@ -458,5 +444,209 @@ export const floatingStyles = StyleSheet.create({
 
   removeItemText: {
     fontSize: 16,
+  },
+
+  quickActions: {
+    flexDirection: 'row',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+
+  quickActionButton: {
+    backgroundColor: '#FF6B35',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+
+  quickActionText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  // Recipe Suggestions
+  suggestionsContainer: {
+    marginTop: 10,
+  },
+
+  suggestionCard: {
+    flexDirection: 'row',
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+
+  suggestionImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+
+  suggestionInfo: {
+    flex: 1,
+  },
+
+  suggestionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333333',
+    marginBottom: 4,
+  },
+
+  suggestionJustification: {
+    fontSize: 13,
+    color: '#666666',
+    marginBottom: 8,
+    fontStyle: 'italic',
+  },
+
+  suggestionMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+
+  suggestionTime: {
+    fontSize: 12,
+    color: '#666666',
+  },
+
+  suggestionDifficulty: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+
+  suggestionScore: {
+    fontSize: 12,
+    color: '#FF6B35',
+    fontWeight: '600',
+  },
+
+  // Ingredient Selector Modal
+  ingredientModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  ingredientModal: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    width: '90%',
+    maxHeight: '80%',
+    padding: 0,
+    flex: 1,
+  },
+
+  ingredientHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+
+  ingredientTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333333',
+  },
+
+  ingredientSubtitle: {
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
+    paddingVertical: 10,
+    backgroundColor: '#F8F9FA',
+  },
+
+  ingredientList: {
+    flex: 1,
+    paddingHorizontal: 15,
+  },
+
+  ingredientGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingVertical: 15,
+    gap: 8,
+  },
+
+  ingredientChip: {
+    backgroundColor: '#F0F0F0',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+
+  ingredientChipSelected: {
+    backgroundColor: '#FF6B35',
+    borderColor: '#FF6B35',
+  },
+
+  ingredientChipText: {
+    fontSize: 14,
+    color: '#333333',
+  },
+
+  ingredientChipTextSelected: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+
+  ingredientActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+    gap: 15,
+  },
+
+  cancelButton: {
+    flex: 1,
+    backgroundColor: '#F0F0F0',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+
+  cancelButtonText: {
+    color: '#666666',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  getSuggestionsButton: {
+    flex: 2,
+    backgroundColor: '#FF6B35',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+
+  getSuggestionsButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  disabledButton: {
+    backgroundColor: '#CCCCCC',
   },
 });
