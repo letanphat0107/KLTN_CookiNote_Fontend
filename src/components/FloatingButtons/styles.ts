@@ -649,4 +649,34 @@ export const floatingStyles = StyleSheet.create({
   disabledButton: {
     backgroundColor: '#CCCCCC',
   },
+
+    // Header actions
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 15,
+  },
+
+  clearHistoryButton: {
+    padding: 5,
+  },
+
+  clearHistoryText: {
+    fontSize: 18,
+  },
+
+  // Loading history
+  loadingHistoryContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
+  },
+
+  loadingHistoryText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666666',
+    textAlign: 'center',
+  },
 });

@@ -18,10 +18,14 @@ import { floatingStyles } from "./styles";
 import { useAppSelector } from "../../store/hooks";
 import {
   sendAIChatMessage,
-  getChatHistory,
   getRecipeSuggestions,
   RecipeSuggestion,
 } from "../../services/aiChatService";
+import {
+  saveChatHistory,
+  loadChatHistory,
+  clearChatHistory,
+} from "../../services/chatStorageService";
 
 interface AIChatButtonProps {
   isOpen: boolean;
@@ -50,6 +54,7 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
   const [showIngredientSelector, setShowIngredientSelector] = useState(false);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   // Animation
@@ -95,28 +100,36 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
     "Mayonnaise",
   ];
 
+  // Load chat history when component mounts or when opened
   useEffect(() => {
     if (isOpen && isAuthenticated) {
-      loadChatHistory();
+      loadStoredChatHistory();
     }
   }, [isOpen, isAuthenticated]);
 
-  const loadChatHistory = async () => {
+  // Save messages to storage whenever messages change
+  useEffect(() => {
+    if (messages.length > 0 && isAuthenticated) {
+      // Filter out loading messages before saving
+      const messagesToSave = messages.filter((msg) => !msg.isLoading);
+      saveChatHistory(messagesToSave);
+    }
+  }, [messages, isAuthenticated]);
+
+  const loadStoredChatHistory = async () => {
+    setIsLoadingHistory(true);
     try {
-      const history = await getChatHistory();
-      setMessages(history);
+      const storedMessages = await loadChatHistory();
+      setMessages(storedMessages);
+
+      // Scroll to bottom after loading
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: false });
+      }, 100);
     } catch (error) {
-      console.error("Error loading chat history:", error);
-      // Initialize with welcome message
-      setMessages([
-        {
-          id: "1",
-          message:
-            "Chào bạn! Tôi là AI trợ lý nấu ăn. Bạn có thể:\n\n• Hỏi về cách nấu ăn\n• Xin gợi ý công thức từ nguyên liệu có sẵn\n• Tìm hiểu về dinh dưỡng\n\nBạn cần hỗ trợ gì?",
-          isUser: false,
-          timestamp: new Date(),
-        },
-      ]);
+      console.error("Error loading stored chat history:", error);
+    } finally {
+      setIsLoadingHistory(false);
     }
   };
 
@@ -261,6 +274,28 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
   const handleRecipePress = (recipeId: number) => {
     onToggle(); // Close AI chat
     navigation?.navigate("RecipeDetail", { recipeId });
+  };
+
+  const handleClearHistory = () => {
+    Alert.alert(
+      "Xóa lịch sử chat",
+      "Bạn có chắc muốn xóa toàn bộ lịch sử trò chuyện?",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await clearChatHistory();
+              await loadStoredChatHistory(); // Reload with welcome message
+            } catch (error) {
+              console.error("Error clearing chat history:", error);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const formatTime = (prepareTime: number, cookTime: number) => {
@@ -501,9 +536,17 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
           {/* Header */}
           <View style={floatingStyles.modalHeader}>
             <Text style={floatingStyles.modalTitle}>🤖 AI Trợ lý nấu ăn</Text>
-            <TouchableOpacity onPress={onToggle}>
-              <Text style={floatingStyles.closeButton}>✕</Text>
-            </TouchableOpacity>
+            <View style={floatingStyles.headerActions}>
+              <TouchableOpacity
+                onPress={handleClearHistory}
+                style={floatingStyles.clearHistoryButton}
+              >
+                <Text style={floatingStyles.clearHistoryText}>🗑️</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={onToggle}>
+                <Text style={floatingStyles.closeButton}>✕</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Quick Actions */}
@@ -527,7 +570,16 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
               scrollViewRef.current?.scrollToEnd({ animated: true })
             }
           >
-            {messages.map(renderChatMessage)}
+            {isLoadingHistory ? (
+              <View style={floatingStyles.loadingHistoryContainer}>
+                <ActivityIndicator size="large" color="#FF6B35" />
+                <Text style={floatingStyles.loadingHistoryText}>
+                  Đang tải lịch sử chat...
+                </Text>
+              </View>
+            ) : (
+              messages.map(renderChatMessage)
+            )}
           </ScrollView>
 
           {/* Chat Input */}
