@@ -13,6 +13,7 @@ export type RootStackParamList = {
   MainTabs: undefined; // Add this line
   HomeScreen: undefined;
   CulinaryStoryDetail: { storyId: string };
+  
 
   // Recipe
   RecipeDetail: { recipeId: string };

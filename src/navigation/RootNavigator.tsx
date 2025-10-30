@@ -23,6 +23,7 @@ import ProfileScreen from "../screens/Account/ProfileScreen";
 import SharedAccountScreen from "../screens/Account/SharedAccountScreen";
 import AdminDashboardScreen from "../screens/Admin/AdminDashboardScreen";
 import ManageDishesScreen from "../screens/Admin/ManageDishesScreen";
+import AdminTabNavigator from "./AdminTabNavigator";
 
 import { RootStackParamList } from "./types";
 
@@ -63,6 +64,17 @@ const RootNavigator = () => {
       {isAuthenticated ? (
         // Authenticated Stack
         <>
+                  {/* Admin screens - conditional based on user role */}
+          {/* Admin screens - conditional based on user role */}
+          {user?.role === "ADMIN" && (
+            <>
+              <Stack.Screen
+                name="AdminDashboard"
+                component={AdminTabNavigator}
+                options={{ headerShown: false }}
+              />
+            </>
+          )}
           {/* Main App with Authenticated Tab Navigator */}
           <Stack.Screen name="MainTabs" component={TabNavigator} />
 
@@ -86,20 +98,7 @@ const RootNavigator = () => {
             component={ForgotPasswordScreen}
           />
 
-          {/* Admin screens - conditional based on user role */}
-          {user?.role === "ADMIN" && (
-            <>
-              <Stack.Screen
-                name="AdminDashboard"
-                component={AdminDashboardScreen}
-              />
-              <Stack.Screen
-                name="ManageDishes"
-                component={ManageDishesScreen}
-              />
-        
-            </>
-          )}
+
         </>
       ) : (
         // Unauthenticated Stack
