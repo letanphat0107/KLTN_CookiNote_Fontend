@@ -16,6 +16,10 @@ import { logoutUser } from "../../store/authSlice";
 import adminService, { DashboardStats } from "../../services/adminService";
 import { adminStyles } from "./styles";
 
+// Sử dụng Legacy API để giữ hàm downloadAsync
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
+
 const AdminDashboardScreen = () => {
   const navigation = useNavigation();
   const dispatch = useAppDispatch();
@@ -55,26 +59,63 @@ const AdminDashboardScreen = () => {
     fetchStats();
   };
 
-  const handleExportReport = async () => {
-    if (!tokens?.accessToken) return;
+ const handleExportReport = async () => {
+  if (!tokens?.accessToken) {
+    Alert.alert("Lỗi", "Vui lòng đăng nhập để thực hiện chức năng này.");
+    return;
+  }
 
-    Alert.alert("Xuất báo cáo", "Bạn có muốn xuất báo cáo người dùng?", [
-      { text: "Hủy", style: "cancel" },
-      {
-        text: "Xuất",
-        onPress: async () => {
-          try {
-            const filePath = await adminService.exportUserReport(
-              tokens.accessToken
-            );
-            Alert.alert("Thành công", `Báo cáo đã được lưu tại: ${filePath}`);
-          } catch (error) {
-            Alert.alert("Lỗi", "Không thể xuất báo cáo");
+  Alert.alert("Xuất báo cáo", "Bạn có muốn xuất báo cáo người dùng?", [
+    { text: "Hủy", style: "cancel" },
+    {
+      text: "Xuất",
+      onPress: async () => {
+        let isSuccess = false;
+        try {
+          // 1. GỌI API & NHẬN URL TẢI XUỐNG
+          const fileDownloadUrl = await adminService.exportUserReport(
+            tokens.accessToken
+          );
+          
+          if (!fileDownloadUrl) {
+              throw new Error("Không nhận được đường dẫn tải tệp từ máy chủ.");
           }
-        },
+
+          // 2. TẢI TỆP VỀ THIẾT BỊ
+          const fileName = `user_report_${Date.now()}.xlsx`; 
+          const fileUri = FileSystem.documentDirectory + fileName; 
+          
+          Alert.alert("Đang xử lý", "Đang tải báo cáo về thiết bị...", [{ text: "OK" }]);
+
+          // Hàm downloadAsync này không còn bị cảnh báo deprecated nữa!
+          const downloadResult = await FileSystem.downloadAsync(
+            fileDownloadUrl,
+            fileUri
+          );
+
+          if (downloadResult.status !== 200) {
+            throw new Error(`Tải tệp thất bại: Trạng thái ${downloadResult.status}`);
+          }
+          
+          // 3. CHIA SẺ/MỞ TỆP
+          if (await Sharing.isAvailableAsync()) {
+              await Sharing.shareAsync(downloadResult.uri);
+              Alert.alert("Thành công", `Báo cáo đã được tải về và mở.`);
+          } else {
+              Alert.alert("Thành công", "Báo cáo đã được tải về. Tính năng chia sẻ không khả dụng.");
+          }
+          
+          isSuccess = true;
+
+        } catch (error) {
+          console.error("Lỗi xuất hoặc tải báo cáo:", error);
+          const errorMessage = error instanceof Error ? error.message : "Đã xảy ra lỗi không xác định.";
+          Alert.alert("Lỗi", `Không thể xuất báo cáo: ${errorMessage}`);
+        }
       },
-    ]);
-  };
+    },
+  ]);
+};
 
   if (loading) {
     return (

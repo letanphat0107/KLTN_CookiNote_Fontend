@@ -37,10 +37,11 @@ export const API_CONFIG = {
       MYRECIPE: "/cookinote/recipes/me",
     },
     ADMIN: {
-      DASHBOARD: "/cookinote/admin/dashboard",
+      DASHBOARD: "/cookinote/admin/stats/users",
       USERS: "/cookinote/admin/users",
       RECIPES: "/cookinote/admin/recipes",
       CATEGORIES: "/cookinote/admin/categories",
+      REPORT: "/cookinote/admin/export/recipes",
     },
     CATEGORY: {
       LIST: "/cookinote/categories",

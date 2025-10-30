@@ -30,6 +30,8 @@ export type RootStackParamList = {
 
   // Admin
   AdminDashboard: undefined;
+  ManageUsers: undefined;
+  ManageRecipe: undefined;
 };
 
 export type TabParamList = {

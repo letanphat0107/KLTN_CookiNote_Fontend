@@ -21,8 +21,10 @@ import RecipeGuideScreen from "../screens/Recipe/RecipeGuideScreen";
 import AccountScreen from "../screens/Account/AccountScreen";
 import ProfileScreen from "../screens/Account/ProfileScreen";
 import SharedAccountScreen from "../screens/Account/SharedAccountScreen";
-import AdminDashboardScreen from "../screens/Admin/AdminDashboardScreen";
+
 import AdminTabNavigator from "./AdminTabNavigator";
+import ManageUsersScreen from "../screens/Admin/ManageUsersScreen";
+import ManageRecipeScreen from "../screens/Admin/ManageRecipesScreen";
 
 import { RootStackParamList } from "./types";
 
@@ -59,8 +61,10 @@ const RootNavigator = () => {
         headerShown: false,
       }}
       initialRouteName={
-        isAuthenticated 
-          ? (user?.role === "ADMIN" ? "AdminDashboard" : "MainTabs")
+        isAuthenticated
+          ? user?.role === "ADMIN"
+            ? "AdminDashboard"
+            : "MainTabs"
           : "Login"
       }
     >
@@ -74,6 +78,22 @@ const RootNavigator = () => {
                 name="AdminDashboard"
                 component={AdminTabNavigator}
                 options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="ManageUsers"
+                component={ManageUsersScreen}
+                options={{
+                  headerShown: true,
+                  title: "Quản lý người dùng",
+                }}
+              />
+              <Stack.Screen
+                name="ManageRecipe"
+                component={ManageRecipeScreen}
+                options={{
+                  headerShown: true,
+                  title: "Quản lý món ăn",
+                }}
               />
             </>
           )}

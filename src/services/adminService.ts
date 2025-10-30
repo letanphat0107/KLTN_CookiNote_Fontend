@@ -184,31 +184,36 @@ class AdminService {
 // ...existing code...
 
   // Export user report
-  async exportUserReport(
-    accessToken: string,
-    path: string = "/user-report"
-  ): Promise<string> {
-    try {
-      const response = await fetch(
-        buildApiUrl(`${API_CONFIG.ENDPOINTS.ADMIN.USERS}/export/recipes`),
-        {
-          method: "POST",
-          headers: this.getAuthHeader(accessToken),
-          body: JSON.stringify({ path }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to export report");
+// Trong adminService.ts (hoặc tương đương)
+async exportUserReport(
+  accessToken: string,
+  // path không cần thiết nếu API tự định nghĩa vị trí, nhưng giữ lại nếu cần
+  path: string = "/user-report" 
+): Promise<string> {
+  try {
+    const response = await fetch(
+      buildApiUrl(`${API_CONFIG.ENDPOINTS.ADMIN.REPORT}`),
+      {
+        method: "POST",
+        headers: this.getAuthHeader(accessToken),
+        body: JSON.stringify({ path }),
       }
+    );
 
-      const data = await response.json();
-      return data.data.filePath;
-    } catch (error) {
-      console.error("Error exporting report:", error);
-      throw error;
+    if (!response.ok) {
+      // Cố gắng lấy thông báo lỗi chi tiết hơn từ phản hồi
+      const errorData = await response.json().catch(() => ({ message: "Failed to export report" }));
+      throw new Error(errorData.message || "Failed to export report");
     }
+
+    const data = await response.json();
+    // ⚠️ Giả định data.data.filePath là URL TẢI XUỐNG
+    return data.data.filePath; 
+  } catch (error) {
+    console.error("Error exporting report:", error);
+    throw error;
   }
+}
 
   // Recipe Management Methods
   async getAdminRecipes(
