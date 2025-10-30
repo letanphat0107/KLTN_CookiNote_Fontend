@@ -25,6 +25,7 @@ import SharedAccountScreen from "../screens/Account/SharedAccountScreen";
 import AdminTabNavigator from "./AdminTabNavigator";
 import ManageUsersScreen from "../screens/Admin/ManageUsersScreen";
 import ManageRecipeScreen from "../screens/Admin/ManageRecipesScreen";
+import CreateRecipeScreen from "../screens/Admin/CreateRecipeScreen";
 
 import { RootStackParamList } from "./types";
 
@@ -93,6 +94,14 @@ const RootNavigator = () => {
                 options={{
                   headerShown: true,
                   title: "Quản lý món ăn",
+                }}
+              />
+              <Stack.Screen
+                name="CreateRecipe"
+                component={CreateRecipeScreen}
+                options={{ 
+                  headerShown: true,
+                  title: "Tạo công thức mới"
                 }}
               />
             </>

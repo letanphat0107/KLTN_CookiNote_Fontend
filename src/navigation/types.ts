@@ -32,6 +32,7 @@ export type RootStackParamList = {
   AdminDashboard: undefined;
   ManageUsers: undefined;
   ManageRecipe: undefined;
+  CreateRecipe: undefined;
 };
 
 export type TabParamList = {

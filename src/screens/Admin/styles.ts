@@ -1,4 +1,3 @@
-
 import { StyleSheet } from "react-native";
 
 export const adminStyles = StyleSheet.create({
@@ -313,5 +312,248 @@ export const adminStyles = StyleSheet.create({
     fontSize: 20,
     color: "#FF6B6B", // Màu chủ đạo
     marginLeft: "auto",
+  },
+
+  // Recipe Management Styles
+  recipeCard: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  recipeImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 8,
+    backgroundColor: "#f0f0f0",
+  },
+  recipeInfo: {
+    flex: 1,
+    marginLeft: 12,
+    justifyContent: "space-between",
+  },
+  recipeTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  recipeOwner: {
+    fontSize: 13,
+    color: "#666",
+    marginBottom: 8,
+  },
+  recipeMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flexWrap: "wrap",
+  },
+  difficultyBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  difficultyText: {
+    fontSize: 11,
+    color: "#fff",
+    fontWeight: "600",
+  },
+  recipeViews: {
+    fontSize: 12,
+    color: "#666",
+  },
+  recipeRating: {
+    fontSize: 12,
+    color: "#666",
+  },
+
+  modalInfoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between", // Đảm bảo Label và Value cách xa nhau
+    alignItems: "center",
+    paddingVertical: 8, // Thêm khoảng cách dọc giữa các dòng
+    borderBottomWidth: 1, // Đường kẻ mỏng phân tách các dòng
+    borderBottomColor: "#eee", // Màu xám nhạt
+  },
+
+  /** * Style cho phần "Tác giả:", "Độ khó:", v.v. (Label)
+   */
+  modalLabel: {
+    fontSize: 16,
+    fontWeight: "600", // Đậm vừa phải để nổi bật
+    color: "#555", // Màu xám đậm hơn
+    flex: 1, // Chiếm một phần không gian
+    marginRight: 10, // Khoảng cách nhỏ với Value
+  },
+
+  /** * Style cho giá trị thực tế, ví dụ: "Nguyễn Văn A" (Value)
+   */
+  modalValue: {
+    fontSize: 16,
+    fontWeight: "400", // Không quá đậm
+    color: "#333", // Màu đen để đọc rõ
+    flex: 2, // Chiếm nhiều không gian hơn Label (tùy chọn)
+    textAlign: "right", // Căn phải để giữ Label và Value tách biệt
+  },
+
+  // Style bổ sung cho container tổng thể của modal (nếu cần)
+  modalContentContainer: {
+    padding: 20,
+  },
+
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between", // Phân bố đều nút Đóng và Xóa
+    marginTop: 20, // Thêm khoảng cách với nội dung phía trên
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+  },
+
+  /** * Style cơ bản áp dụng cho cả hai nút (Delete và Cancel/Close). */
+  modalButton: {
+    flex: 1, // Để hai nút chiếm không gian bằng nhau
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginHorizontal: 5, // Khoảng cách giữa hai nút
+  },
+
+  /** * Style dành riêng cho nút Xóa/Hủy (màu đỏ). */
+  deleteButton: {
+    backgroundColor: "#D9534F", // Màu đỏ nổi bật cho hành động nguy hiểm
+    marginRight: 10, // Ưu tiên khoảng cách với nút Đóng
+  },
+
+  /** * Style dành riêng cho nút Đóng/Hủy (màu xám hoặc xanh nhẹ). */
+  cancelButton: {
+    backgroundColor: "#F5F5F5", // Màu nền nhẹ nhàng
+    borderWidth: 1,
+    borderColor: "#ccc",
+  },
+
+  /** * Ghi đè màu chữ cho nút Đóng (Cancel) để phù hợp với nền sáng. */
+  cancelButtonText: {
+    color: "#333", // Màu chữ đen/xám cho nền sáng
+  },
+
+  input: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    fontSize: 14,
+  },
+  imagePickerButton: {
+    backgroundColor: "#f5f5f5",
+    padding: 40,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: "#ddd",
+    borderStyle: "dashed",
+  },
+  coverPreview: {
+    width: "100%",
+    height: 200,
+    borderRadius: 8,
+  },
+  addButton: {
+    backgroundColor: "#4CAF50",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  addButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+  stepContainer: {
+    backgroundColor: "#f9f9f9",
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  stepNumber: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 12,
+    color: "#FF6B6B",
+  },
+  removeButton: {
+    marginTop: 12,
+    padding: 8,
+    alignItems: "center",
+  },
+  submitButton: {
+    backgroundColor: "#FF6B6B",
+    padding: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  modalRecipeImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 12,
+    marginBottom: 16,
+    backgroundColor: "#f0f0f0",
+  },
+  modalRecipeTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 16,
+  },
+
+  // -----------------------------------------------------------------
+  // STYLE CHO CÁC DÒNG THÔNG TIN (Label-Value)
+  // -----------------------------------------------------------------
+
+  // -----------------------------------------------------------------
+  // STYLE CHO NÚT TẠO MỚI (Create Recipe Button)
+  // -----------------------------------------------------------------
+  createButton: {
+    backgroundColor: "#FF6B6B", // ⬅️ Dùng màu chủ đạo
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
+    marginVertical: 15,
+  },
+  createButtonText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+  },
+
+
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#fff", // Màu chữ mặc định (dùng cho nút Delete)
   },
 });

@@ -39,7 +39,7 @@ export const API_CONFIG = {
     ADMIN: {
       DASHBOARD: "/cookinote/admin/stats/users",
       USERS: "/cookinote/admin/users",
-      RECIPES: "/cookinote/admin/recipes",
+      RECIPES: "/cookinote/recipes/public",
       CATEGORIES: "/cookinote/admin/categories",
       REPORT: "/cookinote/admin/export/recipes",
     },

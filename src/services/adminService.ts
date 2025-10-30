@@ -1,5 +1,3 @@
-
-
 import { API_CONFIG, buildApiUrl, createAuthHeaders } from "../config/api";
 
 export interface AdminUser {
@@ -35,6 +33,32 @@ export interface DashboardStats {
   totalRecipes: number;
   activeUsers: number;
   newUsersToday: number;
+}
+
+export interface CreateRecipeData {
+  categoryId: number;
+  title: string;
+  description: string;
+  prepareTime: number;
+  cookTime: number;
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  privacy: "PUBLIC" | "PRIVATE";
+  ingredients: Array<{
+    name: string;
+    quantity: string;
+  }>;
+  steps: Array<{
+    stepNo: number;
+    content: string;
+    suggestedTime: number;
+    tips?: string;
+  }>;
+}
+
+export interface CreateRecipeResponse {
+  id: number;
+  title: string;
+  // ... other fields
 }
 
 class AdminService {
@@ -148,10 +172,10 @@ class AdminService {
   }
 
   // Enable user account
-  // ...existing code...
-
-  // Enable user account
-  async enableUser(accessToken: string, userId: number): Promise<{ success: boolean; message?: string }> {
+  async enableUser(
+    accessToken: string,
+    userId: number
+  ): Promise<{ success: boolean; message?: string }> {
     try {
       const response = await fetch(
         buildApiUrl(`${API_CONFIG.ENDPOINTS.ADMIN.USERS}/${userId}/enable`),
@@ -165,10 +189,13 @@ class AdminService {
 
       if (!response.ok) {
         // Trường hợp đặc biệt: email chưa xác thực (status 500)
-        if (response.status === 500 && data.message?.includes("xác thực email")) {
+        if (
+          response.status === 500 &&
+          data.message?.includes("xác thực email")
+        ) {
           return {
             success: false,
-            message: data.message
+            message: data.message,
           };
         }
         throw new Error(data.message || "Failed to enable user");
@@ -181,39 +208,39 @@ class AdminService {
     }
   }
 
-// ...existing code...
-
   // Export user report
-// Trong adminService.ts (hoặc tương đương)
-async exportUserReport(
-  accessToken: string,
-  // path không cần thiết nếu API tự định nghĩa vị trí, nhưng giữ lại nếu cần
-  path: string = "/user-report" 
-): Promise<string> {
-  try {
-    const response = await fetch(
-      buildApiUrl(`${API_CONFIG.ENDPOINTS.ADMIN.REPORT}`),
-      {
-        method: "POST",
-        headers: this.getAuthHeader(accessToken),
-        body: JSON.stringify({ path }),
+  // Trong adminService.ts (hoặc tương đương)
+  async exportUserReport(
+    accessToken: string,
+    // path không cần thiết nếu API tự định nghĩa vị trí, nhưng giữ lại nếu cần
+    path: string = "/user-report"
+  ): Promise<string> {
+    try {
+      const response = await fetch(
+        buildApiUrl(`${API_CONFIG.ENDPOINTS.ADMIN.REPORT}`),
+        {
+          method: "POST",
+          headers: this.getAuthHeader(accessToken),
+          body: JSON.stringify({ path }),
+        }
+      );
+
+      if (!response.ok) {
+        // Cố gắng lấy thông báo lỗi chi tiết hơn từ phản hồi
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: "Failed to export report" }));
+        throw new Error(errorData.message || "Failed to export report");
       }
-    );
 
-    if (!response.ok) {
-      // Cố gắng lấy thông báo lỗi chi tiết hơn từ phản hồi
-      const errorData = await response.json().catch(() => ({ message: "Failed to export report" }));
-      throw new Error(errorData.message || "Failed to export report");
+      const data = await response.json();
+      // ⚠️ Giả định data.data.filePath là URL TẢI XUỐNG
+      return data.data.filePath;
+    } catch (error) {
+      console.error("Error exporting report:", error);
+      throw error;
     }
-
-    const data = await response.json();
-    // ⚠️ Giả định data.data.filePath là URL TẢI XUỐNG
-    return data.data.filePath; 
-  } catch (error) {
-    console.error("Error exporting report:", error);
-    throw error;
   }
-}
 
   // Recipe Management Methods
   async getAdminRecipes(
@@ -262,6 +289,122 @@ async exportUserReport(
       }
     } catch (error) {
       console.error("Error deleting recipe:", error);
+      throw error;
+    }
+  }
+
+  // Create new recipe
+  async createRecipe(
+    accessToken: string,
+    recipeData: CreateRecipeData
+  ): Promise<CreateRecipeResponse> {
+    try {
+      const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.RECIPE.CREATE), {
+        method: "POST",
+        headers: {
+          ...this.getAuthHeader(accessToken),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(recipeData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create recipe");
+      }
+
+      const data = await response.json();
+      return data.data;
+    } catch (error) {
+      console.error("Error creating recipe:", error);
+      throw error;
+    }
+  }
+
+  // Upload recipe cover image
+  async uploadRecipeCover(
+    accessToken: string,
+    recipeId: number,
+    imageUri: string
+  ): Promise<void> {
+    try {
+      const formData = new FormData();
+
+      // Create file object from URI
+      const filename = imageUri.split("/").pop() || "cover.jpg";
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : "image/jpeg";
+
+      formData.append("file", {
+        uri: imageUri,
+        name: filename,
+        type: type,
+      } as any);
+
+      const response = await fetch(
+        buildApiUrl(`${API_CONFIG.ENDPOINTS.RECIPE.CREATE}/${recipeId}/cover`),
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            // Don't set Content-Type, let FormData handle it
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to upload cover image");
+      }
+    } catch (error) {
+      console.error("Error uploading recipe cover:", error);
+      throw error;
+    }
+  }
+
+  // Upload step images
+  async uploadStepImages(
+    accessToken: string,
+    recipeId: number,
+    stepId: number,
+    imageUris: string[]
+  ): Promise<void> {
+    try {
+      const formData = new FormData();
+
+      // Add multiple files
+      imageUris.forEach((uri, index) => {
+        const filename = uri.split("/").pop() || `step_${index}.jpg`;
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : "image/jpeg";
+
+        formData.append("files", {
+          uri: uri,
+          name: filename,
+          type: type,
+        } as any);
+      });
+
+      const response = await fetch(
+        buildApiUrl(
+          `${API_CONFIG.ENDPOINTS.RECIPE.CREATE}/${recipeId}/steps/${stepId}/images`
+        ),
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to upload step images");
+      }
+    } catch (error) {
+      console.error("Error uploading step images:", error);
       throw error;
     }
   }

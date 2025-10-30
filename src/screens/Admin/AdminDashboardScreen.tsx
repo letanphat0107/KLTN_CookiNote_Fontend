@@ -108,7 +108,6 @@ const AdminDashboardScreen = () => {
           isSuccess = true;
 
         } catch (error) {
-          console.error("Lỗi xuất hoặc tải báo cáo:", error);
           const errorMessage = error instanceof Error ? error.message : "Đã xảy ra lỗi không xác định.";
           Alert.alert("Lỗi", `Không thể xuất báo cáo: ${errorMessage}`);
         }
