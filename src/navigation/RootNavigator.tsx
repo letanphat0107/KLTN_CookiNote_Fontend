@@ -59,12 +59,15 @@ const RootNavigator = () => {
       screenOptions={{
         headerShown: false,
       }}
-      initialRouteName={isAuthenticated ? "MainTabs" : "Login"}
+      initialRouteName={
+        isAuthenticated 
+          ? (user?.role === "ADMIN" ? "AdminDashboard" : "MainTabs")
+          : "Login"
+      }
     >
       {isAuthenticated ? (
         // Authenticated Stack
         <>
-                  {/* Admin screens - conditional based on user role */}
           {/* Admin screens - conditional based on user role */}
           {user?.role === "ADMIN" && (
             <>
@@ -97,10 +100,9 @@ const RootNavigator = () => {
             name="ForgotPassword"
             component={ForgotPasswordScreen}
           />
-
-
         </>
       ) : (
+        // ...existing code...
         // Unauthenticated Stack
         <>
           {/* Authentication */}
