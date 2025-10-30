@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
+    marginTop:40
   },
   tabItem: {
     flex: 1,

@@ -48,13 +48,13 @@ const ManageUsersScreen = () => {
       );
 
       if (isRefresh || pageNum === 0) {
-        setUsers(data.users);
+        setUsers(data.items);
       } else {
-        setUsers((prev) => [...prev, ...data.users]);
+        setUsers((prev) => [...prev, ...data.items]);
       }
 
       setTotalPages(data.totalPages);
-      setPage(pageNum);
+      setPage(data.page);
     } catch (error) {
       console.error("Error fetching users:", error);
       Alert.alert("Lỗi", "Không thể tải danh sách người dùng");

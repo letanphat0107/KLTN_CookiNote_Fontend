@@ -4,10 +4,10 @@ import { API_CONFIG, buildApiUrl, createAuthHeaders } from "../config/api";
 
 export interface AdminUser {
   userId: number;
-  email: string;
   username: string;
-  displayName: string;
+  email: string;
   avatarUrl?: string;
+  displayName: string;
   role: string;
   enabled: boolean;
   emailVerified: boolean;
@@ -26,11 +26,12 @@ export interface AdminUserDetail extends AdminUser {
 }
 
 export interface PaginatedUsers {
-  users: AdminUser[];
-  total: number;
+  items: AdminUser[];
   page: number;
-  pageSize: number;
+  size: number;
+  totalElements: number;
   totalPages: number;
+  hasNext: boolean;
 }
 
 export interface DashboardStats {
@@ -63,7 +64,6 @@ class AdminService {
       const data = await response.json();
       return data.data;
     } catch (error) {
-      console.error("Error fetching dashboard stats:", error);
       throw error;
     }
   }
@@ -86,7 +86,7 @@ class AdminService {
       if (role) params.append("role", role);
 
       const response = await fetch(
-        `${buildApiUrl(API_CONFIG.ENDPOINTS.ADMIN.USERS)}?${params}`,
+        `${buildApiUrl(API_CONFIG.ENDPOINTS.ADMIN.USERS)}`,
         {
           method: "GET",
           headers: this.getAuthHeader(accessToken),

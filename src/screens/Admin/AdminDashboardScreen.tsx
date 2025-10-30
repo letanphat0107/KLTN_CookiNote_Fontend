@@ -11,16 +11,26 @@ import {
   Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useAppSelector } from "../../store/hooks";
+import { useAppSelector, useAppDispatch } from "../../store/hooks";
+import { logoutUser } from "../../store/authSlice";
 import adminService, { DashboardStats } from "../../services/adminService";
 import { adminStyles } from "./styles";
 
 const AdminDashboardScreen = () => {
   const navigation = useNavigation();
+  const dispatch = useAppDispatch();
+
   const { tokens } = useAppSelector((state) => state.auth);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  const defaultStats: DashboardStats = {
+  totalUsers: 0,
+  totalRecipes: 0,
+  activeUsers: 0,
+  newUsersToday: 0,
+};
 
   const fetchStats = async () => {
     if (!tokens?.accessToken) return;
@@ -29,8 +39,7 @@ const AdminDashboardScreen = () => {
       const data = await adminService.getDashboardStats(tokens.accessToken);
       setStats(data);
     } catch (error) {
-      console.error("Error fetching stats:", error);
-      Alert.alert("Lỗi", "Không thể tải thông tin thống kê");
+      setStats(defaultStats);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -74,6 +83,44 @@ const AdminDashboardScreen = () => {
       </View>
     );
   }
+
+  const handleLogout = () => {
+    Alert.alert("Đăng xuất", "Bạn có chắc muốn đăng xuất?", [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Đăng xuất",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            // Dispatch logout thunk
+            const result = await dispatch(logoutUser());
+
+            if (
+              logoutUser.fulfilled.match(result) ||
+              logoutUser.rejected.match(result)
+            ) {
+              // Navigate to login screen after logout (successful or failed)
+              if (navigation) {
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: "Login" as never }],
+                });
+              }
+            }
+          } catch (error) {
+            console.error("Logout error:", error);
+            // Even if logout fails, still navigate to login
+            if (navigation) {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "Login" as never }],
+              });
+            }
+          }
+        },
+      },
+    ]);
+  };
 
   return (
     <ScrollView
@@ -164,6 +211,20 @@ const AdminDashboardScreen = () => {
             <Text style={adminStyles.actionTitle}>Quản lý món ăn</Text>
             <Text style={adminStyles.actionSubtitle}>
               Tạo, chỉnh sửa và xóa món ăn
+            </Text>
+          </View>
+          <Text style={adminStyles.actionArrow}>›</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={adminStyles.actionButton}
+          onPress={handleLogout}
+        >
+          <Text style={adminStyles.actionIcon}>🚪</Text>
+          <View style={adminStyles.actionContent}>
+            <Text style={adminStyles.actionTitle}>Đăng xuất</Text>
+            <Text style={adminStyles.actionSubtitle}>
+              Thoát khỏi tài khoản quản trị
             </Text>
           </View>
           <Text style={adminStyles.actionArrow}>›</Text>

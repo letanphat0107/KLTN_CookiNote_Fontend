@@ -22,7 +22,6 @@ import AccountScreen from "../screens/Account/AccountScreen";
 import ProfileScreen from "../screens/Account/ProfileScreen";
 import SharedAccountScreen from "../screens/Account/SharedAccountScreen";
 import AdminDashboardScreen from "../screens/Admin/AdminDashboardScreen";
-import ManageDishesScreen from "../screens/Admin/ManageDishesScreen";
 import AdminTabNavigator from "./AdminTabNavigator";
 
 import { RootStackParamList } from "./types";

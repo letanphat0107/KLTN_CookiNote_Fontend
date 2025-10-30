@@ -30,7 +30,6 @@ export type RootStackParamList = {
 
   // Admin
   AdminDashboard: undefined;
-  ManageDishes: undefined;
   ManageUsers: undefined;
   AddRecipe: undefined;
 };
