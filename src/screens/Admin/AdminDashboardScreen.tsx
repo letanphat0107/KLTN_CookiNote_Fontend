@@ -190,7 +190,7 @@ const AdminDashboardScreen = () => {
 
         <TouchableOpacity
           style={adminStyles.actionButton}
-          onPress={() => navigation.navigate("Users" as never)}
+          onPress={() => navigation.navigate("ManageUsers" as never)}
         >
           <Text style={adminStyles.actionIcon}>👤</Text>
           <View style={adminStyles.actionContent}>
@@ -204,7 +204,7 @@ const AdminDashboardScreen = () => {
 
         <TouchableOpacity
           style={adminStyles.actionButton}
-          onPress={() => navigation.navigate("Recipes" as never)}
+          onPress={() => navigation.navigate("ManageRecipe" as never)}
         >
           <Text style={adminStyles.actionIcon}>🍳</Text>
           <View style={adminStyles.actionContent}>

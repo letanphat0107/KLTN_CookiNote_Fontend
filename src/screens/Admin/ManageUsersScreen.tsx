@@ -21,6 +21,7 @@ import { adminStyles } from "./styles";
 const ManageUsersScreen = () => {
   const { tokens } = useAppSelector((state) => state.auth);
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(0);
@@ -43,8 +44,8 @@ const ManageUsersScreen = () => {
         tokens.accessToken,
         pageNum,
         10,
-        search,
-        selectedRole
+        "", // Không truyền search
+        "" // Không truyền role
       );
 
       if (isRefresh || pageNum === 0) {
@@ -64,9 +65,32 @@ const ManageUsersScreen = () => {
     }
   };
 
+  // Filter users locally
+  useEffect(() => {
+    let result = [...users];
+
+    // Filter by search
+    if (search.trim()) {
+      const searchLower = search.toLowerCase().trim();
+      result = result.filter(
+        (user) =>
+          user.displayName.toLowerCase().includes(searchLower) ||
+          user.email.toLowerCase().includes(searchLower) ||
+          user.username.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Filter by role
+    if (selectedRole) {
+      result = result.filter((user) => user.role === selectedRole);
+    }
+
+    setFilteredUsers(result);
+  }, [users, search, selectedRole]);
+
   useEffect(() => {
     fetchUsers(0);
-  }, [search, selectedRole]);
+  }, []);
 
   const onRefresh = () => {
     fetchUsers(0, true);
@@ -105,14 +129,31 @@ const ManageUsersScreen = () => {
           try {
             if (currentStatus) {
               await adminService.disableUser(tokens.accessToken, userId);
+              Alert.alert("Thành công", `Đã ${action} tài khoản`);
             } else {
-              await adminService.enableUser(tokens.accessToken, userId);
+              const result = await adminService.enableUser(
+                tokens.accessToken,
+                userId
+              );
+              if (result.success) {
+                Alert.alert("Thành công", `Đã ${action} tài khoản`);
+              } else {
+                // Trường hợp email chưa xác thực
+                Alert.alert(
+                  "Không thể kích hoạt",
+                  result.message ||
+                    "Tài khoản chưa xác thực email. Người dùng cần xác thực email trước.",
+                  [{ text: "Đã hiểu", style: "default" }]
+                );
+                return; // Không đóng modal và không refresh
+              }
             }
-            Alert.alert("Thành công", `Đã ${action} tài khoản`);
             setModalVisible(false);
             fetchUsers(0, true);
-          } catch (error) {
-            Alert.alert("Lỗi", `Không thể ${action} tài khoản`);
+          } catch (error: any) {
+            const errorMessage =
+              error.message || `Không thể ${action} tài khoản`;
+            Alert.alert("Lỗi", errorMessage);
           }
         },
       },
@@ -233,7 +274,7 @@ const ManageUsersScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={users}
+          data={filteredUsers}
           renderItem={renderUserItem}
           keyExtractor={(item) => item.userId.toString()}
           refreshControl={
@@ -300,22 +341,22 @@ const ManageUsersScreen = () => {
                   <View style={adminStyles.statsGrid}>
                     <View style={adminStyles.statItem}>
                       <Text style={adminStyles.statValue}>
-                        {selectedUser.stats.totalRecipes}
+                        {selectedUser.recipeCount}
                       </Text>
                       <Text style={adminStyles.statLabel}>Món ăn</Text>
                     </View>
                     <View style={adminStyles.statItem}>
                       <Text style={adminStyles.statValue}>
-                        {selectedUser.stats.totalFavorites}
+                        {selectedUser.favoriteCount}
                       </Text>
                       <Text style={adminStyles.statLabel}>Yêu thích</Text>
                     </View>
-                    <View style={adminStyles.statItem}>
+                    {/* <View style={adminStyles.statItem}>
                       <Text style={adminStyles.statValue}>
-                        {selectedUser.stats.totalViews}
+                        {selectedUser.}
                       </Text>
                       <Text style={adminStyles.statLabel}>Lượt xem</Text>
-                    </View>
+                    </View> */}
                   </View>
 
                   <TouchableOpacity

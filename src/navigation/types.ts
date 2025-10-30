@@ -30,8 +30,6 @@ export type RootStackParamList = {
 
   // Admin
   AdminDashboard: undefined;
-  ManageUsers: undefined;
-  AddRecipe: undefined;
 };
 
 export type TabParamList = {
@@ -40,4 +38,10 @@ export type TabParamList = {
   CulinaryStoryDetail: { storyId: string };
   Favorite: undefined;
   UnauthFavorite: undefined;
+};
+
+export type AdminTabParamList = {
+  AdminDashboard: undefined;
+  ManageUsers: undefined;
+  ManageRecipe: undefined;
 };

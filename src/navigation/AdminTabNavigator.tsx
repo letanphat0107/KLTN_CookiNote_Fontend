@@ -10,9 +10,9 @@ const AdminTabNavigator = () => {
 
   const renderScreen = () => {
     switch (activeTab) {
-      case "Users":
+      case "ManageUsers":
         return <ManageUsersScreen />;
-      case "Recipes":
+      case "ManageRecipe":
         return <ManageRecipesScreen />;
       default:
         return <AdminDashboardScreen />;
@@ -23,7 +23,7 @@ const AdminTabNavigator = () => {
     <View style={{ flex: 1 }}>
       {/* --- Thanh Tab --- */}
       <View style={styles.tabBar}>
-        {["Dashboard", "Users", "Recipes"].map((tab) => (
+        {["AdminDashboard", "ManageUsers", "ManageRecipe"].map((tab) => (
           <TouchableOpacity
             key={tab}
             style={[
@@ -38,9 +38,9 @@ const AdminTabNavigator = () => {
                 activeTab === tab && styles.activeTabLabel,
               ]}
             >
-              {tab === "Dashboard"
+              {tab === "AdminDashboard"
                 ? "Tổng quan"
-                : tab === "Users"
+                : tab === "ManageUsers"
                 ? "Người dùng"
                 : "Món ăn"}
             </Text>

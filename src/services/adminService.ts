@@ -17,12 +17,8 @@ export interface AdminUser {
 }
 
 export interface AdminUserDetail extends AdminUser {
-  stats: {
-    totalRecipes: number;
-    totalFavorites: number;
-    totalViews: number;
-    lastLogin?: string;
-  };
+  passwordChangedAt?: string;
+  authProvider?: string;
 }
 
 export interface PaginatedUsers {
@@ -152,7 +148,10 @@ class AdminService {
   }
 
   // Enable user account
-  async enableUser(accessToken: string, userId: number): Promise<void> {
+  // ...existing code...
+
+  // Enable user account
+  async enableUser(accessToken: string, userId: number): Promise<{ success: boolean; message?: string }> {
     try {
       const response = await fetch(
         buildApiUrl(`${API_CONFIG.ENDPOINTS.ADMIN.USERS}/${userId}/enable`),
@@ -162,14 +161,27 @@ class AdminService {
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to enable user");
+        // Trường hợp đặc biệt: email chưa xác thực (status 500)
+        if (response.status === 500 && data.message?.includes("xác thực email")) {
+          return {
+            success: false,
+            message: data.message
+          };
+        }
+        throw new Error(data.message || "Failed to enable user");
       }
-    } catch (error) {
+
+      return { success: true };
+    } catch (error: any) {
       console.error("Error enabling user:", error);
       throw error;
     }
   }
+
+// ...existing code...
 
   // Export user report
   async exportUserReport(
