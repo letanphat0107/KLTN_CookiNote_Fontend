@@ -565,4 +565,27 @@ export const adminStyles = StyleSheet.create({
   cancelButtonText: {
     color: "#6C757D",
   },
+  fabButton: {
+    position: "absolute",
+    bottom: 60,
+    right: 24,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#FF6B6B",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 8,
+    zIndex: 999,
+  },
+  fabIcon: {
+    fontSize: 32,
+    fontWeight: "300",
+    color: "#FFFFFF",
+    lineHeight: 32,
+  },
 });

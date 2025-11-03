@@ -193,14 +193,6 @@ const ManageRecipesScreen = () => {
 
   return (
     <View style={adminStyles.container}>
-      {/* Create Recipe Button */}
-      <TouchableOpacity
-        style={adminStyles.createButton}
-        onPress={() => navigation.navigate("CreateRecipe" as never)}
-      >
-        <Text style={adminStyles.createButtonText}>➕ Tạo công thức mới</Text>
-      </TouchableOpacity>
-
       {/* Search Bar */}
       <View style={adminStyles.searchContainer}>
         <Text style={{ fontSize: 20 }}>🔍</Text>
@@ -315,6 +307,15 @@ const ManageRecipesScreen = () => {
           }
         />
       )}
+
+       {/* Floating Action Button */}
+      <TouchableOpacity
+        style={adminStyles.fabButton}
+        onPress={() => navigation.navigate("CreateRecipe" as never)}
+        activeOpacity={0.8}
+      >
+        <Text style={adminStyles.fabIcon}>+</Text>
+      </TouchableOpacity>
 
       {/* Recipe Detail Modal */}
       <Modal
