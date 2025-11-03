@@ -59,7 +59,7 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
               if (navigation) {
                 navigation.reset({
                   index: 0,
-                  routes: [{ name: "MainTabs" }],
+                  routes: [{ name: "Login" }],
                 });
               }
             }

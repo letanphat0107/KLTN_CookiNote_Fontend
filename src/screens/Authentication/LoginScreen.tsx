@@ -62,6 +62,20 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       if (response.ok && result.code === 200) {
         // Login successful
         dispatch(loginSuccess(result.data));
+
+        // Navigate based on user role
+        if (navigation) {
+          const userRole = result.data.role;
+
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: userRole === "ADMIN" ? "AdminDashboard" : "MainTabs",
+              },
+            ],
+          });
+        }
       } else {
         // Handle login errors
         const errorMessage = result.message || "Đăng nhập thất bại";

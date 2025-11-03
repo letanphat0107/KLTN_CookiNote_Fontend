@@ -168,6 +168,11 @@ const RootNavigator = () => {
         <>
           {/* Authentication */}
           <Stack.Screen name="MainTabs" component={TabNavigator} />
+          <Stack.Screen
+                name="AdminDashboard"
+                component={AdminTabNavigator}
+                options={{ headerShown: false }}
+              />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen

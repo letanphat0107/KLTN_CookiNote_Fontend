@@ -66,7 +66,7 @@ export const checkAuthStatus = createAsyncThunk(
 
           // Retry validation with new token
           const retryResponse = await fetch(
-            `${API_CONFIG.BASE_URL}/cookinote/user/me`,
+            `${API_CONFIG.BASE_URL}/cookinote/auth/refresh`,
             {
               method: "GET",
               headers: {
