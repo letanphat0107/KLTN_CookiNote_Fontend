@@ -211,17 +211,8 @@ export const adminStyles = StyleSheet.create({
     color: "#999",
     marginTop: 16,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: "80%",
-  },
+
+
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -374,75 +365,15 @@ export const adminStyles = StyleSheet.create({
     color: "#666",
   },
 
-  modalInfoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between", // Đảm bảo Label và Value cách xa nhau
-    alignItems: "center",
-    paddingVertical: 8, // Thêm khoảng cách dọc giữa các dòng
-    borderBottomWidth: 1, // Đường kẻ mỏng phân tách các dòng
-    borderBottomColor: "#eee", // Màu xám nhạt
-  },
-
-  /** * Style cho phần "Tác giả:", "Độ khó:", v.v. (Label)
-   */
-  modalLabel: {
-    fontSize: 16,
-    fontWeight: "600", // Đậm vừa phải để nổi bật
-    color: "#555", // Màu xám đậm hơn
-    flex: 1, // Chiếm một phần không gian
-    marginRight: 10, // Khoảng cách nhỏ với Value
-  },
-
-  /** * Style cho giá trị thực tế, ví dụ: "Nguyễn Văn A" (Value)
-   */
-  modalValue: {
-    fontSize: 16,
-    fontWeight: "400", // Không quá đậm
-    color: "#333", // Màu đen để đọc rõ
-    flex: 2, // Chiếm nhiều không gian hơn Label (tùy chọn)
-    textAlign: "right", // Căn phải để giữ Label và Value tách biệt
-  },
 
   // Style bổ sung cho container tổng thể của modal (nếu cần)
   modalContentContainer: {
     padding: 20,
   },
 
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between", // Phân bố đều nút Đóng và Xóa
-    marginTop: 20, // Thêm khoảng cách với nội dung phía trên
-    paddingTop: 15,
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
-  },
-
-  /** * Style cơ bản áp dụng cho cả hai nút (Delete và Cancel/Close). */
-  modalButton: {
-    flex: 1, // Để hai nút chiếm không gian bằng nhau
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    marginHorizontal: 5, // Khoảng cách giữa hai nút
-  },
+  
 
   /** * Style dành riêng cho nút Xóa/Hủy (màu đỏ). */
-  deleteButton: {
-    backgroundColor: "#D9534F", // Màu đỏ nổi bật cho hành động nguy hiểm
-    marginRight: 10, // Ưu tiên khoảng cách với nút Đóng
-  },
-
-  /** * Style dành riêng cho nút Đóng/Hủy (màu xám hoặc xanh nhẹ). */
-  cancelButton: {
-    backgroundColor: "#F5F5F5", // Màu nền nhẹ nhàng
-    borderWidth: 1,
-    borderColor: "#ccc",
-  },
-
-  /** * Ghi đè màu chữ cho nút Đóng (Cancel) để phù hợp với nền sáng. */
-  cancelButtonText: {
-    color: "#333", // Màu chữ đen/xám cho nền sáng
-  },
 
   input: {
     backgroundColor: "#fff",
@@ -509,19 +440,7 @@ export const adminStyles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  modalRecipeImage: {
-    width: "100%",
-    height: 200,
-    borderRadius: 12,
-    marginBottom: 16,
-    backgroundColor: "#f0f0f0",
-  },
-  modalRecipeTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 16,
-  },
+
 
   // -----------------------------------------------------------------
   // STYLE CHO CÁC DÒNG THÔNG TIN (Label-Value)
@@ -551,9 +470,99 @@ export const adminStyles = StyleSheet.create({
   },
 
 
+
+
+  // Modal Styles - Full Screen
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "95%",
+    height: "90%",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalRecipeImage: {
+    width: "100%",
+    height: 280,
+    backgroundColor: "#F8F9FA",
+  },
+  modalRecipeTitle: {
+    fontSize: 26,
+    fontWeight: "700",
+    color: "#212529",
+    marginHorizontal: 24,
+    marginTop: 24,
+    marginBottom: 8,
+    letterSpacing: -0.5,
+  },
+  modalInfoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F3F5",
+  },
+  modalLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#6C757D",
+    flex: 1,
+  },
+  modalValue: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#212529",
+    textAlign: "right",
+    flex: 1.5,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 24,
+    marginHorizontal: 24,
+    marginBottom: 32,
+    paddingTop: 24,
+    borderTopWidth: 1,
+    borderTopColor: "#F1F3F5",
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  deleteButton: {
+    backgroundColor: "#DC3545",
+  },
+  cancelButton: {
+    backgroundColor: "#F8F9FA",
+    borderWidth: 1,
+    borderColor: "#E9ECEF",
+  },
   modalButtonText: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#fff", // Màu chữ mặc định (dùng cho nút Delete)
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+  cancelButtonText: {
+    color: "#6C757D",
   },
 });

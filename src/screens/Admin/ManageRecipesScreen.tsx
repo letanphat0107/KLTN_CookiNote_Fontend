@@ -319,99 +319,131 @@ const ManageRecipesScreen = () => {
       {/* Recipe Detail Modal */}
       <Modal
         visible={modalVisible}
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={adminStyles.modalOverlay}>
           <View style={adminStyles.modalContent}>
-            {selectedRecipe && (
-              <ScrollView>
-                <Image
-                  source={{
-                    uri:
-                      selectedRecipe.imageUrl ||
-                      "https://via.placeholder.com/300",
-                  }}
-                  style={adminStyles.modalRecipeImage}
-                />
-                <Text style={adminStyles.modalRecipeTitle}>
-                  {selectedRecipe.title}
-                </Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {/* Recipe Image */}
+              <Image
+                source={{
+                  uri:
+                    selectedRecipe?.imageUrl ||
+                    "https://via.placeholder.com/400x280",
+                }}
+                style={adminStyles.modalRecipeImage}
+                resizeMode="cover"
+              />
 
+              {/* Recipe Title */}
+              <Text style={adminStyles.modalRecipeTitle}>
+                {selectedRecipe?.title}
+              </Text>
+
+              {/* Recipe Info */}
+              <View style={{ paddingBottom: 20 }}>
+                {/* Author */}
                 <View style={adminStyles.modalInfoRow}>
-                  <Text style={adminStyles.modalLabel}>Tác giả:</Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                    <Text style={{ fontSize: 20, marginRight: 8 }}>👤</Text>
+                    <Text style={adminStyles.modalLabel}>Tác giả</Text>
+                  </View>
                   <Text style={adminStyles.modalValue}>
-                    {selectedRecipe.ownerName}
+                    {selectedRecipe?.ownerName}
                   </Text>
                 </View>
 
+                {/* Difficulty */}
                 <View style={adminStyles.modalInfoRow}>
-                  <Text style={adminStyles.modalLabel}>Độ khó:</Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                    <Text style={{ fontSize: 20, marginRight: 8 }}>📊</Text>
+                    <Text style={adminStyles.modalLabel}>Độ khó</Text>
+                  </View>
                   <View
                     style={[
                       adminStyles.difficultyBadge,
                       {
                         backgroundColor: getDifficultyColor(
-                          selectedRecipe.difficulty
+                          selectedRecipe?.difficulty || ""
                         ),
+                        paddingHorizontal: 16,
+                        paddingVertical: 6,
                       },
                     ]}
                   >
-                    <Text style={adminStyles.difficultyText}>
-                      {getDifficultyText(selectedRecipe.difficulty)}
+                    <Text style={[adminStyles.difficultyText, { fontSize: 13 }]}>
+                      {getDifficultyText(selectedRecipe?.difficulty || "")}
                     </Text>
                   </View>
                 </View>
 
+                {/* Time */}
                 <View style={adminStyles.modalInfoRow}>
-                  <Text style={adminStyles.modalLabel}>Thời gian:</Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                    <Text style={{ fontSize: 20, marginRight: 8 }}>⏱️</Text>
+                    <Text style={adminStyles.modalLabel}>Thời gian</Text>
+                  </View>
                   <Text style={adminStyles.modalValue}>
-                    Chuẩn bị: {selectedRecipe.prepare_time}p | Nấu:{" "}
-                    {selectedRecipe.cook_time}p
+                    🔪 {selectedRecipe?.prepare_time}p | 🍳{" "}
+                    {selectedRecipe?.cook_time}p
                   </Text>
                 </View>
 
+                {/* Views */}
                 <View style={adminStyles.modalInfoRow}>
-                  <Text style={adminStyles.modalLabel}>Lượt xem:</Text>
-                  <Text style={adminStyles.modalValue}>
-                    {selectedRecipe.view}
+                  <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                    <Text style={{ fontSize: 20, marginRight: 8 }}>👁️</Text>
+                    <Text style={adminStyles.modalLabel}>Lượt xem</Text>
+                  </View>
+                  <Text style={[adminStyles.modalValue, { fontWeight: "700", color: "#FF6B6B" }]}>
+                    {selectedRecipe?.view.toLocaleString()}
                   </Text>
                 </View>
 
-                {/* <View style={adminStyles.modalInfoRow}>
-                  <Text style={adminStyles.modalLabel}>Đánh giá:</Text>
+                {/* Created Date */}
+                <View style={[adminStyles.modalInfoRow, { borderBottomWidth: 0 }]}>
+                  <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                    <Text style={{ fontSize: 20, marginRight: 8 }}>📅</Text>
+                    <Text style={adminStyles.modalLabel}>Ngày tạo</Text>
+                  </View>
                   <Text style={adminStyles.modalValue}>
-                    ⭐ {selectedRecipe.averageRating?.toFixed(1) || "0.0"} (
-                    {selectedRecipe.ratingCount || 0} đánh giá)
-                  </Text>
-                </View> */}
-
-                <View style={adminStyles.modalInfoRow}>
-                  <Text style={adminStyles.modalLabel}>Ngày tạo:</Text>
-                  <Text style={adminStyles.modalValue}>
-                    {new Date(selectedRecipe.createdAt).toLocaleDateString(
-                      "vi-VN"
-                    )}
+                    {selectedRecipe &&
+                      new Date(selectedRecipe.createdAt).toLocaleDateString(
+                        "vi-VN",
+                        {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        }
+                      )}
                   </Text>
                 </View>
+              </View>
 
-                <View style={adminStyles.modalButtons}>
-                  <TouchableOpacity
-                    style={[adminStyles.modalButton, adminStyles.deleteButton]}
-                    onPress={() => handleDeleteRecipe(selectedRecipe.id)}
-                  >
-                    <Text style={adminStyles.modalButtonText}>Xóa món ăn</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[adminStyles.modalButton, adminStyles.cancelButton]}
-                    onPress={() => setModalVisible(false)}
-                  >
-                    <Text style={adminStyles.modalButtonText}>Đóng</Text>
-                  </TouchableOpacity>
-                </View>
-              </ScrollView>
-            )}
+              {/* Action Buttons */}
+              <View style={adminStyles.modalButtons}>
+                <TouchableOpacity
+                  style={[adminStyles.modalButton, adminStyles.cancelButton]}
+                  onPress={() => setModalVisible(false)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[adminStyles.modalButtonText, adminStyles.cancelButtonText]}>
+                    Đóng
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[adminStyles.modalButton, adminStyles.deleteButton]}
+                  onPress={() =>
+                    selectedRecipe && handleDeleteRecipe(selectedRecipe.id)
+                  }
+                  activeOpacity={0.8}
+                >
+                  <Text style={adminStyles.modalButtonText}>🗑️ Xóa món ăn</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
