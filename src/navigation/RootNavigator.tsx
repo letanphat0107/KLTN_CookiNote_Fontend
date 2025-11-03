@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-import { Alert } from "react-native";
+import { AppState, AppStateStatus } from "react-native";
 
 // Redux
 import { useAppDispatch, useAppSelector } from "../store/hooks";
@@ -33,26 +33,60 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 const RootNavigator = () => {
   const dispatch = useAppDispatch();
-  const { isAuthenticated, isLoading, user, error } = useAppSelector(
+  const { isAuthenticated, isLoading, user } = useAppSelector(
     (state) => state.auth
   );
 
-  // Check authentication status when app starts
+  const [initialCheckDone, setInitialCheckDone] = useState(false);
+  const [appState, setAppState] = useState(AppState.currentState);
+
+  // Check authentication status when app starts (only once)
   useEffect(() => {
     const checkAuth = async () => {
       try {
         await dispatch(checkAuthStatus()).unwrap();
       } catch (error) {
         console.log("Auth check failed:", error);
-        // Error is already handled in the thunk
+      } finally {
+        setInitialCheckDone(true);
       }
     };
 
-    checkAuth();
-  }, [dispatch]);
+    if (!initialCheckDone) {
+      checkAuth();
+    }
+  }, [dispatch, initialCheckDone]);
 
-  // Show loading screen while checking authentication
-  if (isLoading) {
+  // Handle app state changes (background/foreground)
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      "change",
+      (nextAppState: AppStateStatus) => {
+        // Track app state changes
+        if (
+          appState.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          // App has come to the foreground
+          // Only silently check auth if user was authenticated
+          if (isAuthenticated && initialCheckDone) {
+            dispatch(checkAuthStatus()).catch((error) => {
+              console.log("Background auth check failed:", error);
+            });
+          }
+        }
+        setAppState(nextAppState);
+      }
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, [dispatch, isAuthenticated, initialCheckDone, appState]);
+
+  // Show loading screen ONLY during initial check
+  // Not when returning from background or image picker
+  if (!initialCheckDone) {
     return <LoadingScreen />;
   }
 
@@ -99,9 +133,9 @@ const RootNavigator = () => {
               <Stack.Screen
                 name="CreateRecipe"
                 component={CreateRecipeScreen}
-                options={{ 
+                options={{
                   headerShown: true,
-                  title: "Tạo công thức mới"
+                  title: "Tạo công thức mới",
                 }}
               />
             </>
@@ -130,7 +164,6 @@ const RootNavigator = () => {
           />
         </>
       ) : (
-        // ...existing code...
         // Unauthenticated Stack
         <>
           {/* Authentication */}

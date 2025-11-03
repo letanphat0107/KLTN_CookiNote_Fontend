@@ -9,8 +9,6 @@ import {
   RefreshControl,
   Alert,
   TextInput,
-  Modal,
-  ScrollView,
 } from "react-native";
 import { useAppSelector } from "../../store/hooks";
 import adminService from "../../services/adminService";
@@ -28,10 +26,8 @@ const ManageRecipesScreen = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [search, setSearch] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("");
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
 
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   const fetchRecipes = async (pageNum: number = 0, isRefresh = false) => {
     if (!tokens?.accessToken) return;
@@ -102,30 +98,8 @@ const ManageRecipesScreen = () => {
   };
 
   const handleRecipePress = (recipe: Recipe) => {
-    setSelectedRecipe(recipe);
-    setModalVisible(true);
-  };
-
-  const handleDeleteRecipe = async (recipeId: number) => {
-    if (!tokens?.accessToken) return;
-
-    Alert.alert("Xác nhận xóa", "Bạn có chắc muốn xóa món ăn này?", [
-      { text: "Hủy", style: "cancel" },
-      {
-        text: "Xóa",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await adminService.deleteRecipe(tokens.accessToken, recipeId);
-            Alert.alert("Thành công", "Đã xóa món ăn");
-            setModalVisible(false);
-            fetchRecipes(0, true);
-          } catch (error: any) {
-            Alert.alert("Lỗi", error.message || "Không thể xóa món ăn");
-          }
-        },
-      },
-    ]);
+    // Navigate to RecipeDetail screen
+    navigation.navigate("RecipeDetail", { recipeId: recipe.id });
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -182,10 +156,6 @@ const ManageRecipesScreen = () => {
             </Text>
           </View>
           <Text style={adminStyles.recipeViews}>👁 {item.view}</Text>
-          {/* <Text style={adminStyles.recipeRating}>
-            ⭐ {item.averageRating?.toFixed(1) || "0.0"} (
-            {item.ratingCount || 0})
-          </Text> */}
         </View>
       </View>
     </TouchableOpacity>
@@ -308,7 +278,7 @@ const ManageRecipesScreen = () => {
         />
       )}
 
-       {/* Floating Action Button */}
+      {/* Floating Action Button */}
       <TouchableOpacity
         style={adminStyles.fabButton}
         onPress={() => navigation.navigate("CreateRecipe" as never)}
@@ -316,138 +286,6 @@ const ManageRecipesScreen = () => {
       >
         <Text style={adminStyles.fabIcon}>+</Text>
       </TouchableOpacity>
-
-      {/* Recipe Detail Modal */}
-      <Modal
-        visible={modalVisible}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={adminStyles.modalOverlay}>
-          <View style={adminStyles.modalContent}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {/* Recipe Image */}
-              <Image
-                source={{
-                  uri:
-                    selectedRecipe?.imageUrl ||
-                    "https://via.placeholder.com/400x280",
-                }}
-                style={adminStyles.modalRecipeImage}
-                resizeMode="cover"
-              />
-
-              {/* Recipe Title */}
-              <Text style={adminStyles.modalRecipeTitle}>
-                {selectedRecipe?.title}
-              </Text>
-
-              {/* Recipe Info */}
-              <View style={{ paddingBottom: 20 }}>
-                {/* Author */}
-                <View style={adminStyles.modalInfoRow}>
-                  <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-                    <Text style={{ fontSize: 20, marginRight: 8 }}>👤</Text>
-                    <Text style={adminStyles.modalLabel}>Tác giả</Text>
-                  </View>
-                  <Text style={adminStyles.modalValue}>
-                    {selectedRecipe?.ownerName}
-                  </Text>
-                </View>
-
-                {/* Difficulty */}
-                <View style={adminStyles.modalInfoRow}>
-                  <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-                    <Text style={{ fontSize: 20, marginRight: 8 }}>📊</Text>
-                    <Text style={adminStyles.modalLabel}>Độ khó</Text>
-                  </View>
-                  <View
-                    style={[
-                      adminStyles.difficultyBadge,
-                      {
-                        backgroundColor: getDifficultyColor(
-                          selectedRecipe?.difficulty || ""
-                        ),
-                        paddingHorizontal: 16,
-                        paddingVertical: 6,
-                      },
-                    ]}
-                  >
-                    <Text style={[adminStyles.difficultyText, { fontSize: 13 }]}>
-                      {getDifficultyText(selectedRecipe?.difficulty || "")}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Time */}
-                <View style={adminStyles.modalInfoRow}>
-                  <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-                    <Text style={{ fontSize: 20, marginRight: 8 }}>⏱️</Text>
-                    <Text style={adminStyles.modalLabel}>Thời gian</Text>
-                  </View>
-                  <Text style={adminStyles.modalValue}>
-                    🔪 {selectedRecipe?.prepare_time}p | 🍳{" "}
-                    {selectedRecipe?.cook_time}p
-                  </Text>
-                </View>
-
-                {/* Views */}
-                <View style={adminStyles.modalInfoRow}>
-                  <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-                    <Text style={{ fontSize: 20, marginRight: 8 }}>👁️</Text>
-                    <Text style={adminStyles.modalLabel}>Lượt xem</Text>
-                  </View>
-                  <Text style={[adminStyles.modalValue, { fontWeight: "700", color: "#FF6B6B" }]}>
-                    {selectedRecipe?.view.toLocaleString()}
-                  </Text>
-                </View>
-
-                {/* Created Date */}
-                <View style={[adminStyles.modalInfoRow, { borderBottomWidth: 0 }]}>
-                  <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-                    <Text style={{ fontSize: 20, marginRight: 8 }}>📅</Text>
-                    <Text style={adminStyles.modalLabel}>Ngày tạo</Text>
-                  </View>
-                  <Text style={adminStyles.modalValue}>
-                    {selectedRecipe &&
-                      new Date(selectedRecipe.createdAt).toLocaleDateString(
-                        "vi-VN",
-                        {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                        }
-                      )}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Action Buttons */}
-              <View style={adminStyles.modalButtons}>
-                <TouchableOpacity
-                  style={[adminStyles.modalButton, adminStyles.cancelButton]}
-                  onPress={() => setModalVisible(false)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={[adminStyles.modalButtonText, adminStyles.cancelButtonText]}>
-                    Đóng
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[adminStyles.modalButton, adminStyles.deleteButton]}
-                  onPress={() =>
-                    selectedRecipe && handleDeleteRecipe(selectedRecipe.id)
-                  }
-                  activeOpacity={0.8}
-                >
-                  <Text style={adminStyles.modalButtonText}>🗑️ Xóa món ăn</Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };
