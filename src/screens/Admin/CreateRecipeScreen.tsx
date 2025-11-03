@@ -249,7 +249,7 @@ const CreateRecipeScreen = () => {
   };
 
   return (
-    <ScrollView style={adminStyles.container}>
+    <ScrollView style={adminStyles.addContainer}>
       <Text style={adminStyles.sectionTitle}>Thông tin cơ bản</Text>
 
       {/* Cover Image */}

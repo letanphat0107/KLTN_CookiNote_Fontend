@@ -5,6 +5,12 @@ export const adminStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f5f5f5",
   },
+  addContainer: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+    padding: 20
+  }
+  ,
   loadingContainer: {
     flex: 1,
     justifyContent: "center",

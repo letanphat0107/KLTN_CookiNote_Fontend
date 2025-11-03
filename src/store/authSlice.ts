@@ -28,7 +28,7 @@ export const checkAuthStatus = createAsyncThunk(
 
       // Validate access token with server
       const response = await fetch(
-        `${API_CONFIG.BASE_URL}/cookinote/user/me`,
+        `${API_CONFIG.BASE_URL}/cookinote/user/me/details`,
         {
           method: "GET",
           headers: {
