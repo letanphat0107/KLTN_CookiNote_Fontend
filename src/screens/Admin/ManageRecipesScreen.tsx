@@ -102,6 +102,32 @@ const ManageRecipesScreen = () => {
     navigation.navigate("RecipeDetail", { recipeId: recipe.id });
   };
 
+  const handleDeleteRecipe = async (recipeId: number) => {
+    if (!tokens?.accessToken) return;
+
+    Alert.alert("Xác nhận xóa", "Bạn có chắc muốn xóa món ăn này?", [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Xóa",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await adminService.deleteRecipe(tokens.accessToken, recipeId);
+            Alert.alert("Thành công", "Đã xóa món ăn");
+            fetchRecipes(0, true);
+          } catch (error: any) {
+            Alert.alert("Lỗi", error.message || "Không thể xóa món ăn");
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleEditRecipe = (recipe: Recipe) => {
+    // Navigate to EditRecipe screen with recipe data
+    navigation.navigate("EditRecipe", { recipeId: recipe.id });
+  };
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "EASY":
@@ -132,6 +158,7 @@ const ManageRecipesScreen = () => {
     <TouchableOpacity
       style={adminStyles.recipeCard}
       onPress={() => handleRecipePress(item)}
+      activeOpacity={0.7}
     >
       <Image
         source={{
@@ -157,6 +184,30 @@ const ManageRecipesScreen = () => {
           </View>
           <Text style={adminStyles.recipeViews}>👁 {item.view}</Text>
         </View>
+      </View>
+
+      {/* Action Buttons */}
+      <View style={adminStyles.recipeActions}>
+        <TouchableOpacity
+          style={adminStyles.actionIconButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            handleEditRecipe(item);
+          }}
+          activeOpacity={0.7}
+        >
+          <Text style={adminStyles.actionIconText}>✏️</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[adminStyles.actionIconButton, { backgroundColor: "#FFEBEE" }]}
+          onPress={(e) => {
+            e.stopPropagation();
+            handleDeleteRecipe(item.id);
+          }}
+          activeOpacity={0.7}
+        >
+          <Text style={adminStyles.actionIconText}>🗑️</Text>
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -281,7 +332,7 @@ const ManageRecipesScreen = () => {
       {/* Floating Action Button */}
       <TouchableOpacity
         style={adminStyles.fabButton}
-        onPress={() => navigation.navigate("CreateRecipe" as never)}
+        onPress={() => navigation.navigate("CreateRecipe")}
         activeOpacity={0.8}
       >
         <Text style={adminStyles.fabIcon}>+</Text>

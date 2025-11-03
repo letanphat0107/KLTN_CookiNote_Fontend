@@ -26,6 +26,7 @@ export interface RecipeWithDetails extends Recipe {
   ownerId: number;
   steps?: RecipeStep[];
   ingredients?: RecipeIngredient[];
+  privacy: "PUBLIC" | "PRIVATE";
 }
 
 // Paginated response for recipes

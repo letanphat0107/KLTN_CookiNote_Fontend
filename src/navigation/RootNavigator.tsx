@@ -26,6 +26,7 @@ import AdminTabNavigator from "./AdminTabNavigator";
 import ManageUsersScreen from "../screens/Admin/ManageUsersScreen";
 import ManageRecipeScreen from "../screens/Admin/ManageRecipesScreen";
 import CreateRecipeScreen from "../screens/Admin/CreateRecipeScreen";
+import EditRecipeScreen from "../screens/Admin/EditRecipeScreen";
 
 import { RootStackParamList } from "./types";
 
@@ -136,6 +137,14 @@ const RootNavigator = () => {
                 options={{
                   headerShown: true,
                   title: "Tạo công thức mới",
+                }}
+              />
+              <Stack.Screen
+                name="EditRecipe"
+                component={EditRecipeScreen}
+                options={{ 
+                  headerShown: true,
+                  title: "Chỉnh sửa công thức"
                 }}
               />
             </>

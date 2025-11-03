@@ -594,4 +594,26 @@ export const adminStyles = StyleSheet.create({
     color: "#FFFFFF",
     lineHeight: 32,
   },
+  recipeActions: {
+    flexDirection: "column",
+    gap: 8,
+    marginLeft: 8,
+    justifyContent: "center",
+  },
+  actionIconButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#E3F2FD",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  actionIconText: {
+    fontSize: 16,
+  },
 });

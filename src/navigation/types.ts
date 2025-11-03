@@ -33,6 +33,7 @@ export type RootStackParamList = {
   ManageUsers: undefined;
   ManageRecipe: undefined;
   CreateRecipe: undefined;
+  EditRecipe: { recipeId: string };
 };
 
 export type TabParamList = {
