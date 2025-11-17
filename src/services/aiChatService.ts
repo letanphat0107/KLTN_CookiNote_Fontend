@@ -166,3 +166,66 @@ export const getRecipeSuggestions = async (
 
 // Export interfaces for use in components
 export type { RecipeSuggestion, RecipeSuggestionResponse };
+
+
+// Add new interface for AI generated recipe
+interface AIGeneratedRecipe {
+  title: string;
+  description: string;
+  prepareTime: number;
+  cookTime: number;
+  difficulty: string;
+  ingredients: Array<{
+    name: string;
+    quantity: string;
+  }>;
+  steps: Array<{
+    stepNo: number;
+    content: string;
+    suggestedTime: number | null;
+    tips: string | null;
+  }>;
+}
+
+interface GenerateRecipeResponse {
+  code: number;
+  message: string;
+  data: AIGeneratedRecipe;
+  timestamp: string;
+  path: string;
+}
+
+// Generate recipe from AI
+export const generateRecipe = async (
+  dishName: string
+): Promise<AIGeneratedRecipe | null> => {
+  try {
+    console.log("Generating recipe for:", dishName);
+
+    const headers = await createAuthHeaders();
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/cookinote/ai/generate-recipe`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ dishName }),
+      }
+    );
+
+    const result: GenerateRecipeResponse = await response.json();
+    console.log("Generate recipe response:", result);
+
+    if (response.ok && result.code === 200) {
+      return result.data;
+    } else {
+      console.error("Failed to generate recipe:", result.message);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error generating recipe:", error);
+    return null;
+  }
+};
+
+// Export new interface
+export type { AIGeneratedRecipe, GenerateRecipeResponse };

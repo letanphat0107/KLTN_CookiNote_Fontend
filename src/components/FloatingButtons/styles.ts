@@ -717,4 +717,145 @@ export const floatingStyles = StyleSheet.create({
     minWidth: 80,
     textAlign: 'center',
   },
+
+  // ...existing code...
+
+generatedRecipeContainer: {
+  backgroundColor: "#FFF8F0",
+  borderRadius: 12,
+  padding: 16,
+  marginTop: 12,
+  borderWidth: 1,
+  borderColor: "#FF6B35",
+},
+generatedRecipeHeader: {
+  marginBottom: 12,
+},
+generatedRecipeTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+  color: "#2D3436",
+  marginBottom: 8,
+},
+generatedRecipeDescription: {
+  fontSize: 14,
+  color: "#666",
+  lineHeight: 20,
+},
+generatedRecipeMeta: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  paddingVertical: 12,
+  borderTopWidth: 1,
+  borderBottomWidth: 1,
+  borderColor: "#E0E0E0",
+  marginBottom: 16,
+},
+generatedRecipeSection: {
+  marginBottom: 16,
+},
+generatedSectionTitle: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#2D3436",
+  marginBottom: 12,
+},
+ingredientRow: {
+  flexDirection: "row",
+  marginBottom: 6,
+},
+ingredientBullet: {
+  color: "#FF6B35",
+  marginRight: 8,
+  fontWeight: "bold",
+},
+ingredientText: {
+  fontSize: 14,
+  color: "#333",
+  flex: 1,
+},
+stepContainer: {
+  backgroundColor: "#FFFFFF",
+  borderRadius: 8,
+  padding: 12,
+  marginBottom: 12,
+  borderLeftWidth: 3,
+  borderLeftColor: "#FF6B35",
+},
+stepHeader: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 8,
+},
+stepNumber: {
+  fontSize: 14,
+  fontWeight: "bold",
+  color: "#FF6B35",
+},
+stepTime: {
+  fontSize: 12,
+  color: "#666",
+},
+stepContent: {
+  fontSize: 14,
+  color: "#333",
+  lineHeight: 20,
+  marginBottom: 8,
+},
+stepTips: {
+  flexDirection: "row",
+  backgroundColor: "#FFFBF0",
+  padding: 8,
+  borderRadius: 6,
+  marginTop: 4,
+},
+stepTipsIcon: {
+  fontSize: 14,
+  marginRight: 6,
+},
+stepTipsText: {
+  fontSize: 13,
+  color: "#666",
+  fontStyle: "italic",
+  flex: 1,
+},
+saveRecipeButton: {
+  backgroundColor: "#FF6B35",
+  borderRadius: 8,
+  padding: 14,
+  alignItems: "center",
+  marginTop: 8,
+},
+saveRecipeButtonText: {
+  color: "#FFFFFF",
+  fontSize: 16,
+  fontWeight: "bold",
+},
+metaItem: {
+  flexDirection: "row",
+  alignItems: "center",
+},
+metaIcon: {
+  fontSize: 16,
+  marginRight: 6,
+},
+metaText: {
+  fontSize: 14,
+  color: "#666",
+  fontWeight: "500",
+},
+difficultyBadge: {
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 12,
+},
+difficultyText: {
+  fontSize: 12,
+  fontWeight: "bold",
+  color: "#FFFFFF",
+},
+
+// ...existing code...
 });

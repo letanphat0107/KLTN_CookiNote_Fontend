@@ -16,16 +16,20 @@ import {
 } from "react-native";
 import { floatingStyles } from "./styles";
 import { useAppSelector } from "../../store/hooks";
-import {
-  sendAIChatMessage,
-  getRecipeSuggestions,
-  RecipeSuggestion,
-} from "../../services/aiChatService";
+
 import {
   saveChatHistory,
   loadChatHistory,
   clearChatHistory,
 } from "../../services/chatStorageService";
+
+import {
+  sendAIChatMessage,
+  getRecipeSuggestions,
+  generateRecipe,
+  RecipeSuggestion,
+  AIGeneratedRecipe,
+} from "../../services/aiChatService";
 
 interface AIChatButtonProps {
   isOpen: boolean;
@@ -40,6 +44,7 @@ interface ChatMessage {
   timestamp: Date;
   isLoading?: boolean;
   suggestions?: RecipeSuggestion[];
+  generatedRecipe?: AIGeneratedRecipe;
 }
 
 const AIChatButton: React.FC<AIChatButtonProps> = ({
@@ -133,60 +138,6 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
-
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      message: inputMessage.trim(),
-      isUser: true,
-      timestamp: new Date(),
-    };
-
-    const loadingMessage: ChatMessage = {
-      id: (Date.now() + 1).toString(),
-      message: "",
-      isUser: false,
-      timestamp: new Date(),
-      isLoading: true,
-    };
-
-    setMessages((prev) => [...prev, userMessage, loadingMessage]);
-    setInputMessage("");
-    setIsLoading(true);
-
-    try {
-      const aiResponse = await sendAIChatMessage(inputMessage.trim());
-
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === loadingMessage.id
-            ? { ...msg, message: aiResponse, isLoading: false }
-            : msg
-        )
-      );
-    } catch (error) {
-      console.error("Error sending message:", error);
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === loadingMessage.id
-            ? {
-                ...msg,
-                message:
-                  "Xin lỗi, tôi không thể trả lời ngay bây giờ. Vui lòng thử lại sau.",
-                isLoading: false,
-              }
-            : msg
-        )
-      );
-    } finally {
-      setIsLoading(false);
-      // Scroll to bottom
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 100);
-    }
-  };
 
   const handleIngredientSuggestion = () => {
     setShowIngredientSelector(true);
@@ -348,6 +299,264 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
     onToggle();
   };
 
+  const isRecipeGenerationRequest = (message: string): boolean => {
+  const keywords = [
+    "tạo công thức",
+    "tạo món",
+    "hướng dẫn nấu",
+    "cách làm",
+    "làm món",
+    "nấu món",
+    "hãy tạo",
+  ];
+  return keywords.some((keyword) =>
+    message.toLowerCase().includes(keyword.toLowerCase())
+  );
+};
+
+// Extract dish name from message
+const extractDishName = (message: string): string => {
+  // Remove common prefixes
+  let dishName = message
+    .toLowerCase()
+    .replace(/^(hãy tạo|tạo công thức|cách làm|hướng dẫn nấu|làm món|nấu món)\s+(giúp tôi\s+)?(cho tôi\s+)?(món\s+)?/i, "")
+    .trim();
+
+  return dishName || message;
+};
+
+const handleSendMessage = async () => {
+  if (!inputMessage.trim()) return;
+
+  const userMessage: ChatMessage = {
+    id: Date.now().toString(),
+    message: inputMessage.trim(),
+    isUser: true,
+    timestamp: new Date(),
+  };
+
+  const loadingMessage: ChatMessage = {
+    id: (Date.now() + 1).toString(),
+    message: "",
+    isUser: false,
+    timestamp: new Date(),
+    isLoading: true,
+  };
+
+  setMessages((prev) => [...prev, userMessage, loadingMessage]);
+  const currentInput = inputMessage.trim();
+  setInputMessage("");
+  setIsLoading(true);
+
+  try {
+    // Check if this is a recipe generation request
+    if (isRecipeGenerationRequest(currentInput)) {
+      const dishName = extractDishName(currentInput);
+
+      const generatedRecipe = await generateRecipe(dishName);
+
+      if (generatedRecipe) {
+        const recipeMessage: ChatMessage = {
+          id: loadingMessage.id,
+          message: `Tôi đã tạo công thức cho "${generatedRecipe.title}". Hãy xem chi tiết bên dưới:`,
+          isUser: false,
+          timestamp: new Date(),
+          isLoading: false,
+          generatedRecipe,
+        };
+
+        setMessages((prev) =>
+          prev.map((msg) => (msg.id === loadingMessage.id ? recipeMessage : msg))
+        );
+      } else {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === loadingMessage.id
+              ? {
+                  ...msg,
+                  message:
+                    "Xin lỗi, tôi không thể tạo công thức này. Vui lòng thử lại với tên món khác.",
+                  isLoading: false,
+                }
+              : msg
+          )
+        );
+      }
+    } else {
+      // Normal chat message
+      const aiResponse = await sendAIChatMessage(currentInput);
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === loadingMessage.id
+            ? { ...msg, message: aiResponse, isLoading: false }
+            : msg
+        )
+      );
+    }
+  } catch (error) {
+    console.error("Error sending message:", error);
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === loadingMessage.id
+          ? {
+              ...msg,
+              message:
+                "Xin lỗi, tôi không thể trả lời ngay bây giờ. Vui lòng thử lại sau.",
+              isLoading: false,
+            }
+          : msg
+      )
+    );
+  } finally {
+    setIsLoading(false);
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+  }
+};
+
+// ...existing code...
+
+// Add new component to render generated recipe
+const renderGeneratedRecipe = (recipe: AIGeneratedRecipe) => (
+  <View style={floatingStyles.generatedRecipeContainer}>
+    {/* Recipe Header */}
+    <View style={floatingStyles.generatedRecipeHeader}>
+      <Text style={floatingStyles.generatedRecipeTitle}>{recipe.title}</Text>
+      <Text style={floatingStyles.generatedRecipeDescription}>
+        {recipe.description}
+      </Text>
+    </View>
+
+    {/* Recipe Meta Info */}
+    <View style={floatingStyles.generatedRecipeMeta}>
+      <View style={floatingStyles.metaItem}>
+        <Text style={floatingStyles.metaIcon}>⏱️</Text>
+        <Text style={floatingStyles.metaText}>
+          {recipe.prepareTime + recipe.cookTime} phút
+        </Text>
+      </View>
+      <View
+        style={[
+          floatingStyles.difficultyBadge,
+          { backgroundColor: formatDifficulty(recipe.difficulty).color },
+        ]}
+      >
+        <Text style={floatingStyles.difficultyText}>
+          {formatDifficulty(recipe.difficulty).text}
+        </Text>
+      </View>
+    </View>
+
+    {/* Ingredients */}
+    <View style={floatingStyles.generatedRecipeSection}>
+      <Text style={floatingStyles.generatedSectionTitle}>
+        🥄 Nguyên liệu ({recipe.ingredients.length})
+      </Text>
+      {recipe.ingredients.map((ingredient, index) => (
+        <View key={index} style={floatingStyles.ingredientRow}>
+          <Text style={floatingStyles.ingredientBullet}>•</Text>
+          <Text style={floatingStyles.ingredientText}>
+            {ingredient.name}: {ingredient.quantity}
+          </Text>
+        </View>
+      ))}
+    </View>
+
+    {/* Steps */}
+    <View style={floatingStyles.generatedRecipeSection}>
+      <Text style={floatingStyles.generatedSectionTitle}>
+        👨‍🍳 Các bước thực hiện ({recipe.steps.length})
+      </Text>
+      {recipe.steps.map((step) => (
+        <View key={step.stepNo} style={floatingStyles.stepContainer}>
+          <View style={floatingStyles.stepHeader}>
+            <Text style={floatingStyles.stepNumber}>Bước {step.stepNo}</Text>
+            {step.suggestedTime && (
+              <Text style={floatingStyles.stepTime}>
+                ⏱️ {step.suggestedTime} phút
+              </Text>
+            )}
+          </View>
+          <Text style={floatingStyles.stepContent}>{step.content}</Text>
+          {step.tips && (
+            <View style={floatingStyles.stepTips}>
+              <Text style={floatingStyles.stepTipsIcon}>💡</Text>
+              <Text style={floatingStyles.stepTipsText}>{step.tips}</Text>
+            </View>
+          )}
+        </View>
+      ))}
+    </View>
+
+    {/* Action Button */}
+    <TouchableOpacity
+      style={floatingStyles.saveRecipeButton}
+      onPress={() => {
+        // TODO: Navigate to create recipe screen with pre-filled data
+        Alert.alert(
+          "Tính năng đang phát triển",
+          "Tính năng lưu công thức sẽ sớm được cập nhật!"
+        );
+      }}
+    >
+      <Text style={floatingStyles.saveRecipeButtonText}>
+        💾 Lưu công thức này
+      </Text>
+    </TouchableOpacity>
+  </View>
+);
+
+const renderChatMessage = (message: ChatMessage) => (
+  <View
+    key={message.id}
+    style={[
+      floatingStyles.messageContainer,
+      message.isUser ? floatingStyles.userMessage : floatingStyles.aiMessage,
+    ]}
+  >
+    {message.isLoading ? (
+      <View style={floatingStyles.loadingMessage}>
+        <ActivityIndicator size="small" color="#FF6B35" />
+        <Text style={floatingStyles.loadingMessageText}>
+          AI đang suy nghĩ...
+        </Text>
+      </View>
+    ) : (
+      <>
+        <Text
+          style={[
+            floatingStyles.messageText,
+            message.isUser
+              ? floatingStyles.userMessageText
+              : floatingStyles.aiMessageText,
+          ]}
+        >
+          {message.message}
+        </Text>
+
+        {/* Generated Recipe */}
+        {message.generatedRecipe && renderGeneratedRecipe(message.generatedRecipe)}
+
+        {/* Recipe Suggestions */}
+        {message.suggestions && message.suggestions.length > 0 && (
+          <View style={floatingStyles.suggestionsContainer}>
+            {message.suggestions.map(renderRecipeSuggestion)}
+          </View>
+        )}
+
+        <Text style={floatingStyles.messageTime}>
+          {message.timestamp.toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </Text>
+      </>
+    )}
+  </View>
+);
+
   const renderRecipeSuggestion = (suggestion: RecipeSuggestion) => (
     <TouchableOpacity
       key={suggestion.recipe.id}
@@ -396,51 +605,6 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
     </TouchableOpacity>
   );
 
-  const renderChatMessage = (message: ChatMessage) => (
-    <View
-      key={message.id}
-      style={[
-        floatingStyles.messageContainer,
-        message.isUser ? floatingStyles.userMessage : floatingStyles.aiMessage,
-      ]}
-    >
-      {message.isLoading ? (
-        <View style={floatingStyles.loadingMessage}>
-          <ActivityIndicator size="small" color="#FF6B35" />
-          <Text style={floatingStyles.loadingMessageText}>
-            AI đang suy nghĩ...
-          </Text>
-        </View>
-      ) : (
-        <>
-          <Text
-            style={[
-              floatingStyles.messageText,
-              message.isUser
-                ? floatingStyles.userMessageText
-                : floatingStyles.aiMessageText,
-            ]}
-          >
-            {message.message}
-          </Text>
-
-          {/* Recipe Suggestions */}
-          {message.suggestions && message.suggestions.length > 0 && (
-            <View style={floatingStyles.suggestionsContainer}>
-              {message.suggestions.map(renderRecipeSuggestion)}
-            </View>
-          )}
-
-          <Text style={floatingStyles.messageTime}>
-            {message.timestamp.toLocaleTimeString("vi-VN", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </Text>
-        </>
-      )}
-    </View>
-  );
 
   const renderIngredientSelector = () => (
     <Modal
