@@ -51,6 +51,144 @@ interface PaginatedFavoriteResponse {
   items: Recipe[];
 }
 
+// Response interfaces
+interface CookedHistoryResponse {
+  code: number;
+  message: string;
+  data: PaginatedFavoriteResponse;
+  timestamp: string;
+  path: string;
+}
+
+interface PaginatedCookedHistoryResponse {
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  items: CookedHistoryItem[];
+}
+
+interface CookedHistoryItem {
+  id: number;
+  recipe: Recipe;
+  cookedAt: string;
+  rating?: number;
+  note?: string;
+}
+
+export const getCookedHistory = async (
+  page = 0,
+  size = 20
+): Promise<PaginatedFavoriteResponse> => {
+  try {
+    console.log("Fetching cooked history...");
+
+    const headers = await createAuthHeaders();
+    const params = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString(),
+      sort: "cookedAt,desc",
+    });
+
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/cookinote/cooked-history/me?${params}`,
+      {
+        method: "GET",
+        headers,
+      }
+    );
+
+    const result: CookedHistoryResponse = await response.json();
+    console.log("Get cooked history response:", result);
+
+    if (response.ok && result.code === 200) {
+      return result.data;
+    } else {
+      console.error("Failed to get cooked history:", result.message);
+      return {
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasNext: false,
+        items: [],
+      };
+    }
+  } catch (error) {
+    console.error("Error getting cooked history:", error);
+    return {
+      page: 0,
+      size: 0,
+      totalElements: 0,
+      totalPages: 0,
+      hasNext: false,
+      items: [],
+    };
+  }
+};
+
+// Add recipe to cooked history
+export const addToCookedHistory = async (
+  recipeId: number,
+  rating?: number,
+  note?: string
+): Promise<boolean> => {
+  try {
+    console.log("Adding to cooked history:", { recipeId, rating, note });
+
+    const headers = await createAuthHeaders();
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/cookinote/cooked-history`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          recipeId,
+          rating,
+          note,
+        }),
+      }
+    );
+
+    const result = await response.json();
+    console.log("Add to cooked history response:", result);
+
+    return response.ok && result.code === 200;
+  } catch (error) {
+    console.error("Error adding to cooked history:", error);
+    return false;
+  }
+};
+
+// Remove from cooked history
+export const removeFromCookedHistory = async (
+  historyId: number
+): Promise<boolean> => {
+  try {
+    console.log("Removing from cooked history:", historyId);
+
+    const headers = await createAuthHeaders();
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/cookinote/cooked-history/${historyId}`,
+      {
+        method: "DELETE",
+        headers,
+      }
+    );
+
+    const result = await response.json();
+    console.log("Remove from cooked history response:", result);
+
+    return response.ok && result.code === 200;
+  } catch (error) {
+    console.error("Error removing from cooked history:", error);
+    return false;
+  }
+};
+
+export type { CookedHistoryItem, PaginatedCookedHistoryResponse };
+
 // Add recipe to favorites
 export const addToFavorites = async (recipeId: number): Promise<boolean> => {
   try {

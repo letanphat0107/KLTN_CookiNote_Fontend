@@ -144,22 +144,6 @@ export const favoriteStyles = StyleSheet.create({
     color: COLORS.background,
     fontFamily: FONT_FAMILIES.bold,
   },
-
-  // Rating
-  ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  ratingStars: {
-    fontSize: FONT_SIZES.sm,
-    marginRight: 4,
-  },
-  ratingText: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.text.light,
-    fontFamily: FONT_FAMILIES.regular,
-  },
   tabContainer: {
     flexDirection: "row",
     backgroundColor: "#F8F9FA",
@@ -319,6 +303,40 @@ export const favoriteStyles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
   },
+  cookedBadge: {
+  position: "absolute",
+  top: 12,
+  right: 12,
+  backgroundColor: "rgba(76, 175, 80, 0.9)",
+  paddingHorizontal: 10,
+  paddingVertical: 6,
+  borderRadius: 12,
+  zIndex: 1,
+},
+cookedBadgeText: {
+  color: "#FFFFFF",
+  fontSize: 11,
+  fontWeight: "600",
+},
+ratingContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginTop: 8,
+  marginBottom: 4,
+},
+ratingText: {
+  fontSize: 16,
+},
+cookedNote: {
+  fontSize: 13,
+  color: "#666",
+  fontStyle: "italic",
+  marginTop: 4,
+  marginBottom: 8,
+  paddingLeft: 8,
+  borderLeftWidth: 2,
+  borderLeftColor: "#FF6B35",
+},
 });
 
 export default favoriteStyles;

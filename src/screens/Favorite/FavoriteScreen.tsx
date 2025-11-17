@@ -19,6 +19,8 @@ import {
   getDeletedRecipes,
   addToFavorites,
   removeFromFavorites,
+  getCookedHistory,
+  CookedHistoryItem,
 } from "../../services/favoriteService";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -26,7 +28,7 @@ interface FavoriteScreenProps {
   navigation?: any;
 }
 
-type TabType = "favorites" | "myRecipes" | "deleted";
+type TabType = "favorites" | "myRecipes" | "cooked" | "deleted";
 
 const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
@@ -37,6 +39,7 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
   // Data states
   const [favoriteRecipes, setFavoriteRecipes] = useState<Recipe[]>([]);
   const [myRecipes, setMyRecipes] = useState<Recipe[]>([]);
+  const [cookedHistory, setCookedHistory] = useState<Recipe[]>([]);
   const [deletedRecipes, setDeletedRecipes] = useState<Recipe[]>([]);
 
   // Loading states
@@ -49,6 +52,7 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
   // Pagination states
   const [hasMoreFavorites, setHasMoreFavorites] = useState(false);
   const [hasMoreMyRecipes, setHasMoreMyRecipes] = useState(false);
+  const [hasMoreCooked, setHasMoreCooked] = useState(false);
   const [hasMoreDeleted, setHasMoreDeleted] = useState(false);
 
   // Track favorite status for each recipe
@@ -59,6 +63,7 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
   const tabs = [
     { key: "favorites" as TabType, label: "Yêu thích", icon: "❤️" },
     { key: "myRecipes" as TabType, label: "Của tôi", icon: "👨‍🍳" },
+    // { key: "cooked" as TabType, label: "Đã nấu", icon: "✅" },
     { key: "deleted" as TabType, label: "Đã xóa", icon: "🗑️" },
   ];
 
@@ -95,6 +100,9 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
           break;
         case "myRecipes":
           await loadMyRecipes(isRefresh);
+          break;
+        case "cooked":
+          await loadCookedHistory(isRefresh);
           break;
         case "deleted":
           await loadDeletedRecipes(isRefresh);
@@ -146,6 +154,26 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
       setFavoriteStatuses(newFavoriteStatuses);
     } catch (error) {
       console.error("Error loading my recipes:", error);
+    }
+  };
+
+  const loadCookedHistory = async (isRefresh = false) => {
+    try {
+      console.log("Loading cooked history...");
+      const result = await getCookedHistory(0, 20);
+      setCookedHistory(result.items);
+      setHasMoreCooked(result.hasNext);
+
+      // Update favorite statuses for cooked recipes
+      const newFavoriteStatuses = { ...favoriteStatuses };
+      result.items.forEach((item) => {
+        if (!(item.id in newFavoriteStatuses)) {
+          newFavoriteStatuses[item.id] = false;
+        }
+      });
+      setFavoriteStatuses(newFavoriteStatuses);
+    } catch (error) {
+      console.error("Error loading cooked history:", error);
     }
   };
 
@@ -243,6 +271,8 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
         return favoriteRecipes;
       case "myRecipes":
         return myRecipes;
+      case "cooked":
+        return cookedHistory;
       case "deleted":
         return deletedRecipes;
       default:
@@ -280,6 +310,14 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
             "Hãy tạo công thức đầu tiên của bạn và chia sẻ với mọi người!",
           buttonText: "Tạo công thức",
         };
+      case "cooked":
+        return {
+          icon: "✅",
+          title: "Chưa nấu món nào",
+          description:
+            "Hãy thử nấu một món ăn và ghi lại trải nghiệm của bạn!",
+          buttonText: "Khám phá công thức",
+        };
       case "deleted":
         return {
           icon: "🗑️",
@@ -311,7 +349,7 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
           <TouchableOpacity
             style={favoriteStyles.exploreButton}
             onPress={() => {
-              if (activeTab === "favorites") {
+              if (activeTab === "favorites" || activeTab === "cooked") {
                 navigation?.navigate("Home");
               } else if (activeTab === "myRecipes") {
                 navigation?.navigate("CreateRecipe");
@@ -327,7 +365,7 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
     );
   };
 
-  const renderRecipeCard = (recipe: Recipe) => {
+  const renderRecipeCard = (recipe: Recipe, historyItem?: CookedHistoryItem) => {
     const isFavorited = favoriteStatuses[recipe.id] || false;
     const isActionLoading = loadingActions[recipe.id] || false;
 
@@ -348,8 +386,33 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
           style={favoriteStyles.recipeImage}
         />
 
+        {/* Cooked Badge */}
+        {historyItem && (
+          <View style={favoriteStyles.cookedBadge}>
+            <Text style={favoriteStyles.cookedBadgeText}>
+              ✅ Đã nấu ngày {new Date(historyItem.cookedAt).toLocaleDateString("vi-VN")}
+            </Text>
+          </View>
+        )}
+
         {/* Recipe Info */}
         <Text style={favoriteStyles.recipeName}>{recipe.title}</Text>
+        
+        {/* Rating if cooked */}
+        {historyItem?.rating && (
+          <View style={favoriteStyles.ratingContainer}>
+            <Text style={favoriteStyles.ratingText}>
+              {"⭐".repeat(historyItem.rating)}
+            </Text>
+          </View>
+        )}
+
+        {/* Note if cooked */}
+        {historyItem?.note && (
+          <Text style={favoriteStyles.cookedNote} numberOfLines={2}>
+            💭 {historyItem.note}
+          </Text>
+        )}
 
         {/* Recipe Details */}
         <View style={favoriteStyles.recipeInfo}>
@@ -499,11 +562,14 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
             />
           }
         >
-          {filteredRecipes.map(renderRecipeCard)}
+          {activeTab === "cooked"
+            ? cookedHistory.map((item) => renderRecipeCard(item))
+            : filteredRecipes.map((recipe) => renderRecipeCard(recipe))}
 
           {/* Load more indicator */}
           {((activeTab === "favorites" && hasMoreFavorites) ||
             (activeTab === "myRecipes" && hasMoreMyRecipes) ||
+            (activeTab === "cooked" && hasMoreCooked) ||
             (activeTab === "deleted" && hasMoreDeleted)) && (
             <View style={favoriteStyles.loadMoreContainer}>
               <Text style={favoriteStyles.loadMoreText}>
