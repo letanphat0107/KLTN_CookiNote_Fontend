@@ -27,6 +27,7 @@ import ManageUsersScreen from "../screens/Admin/ManageUsersScreen";
 import ManageRecipeScreen from "../screens/Admin/ManageRecipesScreen";
 import CreateRecipeScreen from "../screens/Admin/CreateRecipeScreen";
 import EditRecipeScreen from "../screens/Admin/EditRecipeScreen";
+import DailySuggestionsScreen from "../screens/Home/DailySuggestionsScreen";
 
 import { RootStackParamList } from "./types";
 
@@ -151,6 +152,7 @@ const RootNavigator = () => {
           )}
           {/* Main App with Authenticated Tab Navigator */}
           <Stack.Screen name="MainTabs" component={TabNavigator} />
+          <Stack.Screen name="DailySuggestions" component={DailySuggestionsScreen} />
 
           {/* Additional authenticated screens */}
           <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />

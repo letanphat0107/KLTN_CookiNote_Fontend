@@ -17,12 +17,12 @@ import { useAppSelector } from "../../store/hooks";
 import { useCategory } from "../../hooks/useCategory";
 import { useRecipe } from "../../hooks/useRecipe";
 import { homeStyles } from "./styles";
-import { 
-  getRecipesByCategoryEndpoint, 
-  searchRecipesByQuery 
+import {
+  getRecipesByCategoryEndpoint,
+  searchRecipesByQuery,
 } from "../../services/recipeService";
 import { Recipe, PaginatedRecipeResponse } from "../../types/recipe";
-import FloatingButtonsContainer from './../../components/FloatingButtons/FloatingButtonContainer';
+import FloatingButtonsContainer from "./../../components/FloatingButtons/FloatingButtonContainer";
 
 const { height } = Dimensions.get("window");
 
@@ -57,7 +57,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [searchResults, setSearchResults] = useState<Recipe[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
-  const [searchDebounceTimer, setSearchDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+  const [searchDebounceTimer, setSearchDebounceTimer] =
+    useState<NodeJS.Timeout | null>(null);
 
   // Category State
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
@@ -96,7 +97,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
     setIsSearching(true);
     setShowSearchResults(true);
-    
+
     try {
       const response = await searchRecipesByQuery(query);
       setSearchResults(response.items);
@@ -111,7 +112,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   // Category handler
   const handleCategoryPress = async (category: any) => {
     console.log("Category pressed:", category);
-    
+
     if (!isAuthenticated) {
       openPrompt();
       return;
@@ -120,7 +121,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     setSelectedCategory(category);
     setIsLoadingCategory(true);
     setCategoryPage(0);
-    
+
     try {
       const response = await getRecipesByCategoryEndpoint(category.id, 0, 12);
       setCategoryRecipes(response.items);
@@ -209,7 +210,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     try {
       if (selectedCategory) {
         // Refresh category recipes
-        const response = await getRecipesByCategoryEndpoint(selectedCategory.id, 0, 12);
+        const response = await getRecipesByCategoryEndpoint(
+          selectedCategory.id,
+          0,
+          12
+        );
         setCategoryRecipes(response.items);
         setCategoryHasMore(response.hasNext);
       } else {
@@ -275,9 +280,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     },
   ];
 
-  const displayCategories = categories.length > 0 ? categories : defaultCategories;
-  const displayPopularRecipes = popularRecipes.length > 0 ? popularRecipes : defaultPopularRecipes;
-  const displayEasyRecipes = easyToCookRecipes.length > 0 ? easyToCookRecipes : defaultEasyRecipes;
+  const displayCategories =
+    categories.length > 0 ? categories : defaultCategories;
+  const displayPopularRecipes =
+    popularRecipes.length > 0 ? popularRecipes : defaultPopularRecipes;
+  const displayEasyRecipes =
+    easyToCookRecipes.length > 0 ? easyToCookRecipes : defaultEasyRecipes;
 
   // Helper functions (existing code)
   const renderCategoryIcon = (category: any) => {
@@ -344,9 +352,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         <Text style={homeStyles.searchResultTitle} numberOfLines={2}>
           {recipe.title}
         </Text>
-        <Text style={homeStyles.searchResultOwner}>
-          👨‍🍳 {recipe.ownerName}
-        </Text>
+        <Text style={homeStyles.searchResultOwner}>👨‍🍳 {recipe.ownerName}</Text>
         <View style={homeStyles.searchResultMeta}>
           <Text
             style={[
@@ -364,6 +370,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     </TouchableOpacity>
   );
 
+  const handleSuggestionBannerPress = () => {
+    if (navigation && isAuthenticated) {
+      navigation.navigate("DailySuggestions");
+    }
+  };
+
   return (
     <View style={homeStyles.container}>
       {/* Header */}
@@ -380,9 +392,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             returnKeyType="search"
           />
           {isSearching && (
-            <ActivityIndicator 
-              size="small" 
-              color="#FF6B35" 
+            <ActivityIndicator
+              size="small"
+              color="#FF6B35"
               style={homeStyles.searchLoading}
             />
           )}
@@ -390,7 +402,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
         {/* Back button when viewing category or search results */}
         {(selectedCategory || showSearchResults) && (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={homeStyles.backButton}
             onPress={handleBackToHome}
           >
@@ -398,8 +410,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           </TouchableOpacity>
         )}
 
-        {!selectedCategory && !showSearchResults && (
-          isAuthenticated ? (
+        {!selectedCategory &&
+          !showSearchResults &&
+          (isAuthenticated ? (
             <TouchableOpacity onPress={handleProfilePress}>
               <Image
                 source={{
@@ -417,8 +430,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             >
               <Text style={homeStyles.accountButtonText}>Tài khoản</Text>
             </TouchableOpacity>
-          )
-        )}
+          ))}
       </View>
 
       {/* Search Results */}
@@ -439,16 +451,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <Text style={homeStyles.searchResultsTitle}>
               Kết quả tìm kiếm "{searchQuery}" ({searchResults.length})
             </Text>
-            
+
             {isSearching ? (
               <View style={homeStyles.searchLoadingContainer}>
                 <ActivityIndicator size="large" color="#FF6B35" />
-                <Text style={homeStyles.searchLoadingText}>Đang tìm kiếm...</Text>
+                <Text style={homeStyles.searchLoadingText}>
+                  Đang tìm kiếm...
+                </Text>
               </View>
             ) : searchResults.length === 0 ? (
               <View style={homeStyles.noResultsContainer}>
                 <Text style={homeStyles.noResultsIcon}>🔍</Text>
-                <Text style={homeStyles.noResultsTitle}>Không tìm thấy kết quả</Text>
+                <Text style={homeStyles.noResultsTitle}>
+                  Không tìm thấy kết quả
+                </Text>
                 <Text style={homeStyles.noResultsText}>
                   Thử tìm kiếm với từ khóa khác
                 </Text>
@@ -480,7 +496,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <Text style={homeStyles.categoryResultsTitle}>
               {selectedCategory.name} ({categoryRecipes.length})
             </Text>
-            
+
             {isLoadingCategory ? (
               <View style={homeStyles.categoryLoadingContainer}>
                 <ActivityIndicator size="large" color="#FF6B35" />
@@ -527,7 +543,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     Đã có CookiNote lo!
                   </Text>
                 </View>
-                <TouchableOpacity style={homeStyles.bannerButton}>
+                <TouchableOpacity
+                  style={homeStyles.bannerButton}
+                  onPress={handleSuggestionBannerPress}
+                >
                   <Text style={homeStyles.bannerButtonText}>Xem ngay</Text>
                 </TouchableOpacity>
               </View>
@@ -582,7 +601,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                       style={homeStyles.recipeCardImage}
                     />
                     <View style={homeStyles.recipeCardInfo}>
-                      <Text style={homeStyles.recipeCardTitle} numberOfLines={2}>
+                      <Text
+                        style={homeStyles.recipeCardTitle}
+                        numberOfLines={2}
+                      >
                         {formatRecipeTitle(recipe)}
                       </Text>
                       {isAuthenticated && (
@@ -594,7 +616,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                             style={[
                               homeStyles.recipeDifficultyText,
                               {
-                                color: formatDifficulty(recipe.difficulty).color,
+                                color: formatDifficulty(recipe.difficulty)
+                                  .color,
                               },
                             ]}
                           >

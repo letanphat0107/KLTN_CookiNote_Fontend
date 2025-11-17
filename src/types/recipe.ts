@@ -116,3 +116,34 @@ export interface WeeklyMenu {
   recipe_id: number;
   user_id: number;
 }
+
+export interface DailyMenuRecipe {
+  id: number;
+  title: string;
+  description: string;
+  imageUrl: string;
+  prepareTime: number;
+  cookTime: number;
+  difficulty: string;
+  averageRating: number;
+  ownerName: string;
+  ownerAvatar: string;
+}
+
+export interface DailyMenuSuggestion {
+  recipe: DailyMenuRecipe;
+  mealType: "BREAKFAST" | "LUNCH" | "DINNER";
+  score: number;
+  strategies: string[];
+  justifications: string[];
+}
+
+export interface DailyMenuResponse {
+  code: number;
+  message: string;
+  data: {
+    freshnessWindowDays: number;
+    generatedDate: string;
+    suggestions: DailyMenuSuggestion[];
+  };
+}
