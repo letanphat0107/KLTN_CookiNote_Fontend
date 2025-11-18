@@ -82,18 +82,38 @@ export class UserService {
 
   // Upload/Change avatar
   static async changeAvatar(
-    imageFile: any,
+    imageUri: string,
     accessToken: string
   ): Promise<UserProfileResponse> {
-    const formData = new FormData();
-    formData.append("avatar", imageFile);
+    try {
+      const formData = new FormData();
+      
+      // Extract filename and file extension
+      const filename = imageUri.split("/").pop() || "avatar.jpg";
+      const match = /\.(\w+)$/.exec(filename);
+      const fileType = match ? `image/${match[1]}` : "image/jpeg";
 
-    const response = await fetch(API_URLS.CHANGE_AVATAR, {
-      method: "PUT",
-      headers: createFormDataHeaders(accessToken),
-      body: formData,
-    });
-    return response.json();
+      // Append file to FormData
+      formData.append("file", {
+        uri: imageUri,
+        type: fileType,
+        name: filename,
+      } as any);
+
+      const response = await fetch(API_URLS.CHANGE_AVATAR, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          // Don't set Content-Type, let FormData handle it
+        },
+        body: formData,
+      });
+
+      return response.json();
+    } catch (error) {
+      console.error("Change avatar error:", error);
+      throw error;
+    }
   }
 
   // Alternative avatar upload with base64

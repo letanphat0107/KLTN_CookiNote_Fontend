@@ -169,20 +169,8 @@ export const useUserProfile = () => {
 
     setIsLoading(true);
     try {
-      // Create FormData for image upload
-      const formData = new FormData();
-      formData.append("avatar", {
-        uri: imageUri,
-        type: "image/jpeg",
-        name: "avatar.jpg",
-      } as any);
-
       const result = await UserService.changeAvatar(
-        {
-          uri: imageUri,
-          type: "image/jpeg",
-          name: "avatar.jpg",
-        },
+        imageUri,
         tokens.accessToken
       );
 

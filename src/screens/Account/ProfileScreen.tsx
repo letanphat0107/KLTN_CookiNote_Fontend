@@ -8,9 +8,9 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { useAppSelector } from "../../store/hooks";
 import { useUserProfile } from "../../hooks/useUserProfile";
-import { useImagePicker } from "../../hooks/useImagePicker";
 import { accountStyles } from "./styles";
 import AccountHeader from "../../components/AccountHeader";
 import EmailOTPModal from "../../components/EmailOTPModal";
@@ -28,8 +28,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     verifyEmailChange,
     resendEmailChangeOTP,
     changeAvatar,
-  } = useUserProfile();
-  const { pickImage } = useImagePicker();
+  } = useUserProfile()
 
   // Form states
   const [displayName, setDisplayName] = useState(user?.displayName || "");
@@ -112,20 +111,106 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   // Handle avatar change through AccountHeader
-  const handleChangeAvatar = async () => {
-    try {
-      const imageUri = await pickImage();
-      if (imageUri) {
-        setIsUpdatingField("avatar");
-        const success = await changeAvatar(imageUri);
-        setIsUpdatingField(null);
-      }
-    } catch (error) {
-      console.error("Avatar change error:", error);
-      Alert.alert("Lỗi", "Không thể chọn ảnh");
-      setIsUpdatingField(null);
+  // Handle avatar change with options
+const handleChangeAvatar = async () => {
+  Alert.alert(
+    "Thay đổi ảnh đại diện",
+    "Chọn nguồn ảnh",
+    [
+      {
+        text: "Chụp ảnh",
+        onPress: () => takePhoto(),
+      },
+      {
+        text: "Chọn từ thư viện",
+        onPress: () => pickFromLibrary(),
+      },
+      {
+        text: "Hủy",
+        style: "cancel",
+      },
+    ],
+    { cancelable: true }
+  );
+};
+
+const takePhoto = async () => {
+  try {
+    // Request camera permissions
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      Alert.alert(
+        "Quyền truy cập bị từ chối",
+        "Vui lòng cấp quyền truy cập camera để chụp ảnh"
+      );
+      return;
     }
-  };
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const imageUri = result.assets[0].uri;
+      console.log("Selected image URI:", imageUri); // Debug log
+      
+      setIsUpdatingField("avatar");
+      const success = await changeAvatar(imageUri);
+      setIsUpdatingField(null);
+
+      if (success) {
+        Alert.alert("Thành công", "Đã cập nhật ảnh đại diện");
+      }
+    }
+  } catch (error) {
+    console.error("Take photo error:", error);
+    Alert.alert("Lỗi", "Không thể chụp ảnh");
+    setIsUpdatingField(null);
+  }
+};
+
+const pickFromLibrary = async () => {
+  try {
+    // Request media library permissions
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      Alert.alert(
+        "Quyền truy cập bị từ chối",
+        "Vui lòng cấp quyền truy cập thư viện ảnh"
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const imageUri = result.assets[0].uri;
+      console.log("Selected image URI:", imageUri); // Debug log
+      
+      setIsUpdatingField("avatar");
+      const success = await changeAvatar(imageUri);
+      setIsUpdatingField(null);
+
+      if (success) {
+        Alert.alert("Thành công", "Đã cập nhật ảnh đại diện");
+      }
+    }
+  } catch (error) {
+    console.error("Pick image error:", error);
+    Alert.alert("Lỗi", "Không thể chọn ảnh");
+    setIsUpdatingField(null);
+  }
+};
 
   // Handle email verification success
   const handleEmailVerificationSuccess = () => {
@@ -158,7 +243,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           userName={user?.displayName || "User"}
           userAvatar={user?.avatarUrl}
           onBackPress={handleBack}
-          enableAvatarEdit={true} // Enable edit mode in ProfileScreen
+          enableAvatarEdit={true} 
           onAvatarPress={handleChangeAvatar}
           isUpdatingAvatar={isUpdatingField === "avatar"}
         />
