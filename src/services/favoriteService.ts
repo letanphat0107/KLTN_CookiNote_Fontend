@@ -24,9 +24,26 @@ interface PaginatedFavoriteResponse {
 interface CookedHistoryResponse {
   code: number;
   message: string;
-  data: PaginatedFavoriteResponse;
+  data: PaginatedCookedHistoryResponse;
   timestamp: string;
   path: string;
+}
+
+interface CookedHistoryItem {
+  id: number;
+  recipeId: number;
+  recipeTitle: string;
+  recipeImageUrl: string;
+  difficulty: string;
+  prepareTime: number;
+  cookTime: number;
+  view: number;
+  userId: number;
+  ownerName: string;
+  cookedAt: string;
+  isRecipeDeleted: boolean;
+  rating?: number;
+  note?: string;
 }
 
 interface PaginatedCookedHistoryResponse {
@@ -38,19 +55,11 @@ interface PaginatedCookedHistoryResponse {
   items: CookedHistoryItem[];
 }
 
-interface CookedHistoryItem {
-  id: number;
-  recipe: Recipe;
-  cookedAt: string;
-  rating?: number;
-  note?: string;
-}
-
 // Get cooked history
 export const getCookedHistory = async (
   page = 0,
   size = 20
-): Promise<PaginatedFavoriteResponse> => {
+): Promise<PaginatedCookedHistoryResponse> => {
   try {
     console.log("Fetching cooked history...");
 
@@ -64,14 +73,31 @@ export const getCookedHistory = async (
       `${API_CONFIG.BASE_URL}/cookinote/cooked-history/me?${params}`,
       {
         method: "GET",
-      }
+      },
+      true,
+      false
     );
 
-    const result: CookedHistoryResponse = await response.json();
-    console.log("Get cooked history response:", result);
+    const result = await response.json();
+    console.log("Get cooked history API response:", result);
 
     if (response.ok && result.code === 200) {
-      return result.data;
+      // If result.data is array, use it directly
+      // Otherwise use result.data.items
+      const items = Array.isArray(result.data)
+        ? result.data
+        : result.data?.items || [];
+
+      console.log("Parsed cooked history items:", items);
+
+      return {
+        page: result.data?.page || 0,
+        size: result.data?.size || items.length,
+        totalElements: result.data?.totalElements || items.length,
+        totalPages: result.data?.totalPages || (items.length > 0 ? 1 : 0),
+        hasNext: result.data?.hasNext || false,
+        items: items,
+      };
     } else {
       console.error("Failed to get cooked history:", result.message);
       return {
