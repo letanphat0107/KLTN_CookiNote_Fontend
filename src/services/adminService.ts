@@ -295,75 +295,427 @@ class AdminService {
 
   // Create new recipe
   async createRecipe(
-  accessToken: string,
-  recipeData: CreateRecipeData,
-  coverImageUri?: string,
-  stepImages?: { stepNo: number; imageUris: string[] }[]
-): Promise<CreateRecipeResponse> {
-  try {
-    const formData = new FormData();
+    accessToken: string,
+    recipeData: CreateRecipeData,
+    coverImageUri?: string,
+    stepImages?: { stepNo: number; imageUris: string[] }[]
+  ): Promise<CreateRecipeResponse> {
+    try {
+      const formData = new FormData();
 
-    // Add recipe data as JSON string
-    const recipeJson = JSON.stringify(recipeData);
-    formData.append("recipe", recipeJson);
+      // Add recipe data as JSON string
+      const recipeJson = JSON.stringify(recipeData);
+      formData.append("recipe", recipeJson);
 
-    // Add cover image if exists
-    if (coverImageUri) {
-      const coverFilename = coverImageUri.split("/").pop() || "cover.jpg";
-      const coverMatch = /\.(\w+)$/.exec(coverFilename);
-      const coverType = coverMatch ? `image/${coverMatch[1]}` : "image/jpeg";
+      // Add cover image if exists
+      if (coverImageUri) {
+        const coverFilename = coverImageUri.split("/").pop() || "cover.jpg";
+        const coverMatch = /\.(\w+)$/.exec(coverFilename);
+        const coverType = coverMatch ? `image/${coverMatch[1]}` : "image/jpeg";
 
-      formData.append("cover", {
-        uri: coverImageUri,
-        name: coverFilename,
-        type: coverType,
-      } as any);
-    }
-
-    // Add step images if exist
-    if (stepImages && stepImages.length > 0) {
-      stepImages.forEach((stepImage) => {
-        if (stepImage.imageUris && stepImage.imageUris.length > 0) {
-          stepImage.imageUris.forEach((uri) => {
-            const filename = uri.split("/").pop() || `step_${stepImage.stepNo}.jpg`;
-            const match = /\.(\w+)$/.exec(filename);
-            const type = match ? `image/${match[1]}` : "image/jpeg";
-
-            formData.append(`stepImages_${stepImage.stepNo}`, {
-              uri: uri,
-              name: filename,
-              type: type,
-            } as any);
-          });
-        }
-      });
-    }
-
-    const response = await fetch(
-      buildApiUrl(API_CONFIG.ENDPOINTS.RECIPE.CREATE),
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          // Don't set Content-Type, let FormData handle it
-        },
-        body: formData,
+        formData.append("cover", {
+          uri: coverImageUri,
+          name: coverFilename,
+          type: coverType,
+        } as any);
       }
-    );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to create recipe");
+      // Add step images if exist
+      if (stepImages && stepImages.length > 0) {
+        stepImages.forEach((stepImage) => {
+          if (stepImage.imageUris && stepImage.imageUris.length > 0) {
+            stepImage.imageUris.forEach((uri) => {
+              const filename =
+                uri.split("/").pop() || `step_${stepImage.stepNo}.jpg`;
+              const match = /\.(\w+)$/.exec(filename);
+              const type = match ? `image/${match[1]}` : "image/jpeg";
+
+              formData.append(`stepImages_${stepImage.stepNo}`, {
+                uri: uri,
+                name: filename,
+                type: type,
+              } as any);
+            });
+          }
+        });
+      }
+
+      const response = await fetch(
+        buildApiUrl(API_CONFIG.ENDPOINTS.RECIPE.CREATE),
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            // Don't set Content-Type, let FormData handle it
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create recipe");
+      }
+
+      const data = await response.json();
+      return data.data;
+    } catch (error) {
+      console.error("Error creating recipe:", error);
+      throw error;
     }
-
-    const data = await response.json();
-    return data.data;
-  } catch (error) {
-    console.error("Error creating recipe:", error);
-    throw error;
   }
-}
 
+  // Update recipe cover image
+  async updateRecipeCover(
+    accessToken: string,
+    recipeId: number,
+    imageUri: string
+  ): Promise<void> {
+    try {
+      const formData = new FormData();
+      const filename = imageUri.split("/").pop() || "cover.jpg";
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : "image/jpeg";
+
+      formData.append("file", {
+        uri: imageUri,
+        name: filename,
+        type: type,
+      } as any);
+
+      const response = await fetch(
+        buildApiUrl(`${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/cover`),
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update cover image");
+      }
+    } catch (error) {
+      console.error("Error updating cover image:", error);
+      throw error;
+    }
+  }
+
+  // Add images to a step
+  async addStepImages(
+    accessToken: string,
+    recipeId: number,
+    stepId: number,
+    imageUris: string[]
+  ): Promise<void> {
+    try {
+      const formData = new FormData();
+
+      imageUris.forEach((uri) => {
+        const filename = uri.split("/").pop() || `step_${stepId}.jpg`;
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : "image/jpeg";
+
+        formData.append("files", {
+          uri: uri,
+          name: filename,
+          type: type,
+        } as any);
+      });
+
+      const response = await fetch(
+        buildApiUrl(
+          `${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/steps/${stepId}/images`
+        ),
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add step images");
+      }
+    } catch (error) {
+      console.error("Error adding step images:", error);
+      throw error;
+    }
+  }
+
+  // Reorder steps
+  async reorderSteps(
+    accessToken: string,
+    recipeId: number,
+    steps: Array<{ stepId: number; newStepNo: number }>
+  ): Promise<void> {
+    try {
+      const response = await fetch(
+        buildApiUrl(
+          `${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/steps/reorder`
+        ),
+        {
+          method: "PUT",
+          headers: this.getAuthHeader(accessToken),
+          body: JSON.stringify({ steps }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to reorder steps");
+      }
+    } catch (error) {
+      console.error("Error reordering steps:", error);
+      throw error;
+    }
+  }
+
+  // Update recipe basic info
+  async updateRecipe(
+    accessToken: string,
+    recipeId: number,
+    recipeData: {
+      categoryId: number;
+      title: string;
+      description: string;
+      prepareTime: number;
+      cookTime: number;
+      difficulty: string;
+      privacy: string;
+      ingredients: Array<{ name: string; quantity: string }>;
+    }
+  ): Promise<void> {
+    try {
+      const response = await fetch(
+        buildApiUrl(`${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}`),
+        {
+          method: "PUT",
+          headers: this.getAuthHeader(accessToken),
+          body: JSON.stringify(recipeData),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update recipe");
+      }
+    } catch (error) {
+      console.error("Error updating recipe:", error);
+      throw error;
+    }
+  }
+
+  // Add a new step with images
+  async addStep(
+    accessToken: string,
+    recipeId: number,
+    stepData: {
+      content: string;
+      suggestedTime?: number;
+      tips?: string;
+    },
+    imageUris?: string[]
+  ): Promise<void> {
+    try {
+      const formData = new FormData();
+
+      // Add step data as JSON
+      formData.append("content", stepData.content);
+      if (stepData.suggestedTime) {
+        formData.append("suggestedTime", stepData.suggestedTime.toString());
+      }
+      if (stepData.tips) {
+        formData.append("tips", stepData.tips);
+      }
+
+      // Add images if exist
+      if (imageUris && imageUris.length > 0) {
+        imageUris.forEach((uri) => {
+          const filename = uri.split("/").pop() || "step_image.jpg";
+          const match = /\.(\w+)$/.exec(filename);
+          const type = match ? `image/${match[1]}` : "image/jpeg";
+
+          formData.append("addFiles", {
+            uri: uri,
+            name: filename,
+            type: type,
+          } as any);
+        });
+      }
+
+      const response = await fetch(
+        buildApiUrl(`${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/steps`),
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add step");
+      }
+    } catch (error) {
+      console.error("Error adding step:", error);
+      throw error;
+    }
+  }
+
+  // Add ingredients
+  async addIngredients(
+    accessToken: string,
+    recipeId: number,
+    ingredients: Array<{ name: string; quantity: string }>
+  ): Promise<void> {
+    try {
+      const response = await fetch(
+        buildApiUrl(
+          `${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/ingredients`
+        ),
+        {
+          method: "POST",
+          headers: this.getAuthHeader(accessToken),
+          body: JSON.stringify({ ingredients }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add ingredients");
+      }
+    } catch (error) {
+      console.error("Error adding ingredients:", error);
+      throw error;
+    }
+  }
+
+  // Update existing step
+  async updateStep(
+    accessToken: string,
+    recipeId: number,
+    stepId: number,
+    stepData: {
+      content: string;
+      stepNo: number;
+      suggestedTime?: number;
+      tips?: string;
+    },
+    addImageUris?: string[]
+  ): Promise<void> {
+    try {
+      const formData = new FormData();
+
+      // Add step data
+      formData.append("content", stepData.content);
+      formData.append("stepNo", stepData.stepNo.toString());
+      if (stepData.suggestedTime !== undefined) {
+        formData.append("suggestedTime", stepData.suggestedTime.toString());
+      }
+      if (stepData.tips) {
+        formData.append("tips", stepData.tips);
+      }
+
+      // Add new images if exist
+      if (addImageUris && addImageUris.length > 0) {
+        addImageUris.forEach((uri) => {
+          const filename = uri.split("/").pop() || "step_image.jpg";
+          const match = /\.(\w+)$/.exec(filename);
+          const type = match ? `image/${match[1]}` : "image/jpeg";
+
+          formData.append("addFiles", {
+            uri: uri,
+            name: filename,
+            type: type,
+          } as any);
+        });
+      }
+
+      const response = await fetch(
+        buildApiUrl(
+          `${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/steps/${stepId}`
+        ),
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update step");
+      }
+    } catch (error) {
+      console.error("Error updating step:", error);
+      throw error;
+    }
+  }
+
+  // Delete steps (bulk delete)
+  async deleteSteps(
+    accessToken: string,
+    recipeId: number,
+    stepIds: number[]
+  ): Promise<void> {
+    try {
+      const response = await fetch(
+        buildApiUrl(`${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/steps`),
+        {
+          method: "DELETE",
+          headers: this.getAuthHeader(accessToken),
+          body: JSON.stringify({ stepIds }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete steps");
+      }
+    } catch (error) {
+      console.error("Error deleting steps:", error);
+      throw error;
+    }
+  }
+
+  // Delete ingredients (bulk delete)
+  async deleteIngredients(
+    accessToken: string,
+    recipeId: number,
+    ingredientIds: number[]
+  ): Promise<void> {
+    try {
+      const response = await fetch(
+        buildApiUrl(
+          `${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/ingredients`
+        ),
+        {
+          method: "DELETE",
+          headers: this.getAuthHeader(accessToken),
+          body: JSON.stringify({ ingredientIds }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete ingredients");
+      }
+    } catch (error) {
+      console.error("Error deleting ingredients:", error);
+      throw error;
+    }
+  }
 }
 
 export default new AdminService();

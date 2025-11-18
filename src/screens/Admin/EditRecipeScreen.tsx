@@ -17,16 +17,19 @@ import { useRecipe } from "../../hooks/useRecipe";
 import { adminStyles } from "./styles";
 
 interface Ingredient {
+  id?: number; // Add ID to track existing ingredients
   name: string;
   quantity: string;
 }
 
 interface Step {
+  id?: number; // Add ID to track existing steps
   stepNo: number;
   content: string;
   suggestedTime: number;
   tips?: string;
   images?: string[];
+  newImages?: string[]; // Track newly added images
 }
 
 const EditRecipeScreen = () => {
@@ -47,6 +50,13 @@ const EditRecipeScreen = () => {
   const [cookTime, setCookTime] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [privacy, setPrivacy] = useState<"PUBLIC" | "PRIVATE">("PUBLIC");
+
+  const [deletedIngredients, setDeletedIngredients] = useState<number[]>([]);
+  const [deletedSteps, setDeletedSteps] = useState<number[]>([]);
+  const [coverImageChanged, setCoverImageChanged] = useState(false);
+  const [originalCoverImage, setOriginalCoverImage] = useState<string | null>(
+    null
+  );
 
   // Cover image
   const [coverImageUri, setCoverImageUri] = useState<string | null>(null);
@@ -78,31 +88,35 @@ const EditRecipeScreen = () => {
         setCategoryId(recipeData.categoryId?.toString() || "1");
         setTitle(recipeData.title);
         setDescription(recipeData.description || "");
-        setPrepareTime(recipeData.prepare_time?.toString() || "");
-        setCookTime(recipeData.cook_time?.toString() || "");
+        setPrepareTime(recipeData.prepareTime?.toString() || "");
+        setCookTime(recipeData.cookTime?.toString() || "");
         setDifficulty(recipeData.difficulty);
         setPrivacy(recipeData.privacy || "PUBLIC");
         setCoverImageUri(recipeData.imageUrl || null);
+        setOriginalCoverImage(recipeData.imageUrl || null);
 
-        // Fill ingredients
+        // Fill ingredients with IDs
         if (recipeData.ingredients && recipeData.ingredients.length > 0) {
           setIngredients(
             recipeData.ingredients.map((ing) => ({
+              id: ing.id,
               name: ing.name,
               quantity: ing.quantity,
             }))
           );
         }
 
-        // Fill steps
+        // Fill steps with IDs
         if (recipeData.steps && recipeData.steps.length > 0) {
           setSteps(
             recipeData.steps.map((step) => ({
-              stepNo: step.stepNo,
+              id: step.id,
+              stepNo: step.stepNo || step.step_no || 0,
               content: step.content,
               suggestedTime: step.suggestedTime || 0,
               tips: step.tips || "",
               images: step.images?.map((img) => img) || [],
+              newImages: [],
             }))
           );
         }
@@ -131,6 +145,7 @@ const EditRecipeScreen = () => {
 
     if (!result.canceled) {
       setCoverImageUri(result.assets[0].uri);
+      setCoverImageChanged(true);
     }
   };
 
@@ -143,26 +158,55 @@ const EditRecipeScreen = () => {
 
     if (!result.canceled) {
       const newSteps = [...steps];
-      newSteps[stepIndex].images = result.assets.map((asset) => asset.uri);
+      const existingNewImages = newSteps[stepIndex].newImages || [];
+      newSteps[stepIndex].newImages = [
+        ...existingNewImages,
+        ...result.assets.map((asset) => asset.uri),
+      ];
       setSteps(newSteps);
     }
+  };
+
+  const removeStepImage = (stepIndex: number, imageIndex: number) => {
+    const newSteps = [...steps];
+    const currentImages = newSteps[stepIndex].images || [];
+    newSteps[stepIndex].images = currentImages.filter(
+      (_, idx) => idx !== imageIndex
+    );
+    setSteps(newSteps);
+  };
+
+  const removeNewStepImage = (stepIndex: number, imageIndex: number) => {
+    const newSteps = [...steps];
+    const currentNewImages = newSteps[stepIndex].newImages || [];
+    newSteps[stepIndex].newImages = currentNewImages.filter(
+      (_, idx) => idx !== imageIndex
+    );
+    setSteps(newSteps);
   };
 
   const addIngredient = () => {
     setIngredients([...ingredients, { name: "", quantity: "" }]);
   };
 
-  const updateIngredient = (
+  const updateIngredient = <K extends keyof Ingredient>(
     index: number,
-    field: keyof Ingredient,
-    value: string
+    field: K,
+    value: Ingredient[K]
   ) => {
     const newIngredients = [...ingredients];
-    newIngredients[index][field] = value;
+    newIngredients[index] = {
+      ...newIngredients[index],
+      [field]: value,
+    } as Ingredient;
     setIngredients(newIngredients);
   };
 
   const removeIngredient = (index: number) => {
+    const ingredient = ingredients[index];
+    if (ingredient.id) {
+      setDeletedIngredients([...deletedIngredients, ingredient.id]);
+    }
     setIngredients(ingredients.filter((_, i) => i !== index));
   };
 
@@ -175,6 +219,7 @@ const EditRecipeScreen = () => {
         suggestedTime: 0,
         tips: "",
         images: [],
+        newImages: [],
       },
     ]);
   };
@@ -190,6 +235,10 @@ const EditRecipeScreen = () => {
   };
 
   const removeStep = (index: number) => {
+    const step = steps[index];
+    if (step.id) {
+      setDeletedSteps([...deletedSteps, step.id]);
+    }
     const newSteps = steps.filter((_, i) => i !== index);
     // Re-number steps
     newSteps.forEach((step, i) => {
@@ -232,23 +281,134 @@ const EditRecipeScreen = () => {
       return;
     }
 
-    if (!validateForm()) return;
+    console.log("Submit ne");
+    
 
+    // if (!validateForm()) return;
+console.log("Validate  ne");
     setLoading(true);
 
     try {
-      // TODO: Implement update API when backend is ready
-      Alert.alert(
-        "Thông báo",
-        "API cập nhật sẽ được implement sau. Hiện tại chỉ có chức năng xem và điền form.",
-        [
-          {
-            text: "OK",
-            onPress: () => navigation.goBack(),
-          },
-        ]
+      // 1. Update basic recipe info INCLUDING ingredients
+      const recipeData = {
+        categoryId: parseInt(categoryId),
+        title: title.trim(),
+        description: description.trim(),
+        prepareTime: parseInt(prepareTime),
+        cookTime: parseInt(cookTime),
+        difficulty,
+        privacy,
+        // Include all current ingredients (existing + new)
+        ingredients: ingredients
+          .filter((ing) => ing.id) // Only existing ingredients
+          .map((ing) => ({
+            name: ing.name.trim(),
+            quantity: ing.quantity.trim(),
+          })),
+      };
+      await adminService.updateRecipe(
+        tokens.accessToken,
+        Number(recipeId),
+        recipeData
       );
+
+      // 2. Update cover image if changed
+      if (
+        coverImageChanged &&
+        coverImageUri &&
+        coverImageUri !== originalCoverImage
+      ) {
+        await adminService.updateRecipeCover(
+          tokens.accessToken,
+          Number(recipeId),
+          coverImageUri
+        );
+      }
+
+      // 3. Delete removed ingredients (bulk delete)
+      if (deletedIngredients.length > 0) {
+        await adminService.deleteIngredients(
+          tokens.accessToken,
+          Number(recipeId),
+          deletedIngredients
+        );
+      }
+
+      // 4. Add new ingredients (ones without ID)
+      const newIngredients = ingredients.filter((ing) => !ing.id);
+      if (newIngredients.length > 0) {
+        await adminService.addIngredients(
+          tokens.accessToken,
+          Number(recipeId),
+          newIngredients
+        );
+      }
+
+      // 5. Delete removed steps (bulk delete)
+      if (deletedSteps.length > 0) {
+        await adminService.deleteSteps(
+          tokens.accessToken,
+          Number(recipeId),
+          deletedSteps
+        );
+      }
+
+      // 6. Update existing steps and add new images
+      const existingSteps = steps.filter((step) => step.id);
+      for (const step of existingSteps) {
+        if (step.id) {
+          await adminService.updateStep(
+            tokens.accessToken,
+            Number(recipeId),
+            step.id,
+            {
+              content: step.content,
+              stepNo: step.stepNo,
+              suggestedTime: step.suggestedTime,
+              tips: step.tips,
+            },
+            step.newImages // Add new images if any
+          );
+        }
+      }
+
+      // 7. Add new steps (ones without ID) with images
+      const newSteps = steps.filter((step) => !step.id);
+      for (const step of newSteps) {
+        await adminService.addStep(
+          tokens.accessToken,
+          Number(recipeId),
+          {
+            content: step.content,
+            suggestedTime: step.suggestedTime,
+            tips: step.tips,
+          },
+          step.newImages || [] // Include images when creating new step
+        );
+      }
+
+      // 8. Reorder steps if needed
+      const stepsWithId = steps.filter((step) => step.id);
+      if (stepsWithId.length > 0) {
+        const reorderData = stepsWithId.map((step, index) => ({
+          stepId: step.id!,
+          newStepNo: index + 1,
+        }));
+        await adminService.reorderSteps(
+          tokens.accessToken,
+          Number(recipeId),
+          reorderData
+        );
+      }
+
+      Alert.alert("Thành công", "Đã cập nhật công thức", [
+        {
+          text: "OK",
+          onPress: () => navigation.goBack(),
+        },
+      ]);
     } catch (error: any) {
+      console.error("Error updating recipe:", error);
       Alert.alert("Lỗi", error.message || "Không thể cập nhật công thức");
     } finally {
       setLoading(false);
@@ -274,10 +434,23 @@ const EditRecipeScreen = () => {
         onPress={pickCoverImage}
       >
         {coverImageUri ? (
-          <Image
-            source={{ uri: coverImageUri }}
-            style={adminStyles.coverPreview}
-          />
+          <View style={{ position: "relative" ,width: "100%",
+    height: 200,
+    borderRadius: 8,}}>
+            <Image
+              source={{ uri: coverImageUri }}
+              style={adminStyles.coverPreview}
+            />
+            <TouchableOpacity
+              style={adminStyles.imageRemoveButton}
+              onPress={() => {
+                setCoverImageUri(null);
+                setCoverImageChanged(true);
+              }}
+            >
+              <Text style={adminStyles.imageRemoveButtonText}>✕</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
           <Text>📷 Chọn ảnh bìa</Text>
         )}
@@ -418,26 +591,67 @@ const EditRecipeScreen = () => {
             onPress={() => pickStepImages(index)}
           >
             <Text>
-              📷 Chọn ảnh cho bước này{" "}
-              {step.images?.length ? `(${step.images.length})` : ""}
+              📷 Thêm ảnh cho bước này
+              {step.images?.length || step.newImages?.length
+                ? ` (${
+                    (step.images?.length || 0) + (step.newImages?.length || 0)
+                  })`
+                : ""}
             </Text>
           </TouchableOpacity>
 
+          {/* Existing images */}
           {step.images && step.images.length > 0 && (
-            <ScrollView horizontal style={{ marginTop: 10 }}>
-              {step.images.map((uri, imgIndex) => (
-                <Image
-                  key={imgIndex}
-                  source={{ uri }}
-                  style={{
-                    width: 80,
-                    height: 80,
-                    marginRight: 10,
-                    borderRadius: 8,
-                  }}
-                />
-              ))}
-            </ScrollView>
+            <View style={adminStyles.stepImagesContainer}>
+              <Text style={{ fontSize: 12, color: "#666", marginBottom: 8 }}>
+                Ảnh hiện có:
+              </Text>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+                {step.images.map((uri, imgIndex) => (
+                  <View key={imgIndex} style={adminStyles.stepImageWrapper}>
+                    <Image
+                      source={{ uri }}
+                      style={adminStyles.stepImagePreview}
+                    />
+                    <TouchableOpacity
+                      style={adminStyles.stepImageRemoveButton}
+                      onPress={() => removeStepImage(index, imgIndex)}
+                    >
+                      <Text style={adminStyles.stepImageRemoveButtonText}>
+                        ✕
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* New images */}
+          {step.newImages && step.newImages.length > 0 && (
+            <View style={adminStyles.stepImagesContainer}>
+              <Text style={{ fontSize: 12, color: "#FF6B35", marginBottom: 8 }}>
+                Ảnh mới thêm:
+              </Text>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+                {step.newImages.map((uri, imgIndex) => (
+                  <View key={imgIndex} style={adminStyles.stepImageWrapper}>
+                    <Image
+                      source={{ uri }}
+                      style={adminStyles.stepImagePreview}
+                    />
+                    <TouchableOpacity
+                      style={adminStyles.stepImageRemoveButton}
+                      onPress={() => removeNewStepImage(index, imgIndex)}
+                    >
+                      <Text style={adminStyles.stepImageRemoveButtonText}>
+                        ✕
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            </View>
           )}
 
           {steps.length > 1 && (
