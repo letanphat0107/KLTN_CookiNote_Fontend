@@ -80,9 +80,23 @@ const CreateRecipeScreen = () => {
 
     if (!result.canceled) {
       const newSteps = [...steps];
-      newSteps[stepIndex].imageUris = result.assets.map((asset) => asset.uri);
+      // Append new images to existing ones instead of replacing
+      const existingImages = newSteps[stepIndex].imageUris || [];
+      newSteps[stepIndex].imageUris = [
+        ...existingImages,
+        ...result.assets.map((asset) => asset.uri),
+      ];
       setSteps(newSteps);
     }
+  };
+
+  const removeStepImage = (stepIndex: number, imageIndex: number) => {
+    const newSteps = [...steps];
+    const currentImages = newSteps[stepIndex].imageUris || [];
+    newSteps[stepIndex].imageUris = currentImages.filter(
+      (_, idx) => idx !== imageIndex
+    );
+    setSteps(newSteps);
   };
 
   const addIngredient = () => {
@@ -116,7 +130,11 @@ const CreateRecipeScreen = () => {
     ]);
   };
 
-  const updateStep = <K extends keyof Step>(index: number, field: K, value: Step[K]) => {
+  const updateStep = <K extends keyof Step>(
+    index: number,
+    field: K,
+    value: Step[K]
+  ) => {
     const newSteps = [...steps];
     newSteps[index] = { ...newSteps[index], [field]: value } as Step;
     setSteps(newSteps);
@@ -170,7 +188,7 @@ const CreateRecipeScreen = () => {
     setLoading(true);
 
     try {
-      // 1. Create recipe
+      // Prepare recipe data
       const recipeData: CreateRecipeData = {
         categoryId: parseInt(categoryId),
         title: title.trim(),
@@ -191,57 +209,30 @@ const CreateRecipeScreen = () => {
         })),
       };
 
+      // Prepare step images
+      const stepImages = steps
+        .filter((step) => step.imageUris && step.imageUris.length > 0)
+        .map((step) => ({
+          stepNo: step.stepNo,
+          imageUris: step.imageUris!,
+        }));
+
+      // Create recipe with all images in one request
       const createdRecipe = await adminService.createRecipe(
         tokens.accessToken,
-        recipeData
+        recipeData,
+        coverImageUri || undefined,
+        stepImages
       );
 
-      Alert.alert("Thành công", "Đã tạo công thức");
-
-      // 2. Upload cover image if exists
-      if (coverImageUri) {
-        try {
-          await adminService.uploadRecipeCover(
-            tokens.accessToken,
-            createdRecipe.id,
-            coverImageUri
-          );
-          Alert.alert("Thành công", "Đã tải lên ảnh bìa");
-        } catch (error) {
-          console.error("Error uploading cover:", error);
-          Alert.alert("Cảnh báo", "Không thể tải lên ảnh bìa");
-        }
-      }
-
-      // 3. Upload step images if exist
-      for (let i = 0; i < steps.length; i++) {
-        const step = steps[i];
-        if (step.imageUris && step.imageUris.length > 0) {
-          try {
-            // You need to get step ID from the created recipe response
-            // For now, assuming stepId = stepNo (adjust based on your API)
-            await adminService.uploadStepImages(
-              tokens.accessToken,
-              createdRecipe.id,
-              step.stepNo,
-              step.imageUris
-            );
-          } catch (error) {
-            console.error(
-              `Error uploading images for step ${step.stepNo}:`,
-              error
-            );
-          }
-        }
-      }
-
-      Alert.alert("Hoàn tất", "Đã tạo công thức với đầy đủ hình ảnh", [
+      Alert.alert("Thành công", "Đã tạo công thức với đầy đủ hình ảnh", [
         {
           text: "OK",
           onPress: () => navigation.goBack(),
         },
       ]);
     } catch (error: any) {
+      console.error("Error creating recipe:", error);
       Alert.alert("Lỗi", error.message || "Không thể tạo công thức");
     } finally {
       setLoading(false);
@@ -258,10 +249,25 @@ const CreateRecipeScreen = () => {
         onPress={pickCoverImage}
       >
         {coverImageUri ? (
-          <Image
-            source={{ uri: coverImageUri }}
-            style={adminStyles.coverPreview}
-          />
+          <View
+            style={{
+              position: "relative",
+              width: "100%",
+              height: 200,
+              borderRadius: 8,
+            }}
+          >
+            <Image
+              source={{ uri: coverImageUri }}
+              style={adminStyles.coverPreview}
+            />
+            <TouchableOpacity
+              style={adminStyles.imageRemoveButton}
+              onPress={() => setCoverImageUri(null)}
+            >
+              <Text style={adminStyles.imageRemoveButtonText}>✕</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
           <Text>📷 Chọn ảnh bìa</Text>
         )}
@@ -397,31 +403,40 @@ const CreateRecipeScreen = () => {
             multiline
           />
 
-          <TouchableOpacity
-            style={adminStyles.imagePickerButton}
-            onPress={() => pickStepImages(index)}
-          >
-            <Text>
-              📷 Chọn ảnh cho bước này{" "}
-              {step.imageUris?.length ? `(${step.imageUris.length})` : ""}
-            </Text>
-          </TouchableOpacity>
+          {/* Image Picker Button */}
+        <TouchableOpacity
+          style={adminStyles.imagePickerButton}
+          onPress={() => pickStepImages(index)}
+        >
+          <Text>
+            📷 {step.imageUris?.length ? "Thêm" : "Chọn"} ảnh cho bước này
+            {step.imageUris?.length ? ` (${step.imageUris.length})` : ""}
+          </Text>
+        </TouchableOpacity>
 
-          {step.imageUris && step.imageUris.length > 0 && (
-            <ScrollView horizontal style={{ marginTop: 10 }}>
-              {step.imageUris.map((uri, imgIndex) => (
+        {/* Step Images Grid */}
+        {step.imageUris && step.imageUris.length > 0 && (
+          <View style={adminStyles.stepImagesContainer}>
+            {step.imageUris.map((uri, imgIndex) => (
+              <View key={imgIndex} style={adminStyles.stepImageWrapper}>
                 <Image
-                  key={imgIndex}
                   source={{ uri }}
-                  style={{
-                    width: 80,
-                    height: 80,
-                    marginRight: 10,
-                    borderRadius: 8,
-                  }}
+                  style={adminStyles.stepImagePreview}
                 />
-              ))}
-            </ScrollView>
+                <TouchableOpacity
+                  style={adminStyles.stepImageRemoveButton}
+                  onPress={() => removeStepImage(index, imgIndex)}
+                >
+                  <Text style={adminStyles.stepImageRemoveButtonText}>✕</Text>
+                </TouchableOpacity>
+                <View style={adminStyles.stepImageNumber}>
+                  <Text style={adminStyles.stepImageNumberText}>
+                    {imgIndex + 1}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
           )}
 
           {steps.length > 1 && (

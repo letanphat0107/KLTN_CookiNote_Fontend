@@ -11,6 +11,7 @@ export const recipeStyles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 20,
+    marginTop: 40,
   },
   scrollContainer: {
     flexGrow: 1,

@@ -25,7 +25,7 @@ export const API_CONFIG = {
     RECIPE: {
       LIST: "/cookinote/recipes",
       DETAIL: "/cookinote/recipes",
-      CREATE: "/cookinote/recipes",
+      CREATE: "/cookinote/recipes/create-with-images",
       UPDATE: "/cookinote/recipes",
       DELETE: "/cookinote/recipes",
       SEARCH: "/cookinote/recipes/search",
