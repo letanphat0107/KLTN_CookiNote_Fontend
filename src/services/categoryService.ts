@@ -1,5 +1,5 @@
 // src/services/categoryService.ts
-import { fetchWithAuth } from "../utils/apiUtils";
+import { fetchWithAuth } from "../utils/apiHelper";
 import { API_URLS, buildApiUrl, API_CONFIG } from "../config/api";
 import { Category } from "../types/recipe";
 
@@ -95,9 +95,6 @@ export const createCategory = async (
       buildApiUrl(API_CONFIG.ENDPOINTS.CATEGORY.CREATE),
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify(categoryData),
       }
     );
@@ -130,9 +127,6 @@ export const updateCategory = async (
 
     const response = await fetchWithAuth(updateUrl, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(categoryData),
     });
 
@@ -162,9 +156,6 @@ export const moveRecipesBetweenCategories = async (
       buildApiUrl(API_CONFIG.ENDPOINTS.CATEGORY.CHANGECATEGORY),
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify(moveData),
       }
     );
@@ -195,9 +186,6 @@ export const deleteCategory = async (categoryId: number): Promise<boolean> => {
 
     const response = await fetchWithAuth(deleteUrl, {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
 
     const result = await response.json();
