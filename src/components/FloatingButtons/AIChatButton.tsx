@@ -27,6 +27,7 @@ import {
   sendAIChatMessage,
   getRecipeSuggestions,
   generateRecipe,
+  saveAIRecipe,
   RecipeSuggestion,
   AIGeneratedRecipe,
 } from "../../services/aiChatService";
@@ -61,6 +62,7 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
+  const [isSavingRecipe, setIsSavingRecipe] = useState(false);
 
   // Animation
   const scaleAnim = useState(new Animated.Value(1))[0];
@@ -375,7 +377,7 @@ const handleSendMessage = async () => {
               ? {
                   ...msg,
                   message:
-                    "Xin lỗi, tôi không thể tạo công thức này. Vui lòng thử lại với tên món khác.",
+                    "Xin lỗi, tôi không thể tạo công thức này. Vui lòng thử lại với 'Hãy tạo cho tôi công thức ....'",
                   isLoading: false,
                 }
               : msg
@@ -416,7 +418,61 @@ const handleSendMessage = async () => {
   }
 };
 
-// ...existing code...
+const handleSaveRecipe = async (recipe: AIGeneratedRecipe) => {
+    Alert.alert(
+      "Lưu công thức",
+      "Bạn có muốn lưu công thức này vào danh sách của mình?",
+      [
+        {
+          text: "Hủy",
+          style: "cancel",
+        },
+        {
+          text: "Lưu",
+          onPress: async () => {
+            setIsSavingRecipe(true);
+            try {
+              const result = await saveAIRecipe(recipe);
+
+              if (result.success) {
+                Alert.alert(
+                  "Thành công",
+                  result.message || "Đã lưu công thức thành công!",
+                  [
+                    {
+                      text: "Xem công thức",
+                      onPress: () => {
+                        if (result.recipeId) {
+                          onToggle(); // Close AI chat
+                          navigation?.navigate("RecipeDetail", {
+                            recipeId: result.recipeId,
+                          });
+                        }
+                      },
+                    },
+                    {
+                      text: "Đóng",
+                      style: "cancel",
+                    },
+                  ]
+                );
+              } else {
+                Alert.alert(
+                  "Lỗi",
+                  result.message || "Không thể lưu công thức"
+                );
+              }
+            } catch (error) {
+              console.error("Error in handleSaveRecipe:", error);
+              Alert.alert("Lỗi", "Đã xảy ra lỗi khi lưu công thức");
+            } finally {
+              setIsSavingRecipe(false);
+            }
+          },
+        },
+      ]
+    );
+  };
 
 // Add new component to render generated recipe
 const renderGeneratedRecipe = (recipe: AIGeneratedRecipe) => (
@@ -492,19 +548,26 @@ const renderGeneratedRecipe = (recipe: AIGeneratedRecipe) => (
 
     {/* Action Button */}
     <TouchableOpacity
-      style={floatingStyles.saveRecipeButton}
-      onPress={() => {
-        // TODO: Navigate to create recipe screen with pre-filled data
-        Alert.alert(
-          "Tính năng đang phát triển",
-          "Tính năng lưu công thức sẽ sớm được cập nhật!"
-        );
-      }}
-    >
-      <Text style={floatingStyles.saveRecipeButtonText}>
-        💾 Lưu công thức này
-      </Text>
-    </TouchableOpacity>
+        style={[
+          floatingStyles.saveRecipeButton,
+          isSavingRecipe && floatingStyles.disabledButton,
+        ]}
+        onPress={() => handleSaveRecipe(recipe)}
+        disabled={isSavingRecipe}
+      >
+        {isSavingRecipe ? (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <ActivityIndicator size="small" color="#FFFFFF" />
+            <Text style={floatingStyles.saveRecipeButtonText}>
+              Đang lưu...
+            </Text>
+          </View>
+        ) : (
+          <Text style={floatingStyles.saveRecipeButtonText}>
+            💾 Lưu công thức này
+          </Text>
+        )}
+      </TouchableOpacity>
   </View>
 );
 

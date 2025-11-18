@@ -187,6 +187,74 @@ export const generateRecipe = async (
   }
 };
 
+export const saveAIRecipe = async (
+  recipe: AIGeneratedRecipe
+): Promise<{ success: boolean; recipeId?: number; message?: string }> => {
+  try {
+    console.log("Saving AI recipe:", recipe);
+
+    // Generate unique categoryId (use timestamp-based approach to avoid conflicts)
+    // Range: 200-999 to avoid conflicts with existing categories (1-118)
+    // const categoryId = 200 + Math.floor(Math.random() * 800);
+    const categoryId = 5;
+
+    const recipeData = {
+      categoryId: categoryId,
+      title: `AI: ${recipe.title}`,
+      description: recipe.description,
+      prepareTime: recipe.prepareTime,
+      cookTime: recipe.cookTime,
+      difficulty: recipe.difficulty.toUpperCase(),
+      privacy: "PRIVATE" as const,
+      ingredients: recipe.ingredients.map((ing) => ({
+        name: ing.name,
+        quantity: ing.quantity,
+      })),
+      steps: recipe.steps.map((step) => ({
+        stepNo: step.stepNo,
+        content: step.content,
+        suggestedTime: step.suggestedTime || 0,
+        tips: step.tips || undefined,
+      })),
+    };
+
+    console.log("Recipe data to save:", recipeData);
+
+    const response = await fetchWithAuth(
+      `${API_CONFIG.BASE_URL}/cookinote/recipes`,
+      {
+        method: "POST",
+        body: JSON.stringify(recipeData),
+      },
+      true,
+      false // JSON request
+    );
+
+    const result = await response.json();
+    console.log("Save AI recipe response:", result);
+
+    if (response.ok && result.code === 200) {
+      return {
+        success: true,
+        recipeId: result.data?.id,
+        message: "Đã lưu công thức thành công!",
+      };
+    } else {
+      console.error("Failed to save AI recipe:", result.message);
+      return {
+        success: false,
+        message: result.message || "Không thể lưu công thức",
+      };
+    }
+  } catch (error) {
+    console.error("Error saving AI recipe:", error);
+    return {
+      success: false,
+      message: "Đã xảy ra lỗi khi lưu công thức",
+    };
+  }
+};
+
 // Export interfaces
 export type {
   ChatMessage,
