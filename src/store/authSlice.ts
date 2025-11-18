@@ -48,30 +48,28 @@ export const checkAuthStatus = createAsyncThunk(
           email: result.data.email,
           displayName: result.data.displayName,
           role: result.data.role,
-          // Keep stored data for fields not returned by server
           username: storedUser.username,
           avatarUrl: storedUser.avatarUrl,
         };
 
-        // Update stored user data with latest from server
         await AsyncStorage.setItem(USER_KEY, JSON.stringify(serverUser));
-
         return { user: serverUser, tokens };
       } else if (response.status === 401 || result.code === 401) {
         // Access token expired, try to refresh
         console.log("Access token expired, attempting refresh...");
 
         try {
-          const refreshResult = await dispatch(refreshTokens()).unwrap();
+          const newTokens = await dispatch(refreshTokens()).unwrap();
+          console.log("Tokens refreshed, retrying validation...");
 
-          // Retry validation with new token
+          // Retry validation with new access token
           const retryResponse = await fetch(
-            `${API_CONFIG.BASE_URL}/cookinote/auth/refresh`,
+            `${API_CONFIG.BASE_URL}/cookinote/user/me/details`,
             {
               method: "GET",
               headers: {
                 ...API_HEADERS,
-                Authorization: `Bearer ${refreshResult.accessToken}`,
+                Authorization: `Bearer ${newTokens.accessToken}`,
               },
             }
           );
@@ -89,11 +87,12 @@ export const checkAuthStatus = createAsyncThunk(
             };
 
             await AsyncStorage.setItem(USER_KEY, JSON.stringify(serverUser));
-            return { user: serverUser, tokens: refreshResult };
+            return { user: serverUser, tokens: newTokens };
           } else {
             throw new Error("Token validation failed after refresh");
           }
         } catch (refreshError) {
+          console.error("Token refresh or retry failed:", refreshError);
           // Clear expired data
           await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
           return rejectWithValue("Token refresh failed - please login again");
@@ -107,14 +106,11 @@ export const checkAuthStatus = createAsyncThunk(
       }
     } catch (error) {
       console.error("Error checking auth status:", error);
-
-      // Network error - clear stored data to be safe
       try {
         await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
       } catch (storageError) {
         console.error("Error clearing storage:", storageError);
       }
-
       return rejectWithValue("Network error - please login again");
     }
   }
@@ -200,15 +196,28 @@ export const refreshTokens = createAsyncThunk(
       const result = await response.json();
       console.log("Refresh token response:", result);
 
-      if (!response.ok) {
+      if (!response.ok || result.code !== 200) {
         // Refresh token is invalid or expired
         return rejectWithValue(result.message || "Refresh token expired");
       }
 
-      // Assuming the response structure is similar to login
-      const newTokens = result.data?.tokens || result.tokens;
+      // FIX: Parse tokens correctly from response
+      const newTokens: Tokens = {
+        accessToken: result.data.accessToken,
+        refreshToken: result.data.refreshToken,
+        accessExpiresInSeconds:
+          typeof result.data.accessExpiresInSeconds === "number"
+            ? result.data.accessExpiresInSeconds
+            : Number(result.data.accessExpiresInSeconds) || 0,
+        refreshExpiresInSeconds:
+          typeof result.data.refreshExpiresInSeconds === "number"
+            ? result.data.refreshExpiresInSeconds
+            : Number(result.data.refreshExpiresInSeconds) || 0,
+      };
 
-      if (!newTokens) {
+      console.log("New tokens extracted:", newTokens);
+
+      if (!newTokens.accessToken || !newTokens.refreshToken) {
         return rejectWithValue("Invalid refresh response format");
       }
 
