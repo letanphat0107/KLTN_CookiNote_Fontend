@@ -4,6 +4,16 @@
       "android": {
         "buildType": "apk"
       }
+    },
+    "ios": {
+      "ios": {
+        "simulator": false
+      }
+    },
+    "simulator": {
+      "ios": {
+        "simulator": true
+      }
     }
   }
 }
