@@ -35,9 +35,9 @@ export class UserService {
   ): Promise<UserProfileResponse> {
     try {
       const response = await fetchWithAuth(API_URLS.UPDATE_DISPLAY_NAME, {
-        method: "PUT",
+        method: "PATCH",
         body: JSON.stringify({ displayName }),
-      });
+      },true, false);
 
       return response.json();
     } catch (error) {
@@ -49,10 +49,11 @@ export class UserService {
   // Change avatar
   static async changeAvatar(
     imageUri: string,
-    accessToken: string
   ): Promise<UserProfileResponse> {
     try {
       const formData = new FormData();
+
+
       const filename = imageUri.split("/").pop() || "avatar.jpg";
       const match = /\.(\w+)$/.exec(filename);
       const fileType = match ? `image/${match[1]}` : "image/jpeg";
@@ -66,7 +67,7 @@ export class UserService {
       const response = await fetchWithAuth(API_URLS.CHANGE_AVATAR, {
         method: "PUT",
         body: formData,
-      });
+      },true, true);
 
       return response.json();
     } catch (error) {

@@ -171,7 +171,6 @@ export const useUserProfile = () => {
     try {
       const result = await UserService.changeAvatar(
         imageUri,
-        tokens.accessToken
       );
 
       if (result.code === 200) {

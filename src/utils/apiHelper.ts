@@ -8,7 +8,8 @@ const TOKEN_KEY = "auth_tokens";
 export const fetchWithAuth = async (
   url: string,
   options: RequestInit = {},
-  retry: boolean = true
+  retry: boolean = true,
+  isFormData: boolean = false
 ): Promise<Response> => {
   try {
     // Get current access token
@@ -19,12 +20,27 @@ export const fetchWithAuth = async (
 
     const tokens = JSON.parse(tokensString);
 
-    // Add authorization header
-    const headers = {
-      ...API_HEADERS,
+    // Prepare headers
+    let headers: any = {
       ...options.headers,
       Authorization: `Bearer ${tokens.accessToken}`,
     };
+
+    // Only add Content-Type for non-FormData requests
+    if (!isFormData) {
+      headers = {
+        ...API_HEADERS,
+        ...headers,
+      };
+    }
+
+    console.log("Fetch with auth:", {
+      url,
+      method: options.method,
+      isFormData,
+      hasBody: !!options.body,
+      headers: isFormData ? { Authorization: "Bearer ***" } : headers,
+    });
 
     // Make request
     const response = await fetch(url, {
@@ -32,25 +48,30 @@ export const fetchWithAuth = async (
       headers,
     });
 
+    console.log("Response status:", response.status);
+
     // If unauthorized and retry is enabled, try to refresh token
-    if (
-      (response.status === 401 ||
-        (response.headers.get("content-type")?.includes("application/json") &&
-          (await response.clone().json()).code === 401)) &&
-      retry
-    ) {
+    if (response.status === 401 && retry) {
       console.log("Access token expired, refreshing...");
 
       try {
         // Refresh tokens
         const result = await store.dispatch(refreshTokens()).unwrap();
 
+        console.log("Tokens refreshed successfully, retrying request...");
+
         // Retry request with new token
-        const retryHeaders = {
-          ...API_HEADERS,
+        let retryHeaders: any = {
           ...options.headers,
           Authorization: `Bearer ${result.accessToken}`,
         };
+
+        if (!isFormData) {
+          retryHeaders = {
+            ...API_HEADERS,
+            ...retryHeaders,
+          };
+        }
 
         return await fetch(url, {
           ...options,

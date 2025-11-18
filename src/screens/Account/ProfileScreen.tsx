@@ -161,9 +161,9 @@ const takePhoto = async () => {
       const success = await changeAvatar(imageUri);
       setIsUpdatingField(null);
 
-      if (success) {
-        Alert.alert("Thành công", "Đã cập nhật ảnh đại diện");
-      }
+      // if (success) {
+      //   Alert.alert("Thành công", "Đã cập nhật ảnh đại diện");
+      // }
     }
   } catch (error) {
     console.error("Take photo error:", error);
@@ -201,9 +201,9 @@ const pickFromLibrary = async () => {
       const success = await changeAvatar(imageUri);
       setIsUpdatingField(null);
 
-      if (success) {
-        Alert.alert("Thành công", "Đã cập nhật ảnh đại diện");
-      }
+      // if (success) {
+      //   Alert.alert("Thành công", "Đã cập nhật ảnh đại diện");
+      // }
     }
   } catch (error) {
     console.error("Pick image error:", error);

@@ -69,7 +69,7 @@ class AdminService {
         buildApiUrl(API_CONFIG.ENDPOINTS.ADMIN.DASHBOARD),
         {
           method: "GET",
-        }
+        },true,false
       );
 
       if (!response.ok) {
@@ -312,7 +312,7 @@ class AdminService {
         {
           method: "POST",
           body: formData,
-        }
+        },true, true
       );
 
       if (!response.ok) {
@@ -347,7 +347,7 @@ class AdminService {
         {
           method: "PUT",
           body: formData,
-        }
+        },true, true
       );
 
       if (!response.ok) {
@@ -388,7 +388,7 @@ class AdminService {
         {
           method: "POST",
           body: formData,
-        }
+        },true, true
       );
 
       if (!response.ok) {
@@ -447,7 +447,7 @@ class AdminService {
         {
           method: "PUT",
           body: JSON.stringify(recipeData),
-        }
+        },true, false
       );
 
       if (!response.ok) {
@@ -500,7 +500,7 @@ class AdminService {
         {
           method: "POST",
           body: formData,
-        }
+        },true, true
       );
 
       if (!response.ok) {
@@ -584,7 +584,7 @@ class AdminService {
         {
           method: "PUT",
           body: formData,
-        }
+        },true, true
       );
 
       if (!response.ok) {
