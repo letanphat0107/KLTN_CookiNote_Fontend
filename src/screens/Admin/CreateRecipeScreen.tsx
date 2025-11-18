@@ -219,7 +219,6 @@ const CreateRecipeScreen = () => {
 
       // Create recipe with all images in one request
       const createdRecipe = await adminService.createRecipe(
-        tokens.accessToken,
         recipeData,
         coverImageUri || undefined,
         stepImages

@@ -1,36 +1,6 @@
 // src/services/aiChatService.ts
 import { API_CONFIG } from "../config/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-// Helper function to get access token
-const getAccessToken = async (): Promise<string | null> => {
-  try {
-    const tokens = await AsyncStorage.getItem("auth_tokens");
-    if (tokens) {
-      const parsedTokens = JSON.parse(tokens);
-      return parsedTokens.accessToken;
-    }
-    return null;
-  } catch (error) {
-    console.error("Error getting access token:", error);
-    return null;
-  }
-};
-
-// Helper function to create auth headers
-const createAuthHeaders = async (): Promise<Record<string, string>> => {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  };
-
-  const accessToken = await getAccessToken();
-  if (accessToken) {
-    headers.Authorization = `Bearer ${accessToken}`;
-  }
-
-  return headers;
-};
+import { fetchWithAuth } from "../utils/apiHelper";
 
 interface ChatMessage {
   id: string;
@@ -42,12 +12,13 @@ interface ChatMessage {
 // Send message to AI
 export const sendAIChatMessage = async (message: string): Promise<string> => {
   try {
-    const headers = await createAuthHeaders();
-    const response = await fetch(`${API_CONFIG.BASE_URL}/cookinote/ai/chat`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ message }),
-    });
+    const response = await fetchWithAuth(
+      `${API_CONFIG.BASE_URL}/cookinote/ai/chat`,
+      {
+        method: "POST",
+        body: JSON.stringify({ message }),
+      }
+    );
 
     const result = await response.json();
 
@@ -68,12 +39,10 @@ export const sendAIChatMessage = async (message: string): Promise<string> => {
 // Get chat history
 export const getChatHistory = async (): Promise<ChatMessage[]> => {
   try {
-    const headers = await createAuthHeaders();
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}/cookinote/ai/chat/history`,
       {
         method: "GET",
-        headers,
       }
     );
 
@@ -89,8 +58,7 @@ export const getChatHistory = async (): Promise<ChatMessage[]> => {
   }
 };
 
-// Add new function for recipe suggestions
-
+// Recipe Suggestion interfaces
 interface RecipeSuggestion {
   recipe: {
     id: number;
@@ -125,12 +93,10 @@ export const getRecipeSuggestions = async (
   try {
     console.log("Getting recipe suggestions for ingredients:", ingredientNames);
 
-    const headers = await createAuthHeaders();
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/suggest-recipes`,
       {
         method: "POST",
-        headers,
         body: JSON.stringify({ ingredientNames }),
       }
     );
@@ -164,11 +130,7 @@ export const getRecipeSuggestions = async (
   }
 };
 
-// Export interfaces for use in components
-export type { RecipeSuggestion, RecipeSuggestionResponse };
-
-
-// Add new interface for AI generated recipe
+// AI Generated Recipe interfaces
 interface AIGeneratedRecipe {
   title: string;
   description: string;
@@ -202,12 +164,10 @@ export const generateRecipe = async (
   try {
     console.log("Generating recipe for:", dishName);
 
-    const headers = await createAuthHeaders();
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}/cookinote/ai/generate-recipe`,
       {
         method: "POST",
-        headers,
         body: JSON.stringify({ dishName }),
       }
     );
@@ -227,5 +187,11 @@ export const generateRecipe = async (
   }
 };
 
-// Export new interface
-export type { AIGeneratedRecipe, GenerateRecipeResponse };
+// Export interfaces
+export type {
+  ChatMessage,
+  RecipeSuggestion,
+  RecipeSuggestionResponse,
+  AIGeneratedRecipe,
+  GenerateRecipeResponse,
+};

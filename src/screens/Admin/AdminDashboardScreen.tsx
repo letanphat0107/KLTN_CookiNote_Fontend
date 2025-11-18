@@ -40,7 +40,7 @@ const AdminDashboardScreen = () => {
     if (!tokens?.accessToken) return;
 
     try {
-      const data = await adminService.getDashboardStats(tokens.accessToken);
+      const data = await adminService.getDashboardStats();
       setStats(data);
     } catch (error) {
       setStats(defaultStats);

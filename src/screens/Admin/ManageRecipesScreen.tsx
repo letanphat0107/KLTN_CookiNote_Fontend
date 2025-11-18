@@ -37,7 +37,7 @@ const ManageRecipesScreen = () => {
       else if (pageNum === 0) setLoading(true);
 
       const data = await adminService.getAdminRecipes(
-        tokens.accessToken,
+        
         pageNum,
         12
       );
@@ -112,7 +112,7 @@ const ManageRecipesScreen = () => {
         style: "destructive",
         onPress: async () => {
           try {
-            await adminService.deleteRecipe(tokens.accessToken, recipeId);
+            await adminService.deleteRecipe( recipeId);
             Alert.alert("Thành công", "Đã xóa món ăn");
             fetchRecipes(0, true);
           } catch (error: any) {

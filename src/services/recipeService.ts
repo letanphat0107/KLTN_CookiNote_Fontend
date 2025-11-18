@@ -1,6 +1,6 @@
 // src/services/recipeService.ts
-import { fetchWithAuth } from "../utils/apiUtils";
-import { API_URLS, buildApiUrl, API_CONFIG } from "../config/api";
+import { fetchWithAuth } from "../utils/apiHelper";
+import { API_URLS, API_CONFIG } from "../config/api";
 import {
   Recipe,
   RecipeWithDetails,
@@ -9,23 +9,6 @@ import {
   PaginatedRecipeResponse,
 } from "../types/recipe";
 import { RecipeSearchParams } from "../types/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-// Helper function to get access token
-const getAccessToken = async (): Promise<string | null> => {
-  try {
-    return await AsyncStorage.getItem("auth_tokens").then((tokens) => {
-      if (tokens) {
-        const parsedTokens = JSON.parse(tokens);
-        return parsedTokens.accessToken;
-      } else {
-        return null;
-      }    }     )
-  } catch (error) {
-    console.error("Error getting access token:", error);
-    return null;
-  }
-};
 
 // Get popular recipes (sorted by view count)
 export const getPopularRecipes = async (limit = 8): Promise<Recipe[]> => {
@@ -49,6 +32,7 @@ export const getPopularRecipes = async (limit = 8): Promise<Recipe[]> => {
       return [];
     }
   } catch (error) {
+    console.error("Error fetching popular recipes:", error);
     return [];
   }
 };
@@ -69,21 +53,13 @@ export const getEasyToCookRecipes = async (limit = 7): Promise<Recipe[]> => {
     const result: RecipeResponse = await response.json();
 
     if (response.ok && result.code === 200) {
-      // Filter for easy recipes if needed, or return all latest
-      const recipes = result.data.items || [];
-
-      // Option 1: Return all latest recipes
-      return recipes;
-
-      // Option 2: Filter for easy recipes only (uncomment if needed)
-      // return recipes.filter(recipe =>
-      //   recipe.difficulty?.toUpperCase() === "EASY"
-      // );
+      return result.data.items || [];
     } else {
       console.error("Failed to fetch latest recipes:", result.message);
       return [];
     }
   } catch (error) {
+    console.error("Error fetching latest recipes:", error);
     return [];
   }
 };
@@ -147,33 +123,15 @@ export const searchRecipes = async (
   }
 };
 
-// Get recipe details with authentication
+// Get recipe details with authentication (using fetchWithAuth)
 export const getRecipeDetails = async (
   recipeId: number
 ): Promise<RecipeWithDetails | null> => {
   try {
     console.log("Fetching recipe details for ID:", recipeId);
 
-    // Get access token
-    const accessToken = await getAccessToken();
-
-    // Prepare headers
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    };
-
-    // Add authorization header if token exists
-    if (accessToken) {
-      headers.Authorization = `Bearer ${accessToken}`;
-    }
-
-    console.log(accessToken);
-    
-
-    const response = await fetch(`${API_URLS.RECIPES}/${recipeId}`, {
+    const response = await fetchWithAuth(`${API_URLS.RECIPES}/${recipeId}`, {
       method: "GET",
-      headers,
     });
 
     if (!response.ok) {
@@ -190,12 +148,10 @@ export const getRecipeDetails = async (
       return null;
     }
   } catch (error) {
-
+    console.error("Error fetching recipe details:", error);
     return null;
   }
 };
-
-// Alternative: Using fetchWithAuth utility
 
 // Get recipes by category with pagination
 export const getRecipesByCategory = async (
@@ -235,7 +191,7 @@ export const getRecipesByCategory = async (
       };
     }
   } catch (error) {
-
+    console.error("Error fetching recipes by category:", error);
     return {
       page: 0,
       size: 0,
@@ -279,11 +235,12 @@ export const getRecipesByDifficulty = async (
       return [];
     }
   } catch (error) {
-
+    console.error("Error fetching recipes by difficulty:", error);
     return [];
   }
 };
 
+// Get recipes by category using specific endpoint
 export const getRecipesByCategoryEndpoint = async (
   categoryId: number,
   page = 0,
@@ -291,7 +248,7 @@ export const getRecipesByCategoryEndpoint = async (
 ): Promise<PaginatedRecipeResponse> => {
   try {
     console.log(`Fetching recipes for category ${categoryId}...`);
-    
+
     const params = new URLSearchParams({
       page: page.toString(),
       size: size.toString(),
@@ -345,7 +302,7 @@ export const searchRecipesByQuery = async (
 ): Promise<PaginatedRecipeResponse> => {
   try {
     console.log(`Searching recipes with query: ${query}`);
-    
+
     const params = new URLSearchParams({
       query: query.trim(),
       page: page.toString(),

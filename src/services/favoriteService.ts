@@ -1,37 +1,7 @@
 // src/services/favoriteService.ts
 import { API_CONFIG, buildApiUrl } from "../config/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { fetchWithAuth } from "../utils/apiHelper";
 import { Recipe } from "../types/recipe";
-
-// Helper function to get access token
-const getAccessToken = async (): Promise<string | null> => {
-  try {
-    const tokens = await AsyncStorage.getItem("auth_tokens");
-    if (tokens) {
-      const parsedTokens = JSON.parse(tokens);
-      return parsedTokens.accessToken;
-    }
-    return null;
-  } catch (error) {
-    console.error("Error getting access token:", error);
-    return null;
-  }
-};
-
-// Helper function to create auth headers
-const createAuthHeaders = async (): Promise<Record<string, string>> => {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  };
-
-  const accessToken = await getAccessToken();
-  if (accessToken) {
-    headers.Authorization = `Bearer ${accessToken}`;
-  }
-
-  return headers;
-};
 
 // Response interfaces
 interface FavoriteResponse {
@@ -51,7 +21,6 @@ interface PaginatedFavoriteResponse {
   items: Recipe[];
 }
 
-// Response interfaces
 interface CookedHistoryResponse {
   code: number;
   message: string;
@@ -77,6 +46,7 @@ interface CookedHistoryItem {
   note?: string;
 }
 
+// Get cooked history
 export const getCookedHistory = async (
   page = 0,
   size = 20
@@ -84,18 +54,16 @@ export const getCookedHistory = async (
   try {
     console.log("Fetching cooked history...");
 
-    const headers = await createAuthHeaders();
     const params = new URLSearchParams({
       page: page.toString(),
       size: size.toString(),
       sort: "cookedAt,desc",
     });
 
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}/cookinote/cooked-history/me?${params}`,
       {
         method: "GET",
-        headers,
       }
     );
 
@@ -137,12 +105,10 @@ export const addToCookedHistory = async (
   try {
     console.log("Adding to cooked history:", { recipeId, rating, note });
 
-    const headers = await createAuthHeaders();
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}/cookinote/cooked-history`,
       {
         method: "POST",
-        headers,
         body: JSON.stringify({
           recipeId,
           rating,
@@ -168,12 +134,10 @@ export const removeFromCookedHistory = async (
   try {
     console.log("Removing from cooked history:", historyId);
 
-    const headers = await createAuthHeaders();
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}/cookinote/cooked-history/${historyId}`,
       {
         method: "DELETE",
-        headers,
       }
     );
 
@@ -187,22 +151,17 @@ export const removeFromCookedHistory = async (
   }
 };
 
-export type { CookedHistoryItem, PaginatedCookedHistoryResponse };
-
 // Add recipe to favorites
 export const addToFavorites = async (recipeId: number): Promise<boolean> => {
   try {
     console.log("Adding recipe to favorites:", recipeId);
 
-    const headers = await createAuthHeaders();
     const url = buildApiUrl(API_CONFIG.ENDPOINTS.RECIPE.ADD_FAVORITE, {
       id: recipeId,
     });
 
-    const response = await fetch(url, {
+    const response = await fetchWithAuth(url, {
       method: "POST",
-      headers,
-      
     });
 
     const result: FavoriteResponse = await response.json();
@@ -227,15 +186,12 @@ export const removeFromFavorites = async (
   try {
     console.log("Removing recipe from favorites:", recipeId);
 
-    const headers = await createAuthHeaders();
     const url = buildApiUrl(API_CONFIG.ENDPOINTS.RECIPE.REMOVE_FAVORITE, {
       id: recipeId,
     });
 
-    const response = await fetch(url, {
+    const response = await fetchWithAuth(url, {
       method: "DELETE",
-      headers,
-      
     });
 
     const result: FavoriteResponse = await response.json();
@@ -260,15 +216,12 @@ export const checkFavoriteStatus = async (
   try {
     console.log("Checking favorite status for recipe:", recipeId);
 
-    const headers = await createAuthHeaders();
     const url = buildApiUrl(API_CONFIG.ENDPOINTS.RECIPE.ADD_FAVORITE, {
       id: recipeId,
     });
 
-    const response = await fetch(url, {
+    const response = await fetchWithAuth(url, {
       method: "GET",
-      headers,
-      
     });
 
     const result: FavoriteResponse = await response.json();
@@ -282,10 +235,6 @@ export const checkFavoriteStatus = async (
 };
 
 // Get user's favorite recipes
-// src/services/favoriteService.ts
-// Fix getFavoriteRecipes response structure
-
-// Get user's favorite recipes
 export const getFavoriteRecipes = async (
   page = 0,
   size = 20
@@ -293,18 +242,16 @@ export const getFavoriteRecipes = async (
   try {
     console.log("Fetching favorite recipes...");
 
-    const headers = await createAuthHeaders();
     const params = new URLSearchParams({
       page: page.toString(),
       size: size.toString(),
       sort: "createdAt,desc",
     });
 
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.RECIPE.FAVORITE}?${params}`,
       {
         method: "GET",
-        headers,
       }
     );
 
@@ -312,9 +259,8 @@ export const getFavoriteRecipes = async (
     console.log("Get favorite recipes response:", result);
 
     if (response.ok && result.code === 200) {
-      // Fix: Handle different response structures
-      const items = Array.isArray(result.data) 
-        ? result.data 
+      const items = Array.isArray(result.data)
+        ? result.data
         : result.data?.items || [];
 
       return {
@@ -357,20 +303,17 @@ export const getMyRecipes = async (
   try {
     console.log("Fetching my recipes...");
 
-    const headers = await createAuthHeaders();
     const params = new URLSearchParams({
       page: page.toString(),
       size: size.toString(),
       sort: "createdAt,desc",
-      owner: "me", // Filter for user's own recipes
+      owner: "me",
     });
 
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.RECIPE.MYRECIPE}?${params}`,
       {
         method: "GET",
-        headers,
-        
       }
     );
 
@@ -419,7 +362,6 @@ export const getDeletedRecipes = async (
   try {
     console.log("Fetching deleted recipes...");
 
-    const headers = await createAuthHeaders();
     const params = new URLSearchParams({
       userId: userId.toString(),
       page: page.toString(),
@@ -427,12 +369,10 @@ export const getDeletedRecipes = async (
       sort: "deletedAt,desc",
     });
 
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}/cookinote/recipes/deleted?${params}`,
       {
         method: "GET",
-        headers,
-        
       }
     );
 
@@ -471,3 +411,5 @@ export const getDeletedRecipes = async (
     };
   }
 };
+
+export type { CookedHistoryItem, PaginatedCookedHistoryResponse };

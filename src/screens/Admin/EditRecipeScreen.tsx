@@ -307,7 +307,7 @@ console.log("Validate  ne");
           })),
       };
       await adminService.updateRecipe(
-        tokens.accessToken,
+        
         Number(recipeId),
         recipeData
       );
@@ -319,7 +319,7 @@ console.log("Validate  ne");
         coverImageUri !== originalCoverImage
       ) {
         await adminService.updateRecipeCover(
-          tokens.accessToken,
+         
           Number(recipeId),
           coverImageUri
         );
@@ -328,7 +328,7 @@ console.log("Validate  ne");
       // 3. Delete removed ingredients (bulk delete)
       if (deletedIngredients.length > 0) {
         await adminService.deleteIngredients(
-          tokens.accessToken,
+          
           Number(recipeId),
           deletedIngredients
         );
@@ -338,7 +338,7 @@ console.log("Validate  ne");
       const newIngredients = ingredients.filter((ing) => !ing.id);
       if (newIngredients.length > 0) {
         await adminService.addIngredients(
-          tokens.accessToken,
+        
           Number(recipeId),
           newIngredients
         );
@@ -347,7 +347,7 @@ console.log("Validate  ne");
       // 5. Delete removed steps (bulk delete)
       if (deletedSteps.length > 0) {
         await adminService.deleteSteps(
-          tokens.accessToken,
+          
           Number(recipeId),
           deletedSteps
         );
@@ -358,7 +358,7 @@ console.log("Validate  ne");
       for (const step of existingSteps) {
         if (step.id) {
           await adminService.updateStep(
-            tokens.accessToken,
+            
             Number(recipeId),
             step.id,
             {
@@ -376,7 +376,7 @@ console.log("Validate  ne");
       const newSteps = steps.filter((step) => !step.id);
       for (const step of newSteps) {
         await adminService.addStep(
-          tokens.accessToken,
+        
           Number(recipeId),
           {
             content: step.content,
@@ -395,7 +395,7 @@ console.log("Validate  ne");
           newStepNo: index + 1,
         }));
         await adminService.reorderSteps(
-          tokens.accessToken,
+          
           Number(recipeId),
           reorderData
         );

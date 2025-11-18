@@ -1,36 +1,6 @@
 // src/services/recipeActionService.ts
-import { API_CONFIG, buildApiUrl } from "../config/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-// Helper function to get access token
-const getAccessToken = async (): Promise<string | null> => {
-  try {
-    const tokens = await AsyncStorage.getItem("auth_tokens");
-    if (tokens) {
-      const parsedTokens = JSON.parse(tokens);
-      return parsedTokens.accessToken;
-    }
-    return null;
-  } catch (error) {
-    console.error("Error getting access token:", error);
-    return null;
-  }
-};
-
-// Helper function to create auth headers
-const createAuthHeaders = async (): Promise<Record<string, string>> => {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  };
-
-  const accessToken = await getAccessToken();
-  if (accessToken) {
-    headers.Authorization = `Bearer ${accessToken}`;
-  }
-
-  return headers;
-};
+import { API_CONFIG } from "../config/api";
+import { fetchWithAuth } from "../utils/apiHelper";
 
 interface ForkRecipeData {
   categoryId: number;
@@ -59,14 +29,12 @@ export const addRecipeToShoppingList = async (
   try {
     console.log("Adding recipe to shopping list:", recipeId);
 
-    const headers = await createAuthHeaders();
-    const url = `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/recipes/${recipeId}`;
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers,
-      
-    });
+    const response = await fetchWithAuth(
+      `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/recipes/${recipeId}`,
+      {
+        method: "POST",
+      }
+    );
 
     const result = await response.json();
     console.log("Add recipe to shopping list response:", result);
@@ -91,15 +59,13 @@ export const forkRecipe = async (
   try {
     console.log("Forking recipe:", recipeId, data);
 
-    const headers = await createAuthHeaders();
-    const url = `${API_CONFIG.BASE_URL}/cookinote/recipes/${recipeId}/fork`;
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(data),
-      
-    });
+    const response = await fetchWithAuth(
+      `${API_CONFIG.BASE_URL}/cookinote/recipes/${recipeId}/fork`,
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      }
+    );
 
     const result = await response.json();
     console.log("Fork recipe response:", result);
@@ -107,7 +73,7 @@ export const forkRecipe = async (
     if (response.ok && result.code === 200) {
       return true;
     } else {
-      // Khoong the tao ban sao cong thuc cua chinh minh
+      // Cannot fork your own recipe
       return false;
     }
   } catch (error) {

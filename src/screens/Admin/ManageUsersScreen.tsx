@@ -41,7 +41,7 @@ const ManageUsersScreen = () => {
       else if (pageNum === 0) setLoading(true);
 
       const data = await adminService.getUsers(
-        tokens.accessToken,
+        
         pageNum,
         10,
         "", // Không truyền search
@@ -107,7 +107,7 @@ const ManageUsersScreen = () => {
 
     try {
       const detail = await adminService.getUserDetail(
-        tokens.accessToken,
+        
         user.userId
       );
       setSelectedUser(detail);
@@ -128,11 +128,11 @@ const ManageUsersScreen = () => {
         onPress: async () => {
           try {
             if (currentStatus) {
-              await adminService.disableUser(tokens.accessToken, userId);
+              await adminService.disableUser( userId);
               Alert.alert("Thành công", `Đã ${action} tài khoản`);
             } else {
               const result = await adminService.enableUser(
-                tokens.accessToken,
+                
                 userId
               );
               if (result.success) {

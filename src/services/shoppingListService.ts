@@ -1,36 +1,6 @@
 // src/services/shoppingListService.ts
 import { API_CONFIG } from "../config/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-// Helper function to get access token
-const getAccessToken = async (): Promise<string | null> => {
-  try {
-    const tokens = await AsyncStorage.getItem("auth_tokens");
-    if (tokens) {
-      const parsedTokens = JSON.parse(tokens);
-      return parsedTokens.accessToken;
-    }
-    return null;
-  } catch (error) {
-    console.error("Error getting access token:", error);
-    return null;
-  }
-};
-
-// Helper function to create auth headers
-const createAuthHeaders = async (): Promise<Record<string, string>> => {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  };
-
-  const accessToken = await getAccessToken();
-  if (accessToken) {
-    headers.Authorization = `Bearer ${accessToken}`;
-  }
-
-  return headers;
-};
+import { fetchWithAuth } from "../utils/apiHelper";
 
 interface ShoppingListItem {
   id: number;
@@ -59,17 +29,12 @@ interface AddItemRequest {
 }
 
 // Get shopping list
-// src/services/shoppingListService.ts
-// Make sure this returns the correct format
-
 export const getShoppingList = async (): Promise<ShoppingListResponse> => {
   try {
-    const headers = await createAuthHeaders();
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}/cookinote/shopping-lists`,
       {
         method: "GET",
-        headers,
       }
     );
 
@@ -104,12 +69,10 @@ export const addShoppingListItem = async (
   item: AddItemRequest
 ): Promise<boolean> => {
   try {
-    const headers = await createAuthHeaders();
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/items`,
       {
         method: "POST",
-        headers,
         body: JSON.stringify(item),
       }
     );
@@ -128,18 +91,16 @@ export const addShoppingListItem = async (
   }
 };
 
+// Remove shopping list items by IDs
 export const removeShoppingListItem = async (
-  itemIds: number[] // ⬅️ giờ là mảng
+  itemIds: number[]
 ): Promise<boolean> => {
   try {
-    const headers = await createAuthHeaders();
-
-    const response = await fetch(
-      `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/items-by-ids`, // ⬅️ không còn /${itemId}
+    const response = await fetchWithAuth(
+      `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/items-by-ids`,
       {
         method: "DELETE",
-        headers,
-        body: JSON.stringify({ itemIds }), // ⬅️ gửi mảng trong body
+        body: JSON.stringify({ itemIds }),
       }
     );
 
@@ -165,16 +126,13 @@ export const toggleShoppingListItemCheck = async (
   try {
     console.log(`Toggling item ${itemId} check status to:`, checked);
 
-    const headers = await createAuthHeaders();
-    
     // Use different endpoints for check and uncheck
     const endpoint = checked
       ? `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/items/${itemId}/check`
       : `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/items/${itemId}/uncheck`;
 
-    const response = await fetch(endpoint, {
+    const response = await fetchWithAuth(endpoint, {
       method: "PATCH",
-      headers,
     });
 
     const result = await response.json();
@@ -192,6 +150,37 @@ export const toggleShoppingListItemCheck = async (
   }
 };
 
+// Move item to another group/recipe
+export const moveShoppingListItem = async (
+  itemId: number,
+  targetRecipeId: number
+): Promise<boolean> => {
+  try {
+    console.log(`Moving item ${itemId} to recipe ${targetRecipeId}`);
+
+    const response = await fetchWithAuth(
+      `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/items/${itemId}/move`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({ targetRecipeId }),
+      }
+    );
+
+    const result = await response.json();
+    console.log("Move item response:", result);
+
+    if (response.ok && result.code === 200) {
+      return true;
+    } else {
+      console.error("Failed to move item:", result.message);
+      return false;
+    }
+  } catch (error) {
+    console.error("Error moving item:", error);
+    return false;
+  }
+};
+
 // Remove items by filter (recipe)
 export const removeShoppingListItemsByRecipe = async (
   recipeId: number
@@ -199,12 +188,10 @@ export const removeShoppingListItemsByRecipe = async (
   try {
     console.log(`Removing items for recipe ${recipeId}`);
 
-    const headers = await createAuthHeaders();
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/items-by-filter?filter=recipe&recipeId=${recipeId}`,
       {
         method: "DELETE",
-        headers,
       }
     );
 
@@ -228,12 +215,10 @@ export const removeCheckedItems = async (): Promise<boolean> => {
   try {
     console.log("Removing all checked items");
 
-    const headers = await createAuthHeaders();
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/items-by-filter?filter=checked`,
       {
         method: "DELETE",
-        headers,
       }
     );
 

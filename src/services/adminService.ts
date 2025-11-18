@@ -1,4 +1,5 @@
-import { API_CONFIG, buildApiUrl, createAuthHeaders } from "../config/api";
+import { API_CONFIG, buildApiUrl } from "../config/api";
+import { fetchWithAuth } from "../utils/apiHelper";
 
 export interface AdminUser {
   userId: number;
@@ -58,22 +59,16 @@ export interface CreateRecipeData {
 export interface CreateRecipeResponse {
   id: number;
   title: string;
-  // ... other fields
 }
 
 class AdminService {
-  private getAuthHeader(accessToken: string) {
-    return createAuthHeaders(accessToken);
-  }
-
   // Get dashboard statistics
-  async getDashboardStats(accessToken: string): Promise<DashboardStats> {
+  async getDashboardStats(): Promise<DashboardStats> {
     try {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         buildApiUrl(API_CONFIG.ENDPOINTS.ADMIN.DASHBOARD),
         {
           method: "GET",
-          headers: this.getAuthHeader(accessToken),
         }
       );
 
@@ -90,7 +85,6 @@ class AdminService {
 
   // Get users list with pagination
   async getUsers(
-    accessToken: string,
     page: number = 0,
     size: number = 10,
     search?: string,
@@ -105,11 +99,10 @@ class AdminService {
       if (search) params.append("search", search);
       if (role) params.append("role", role);
 
-      const response = await fetch(
-        `${buildApiUrl(API_CONFIG.ENDPOINTS.ADMIN.USERS)}`,
+      const response = await fetchWithAuth(
+        `${buildApiUrl(API_CONFIG.ENDPOINTS.ADMIN.USERS)}?${params}`,
         {
           method: "GET",
-          headers: this.getAuthHeader(accessToken),
         }
       );
 
@@ -126,16 +119,12 @@ class AdminService {
   }
 
   // Get user detail
-  async getUserDetail(
-    accessToken: string,
-    userId: number
-  ): Promise<AdminUserDetail> {
+  async getUserDetail(userId: number): Promise<AdminUserDetail> {
     try {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         buildApiUrl(`${API_CONFIG.ENDPOINTS.ADMIN.USERS}/${userId}`),
         {
           method: "GET",
-          headers: this.getAuthHeader(accessToken),
         }
       );
 
@@ -152,13 +141,12 @@ class AdminService {
   }
 
   // Disable user account
-  async disableUser(accessToken: string, userId: number): Promise<void> {
+  async disableUser(userId: number): Promise<void> {
     try {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         buildApiUrl(`${API_CONFIG.ENDPOINTS.ADMIN.USERS}/${userId}/disable`),
         {
           method: "PATCH",
-          headers: this.getAuthHeader(accessToken),
         }
       );
 
@@ -173,22 +161,19 @@ class AdminService {
 
   // Enable user account
   async enableUser(
-    accessToken: string,
     userId: number
   ): Promise<{ success: boolean; message?: string }> {
     try {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         buildApiUrl(`${API_CONFIG.ENDPOINTS.ADMIN.USERS}/${userId}/enable`),
         {
           method: "PATCH",
-          headers: this.getAuthHeader(accessToken),
         }
       );
 
       const data = await response.json();
 
       if (!response.ok) {
-        // Trường hợp đặc biệt: email chưa xác thực (status 500)
         if (
           response.status === 500 &&
           data.message?.includes("xác thực email")
@@ -209,24 +194,17 @@ class AdminService {
   }
 
   // Export user report
-  // Trong adminService.ts (hoặc tương đương)
-  async exportUserReport(
-    accessToken: string,
-    // path không cần thiết nếu API tự định nghĩa vị trí, nhưng giữ lại nếu cần
-    path: string = "/user-report"
-  ): Promise<string> {
+  async exportUserReport(path: string = "/user-report"): Promise<string> {
     try {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         buildApiUrl(`${API_CONFIG.ENDPOINTS.ADMIN.REPORT}`),
         {
           method: "POST",
-          headers: this.getAuthHeader(accessToken),
           body: JSON.stringify({ path }),
         }
       );
 
       if (!response.ok) {
-        // Cố gắng lấy thông báo lỗi chi tiết hơn từ phản hồi
         const errorData = await response
           .json()
           .catch(() => ({ message: "Failed to export report" }));
@@ -234,7 +212,6 @@ class AdminService {
       }
 
       const data = await response.json();
-      // ⚠️ Giả định data.data.filePath là URL TẢI XUỐNG
       return data.data.filePath;
     } catch (error) {
       console.error("Error exporting report:", error);
@@ -243,22 +220,17 @@ class AdminService {
   }
 
   // Recipe Management Methods
-  async getAdminRecipes(
-    accessToken: string,
-    page: number = 0,
-    size: number = 10
-  ) {
+  async getAdminRecipes(page: number = 0, size: number = 10) {
     try {
       const params = new URLSearchParams({
         page: page.toString(),
         size: size.toString(),
       });
 
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${buildApiUrl(API_CONFIG.ENDPOINTS.ADMIN.RECIPES)}?${params}`,
         {
           method: "GET",
-          headers: this.getAuthHeader(accessToken),
         }
       );
 
@@ -274,13 +246,12 @@ class AdminService {
     }
   }
 
-  async deleteRecipe(accessToken: string, recipeId: number): Promise<void> {
+  async deleteRecipe(recipeId: number): Promise<void> {
     try {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         buildApiUrl(`${API_CONFIG.ENDPOINTS.RECIPE.DELETE}/${recipeId}`),
         {
           method: "DELETE",
-          headers: this.getAuthHeader(accessToken),
         }
       );
 
@@ -295,7 +266,6 @@ class AdminService {
 
   // Create new recipe
   async createRecipe(
-    accessToken: string,
     recipeData: CreateRecipeData,
     coverImageUri?: string,
     stepImages?: { stepNo: number; imageUris: string[] }[]
@@ -303,11 +273,9 @@ class AdminService {
     try {
       const formData = new FormData();
 
-      // Add recipe data as JSON string
       const recipeJson = JSON.stringify(recipeData);
       formData.append("recipe", recipeJson);
 
-      // Add cover image if exists
       if (coverImageUri) {
         const coverFilename = coverImageUri.split("/").pop() || "cover.jpg";
         const coverMatch = /\.(\w+)$/.exec(coverFilename);
@@ -320,7 +288,6 @@ class AdminService {
         } as any);
       }
 
-      // Add step images if exist
       if (stepImages && stepImages.length > 0) {
         stepImages.forEach((stepImage) => {
           if (stepImage.imageUris && stepImage.imageUris.length > 0) {
@@ -340,14 +307,10 @@ class AdminService {
         });
       }
 
-      const response = await fetch(
+      const response = await fetchWithAuth(
         buildApiUrl(API_CONFIG.ENDPOINTS.RECIPE.CREATE),
         {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            // Don't set Content-Type, let FormData handle it
-          },
           body: formData,
         }
       );
@@ -366,11 +329,7 @@ class AdminService {
   }
 
   // Update recipe cover image
-  async updateRecipeCover(
-    accessToken: string,
-    recipeId: number,
-    imageUri: string
-  ): Promise<void> {
+  async updateRecipeCover(recipeId: number, imageUri: string): Promise<void> {
     try {
       const formData = new FormData();
       const filename = imageUri.split("/").pop() || "cover.jpg";
@@ -383,13 +342,10 @@ class AdminService {
         type: type,
       } as any);
 
-      const response = await fetch(
+      const response = await fetchWithAuth(
         buildApiUrl(`${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/cover`),
         {
           method: "PUT",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
           body: formData,
         }
       );
@@ -406,7 +362,6 @@ class AdminService {
 
   // Add images to a step
   async addStepImages(
-    accessToken: string,
     recipeId: number,
     stepId: number,
     imageUris: string[]
@@ -426,15 +381,12 @@ class AdminService {
         } as any);
       });
 
-      const response = await fetch(
+      const response = await fetchWithAuth(
         buildApiUrl(
           `${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/steps/${stepId}/images`
         ),
         {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
           body: formData,
         }
       );
@@ -451,18 +403,16 @@ class AdminService {
 
   // Reorder steps
   async reorderSteps(
-    accessToken: string,
     recipeId: number,
     steps: Array<{ stepId: number; newStepNo: number }>
   ): Promise<void> {
     try {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         buildApiUrl(
           `${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/steps/reorder`
         ),
         {
           method: "PUT",
-          headers: this.getAuthHeader(accessToken),
           body: JSON.stringify({ steps }),
         }
       );
@@ -479,7 +429,6 @@ class AdminService {
 
   // Update recipe basic info
   async updateRecipe(
-    accessToken: string,
     recipeId: number,
     recipeData: {
       categoryId: number;
@@ -493,11 +442,10 @@ class AdminService {
     }
   ): Promise<void> {
     try {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         buildApiUrl(`${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}`),
         {
           method: "PUT",
-          headers: this.getAuthHeader(accessToken),
           body: JSON.stringify(recipeData),
         }
       );
@@ -514,7 +462,6 @@ class AdminService {
 
   // Add a new step with images
   async addStep(
-    accessToken: string,
     recipeId: number,
     stepData: {
       content: string;
@@ -526,7 +473,6 @@ class AdminService {
     try {
       const formData = new FormData();
 
-      // Add step data as JSON
       formData.append("content", stepData.content);
       if (stepData.suggestedTime) {
         formData.append("suggestedTime", stepData.suggestedTime.toString());
@@ -535,7 +481,6 @@ class AdminService {
         formData.append("tips", stepData.tips);
       }
 
-      // Add images if exist
       if (imageUris && imageUris.length > 0) {
         imageUris.forEach((uri) => {
           const filename = uri.split("/").pop() || "step_image.jpg";
@@ -550,13 +495,10 @@ class AdminService {
         });
       }
 
-      const response = await fetch(
+      const response = await fetchWithAuth(
         buildApiUrl(`${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/steps`),
         {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
           body: formData,
         }
       );
@@ -573,18 +515,16 @@ class AdminService {
 
   // Add ingredients
   async addIngredients(
-    accessToken: string,
     recipeId: number,
     ingredients: Array<{ name: string; quantity: string }>
   ): Promise<void> {
     try {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         buildApiUrl(
           `${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/ingredients`
         ),
         {
           method: "POST",
-          headers: this.getAuthHeader(accessToken),
           body: JSON.stringify({ ingredients }),
         }
       );
@@ -601,7 +541,6 @@ class AdminService {
 
   // Update existing step
   async updateStep(
-    accessToken: string,
     recipeId: number,
     stepId: number,
     stepData: {
@@ -615,7 +554,6 @@ class AdminService {
     try {
       const formData = new FormData();
 
-      // Add step data
       formData.append("content", stepData.content);
       formData.append("stepNo", stepData.stepNo.toString());
       if (stepData.suggestedTime !== undefined) {
@@ -625,7 +563,6 @@ class AdminService {
         formData.append("tips", stepData.tips);
       }
 
-      // Add new images if exist
       if (addImageUris && addImageUris.length > 0) {
         addImageUris.forEach((uri) => {
           const filename = uri.split("/").pop() || "step_image.jpg";
@@ -640,15 +577,12 @@ class AdminService {
         });
       }
 
-      const response = await fetch(
+      const response = await fetchWithAuth(
         buildApiUrl(
           `${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/steps/${stepId}`
         ),
         {
           method: "PUT",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
           body: formData,
         }
       );
@@ -664,17 +598,12 @@ class AdminService {
   }
 
   // Delete steps (bulk delete)
-  async deleteSteps(
-    accessToken: string,
-    recipeId: number,
-    stepIds: number[]
-  ): Promise<void> {
+  async deleteSteps(recipeId: number, stepIds: number[]): Promise<void> {
     try {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         buildApiUrl(`${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/steps`),
         {
           method: "DELETE",
-          headers: this.getAuthHeader(accessToken),
           body: JSON.stringify({ stepIds }),
         }
       );
@@ -691,18 +620,16 @@ class AdminService {
 
   // Delete ingredients (bulk delete)
   async deleteIngredients(
-    accessToken: string,
     recipeId: number,
     ingredientIds: number[]
   ): Promise<void> {
     try {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         buildApiUrl(
           `${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/ingredients`
         ),
         {
           method: "DELETE",
-          headers: this.getAuthHeader(accessToken),
           body: JSON.stringify({ ingredientIds }),
         }
       );
