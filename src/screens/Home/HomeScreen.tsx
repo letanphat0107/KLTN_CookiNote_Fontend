@@ -406,7 +406,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             style={homeStyles.backButton}
             onPress={handleBackToHome}
           >
-            <Text style={homeStyles.backButtonText}>← Về trang chủ</Text>
+            <Text style={homeStyles.backButtonText}>Về trang chủ</Text>
           </TouchableOpacity>
         )}
 

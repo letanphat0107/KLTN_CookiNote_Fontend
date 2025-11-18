@@ -539,7 +539,7 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
                   !isAuthenticated && recipeStyles.disabledButtonText,
                 ]}
               >
-                🛒 Thêm vào giỏ
+                📃 Thêm vào giỏ
               </Text>
             )}
           </TouchableOpacity>

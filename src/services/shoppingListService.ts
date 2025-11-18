@@ -166,14 +166,16 @@ export const toggleShoppingListItemCheck = async (
     console.log(`Toggling item ${itemId} check status to:`, checked);
 
     const headers = await createAuthHeaders();
-    const response = await fetch(
-      `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/items/${itemId}/check`,
-      {
-        method: "PATCH",
-        headers,
-        body: JSON.stringify({ checked }),
-      }
-    );
+    
+    // Use different endpoints for check and uncheck
+    const endpoint = checked
+      ? `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/items/${itemId}/check`
+      : `${API_CONFIG.BASE_URL}/cookinote/shopping-lists/items/${itemId}/uncheck`;
+
+    const response = await fetch(endpoint, {
+      method: "PATCH",
+      headers,
+    });
 
     const result = await response.json();
     console.log("Toggle check response:", result);

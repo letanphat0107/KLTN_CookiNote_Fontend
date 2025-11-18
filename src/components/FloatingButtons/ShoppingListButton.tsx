@@ -108,7 +108,7 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
         setNewQuantity("");
         setShowAddForm(false);
         await loadShoppingList();
-        Alert.alert("Thành công", "Đã thêm vào danh sách mua sắm");
+        // Alert.alert("Thành công", "Đã thêm vào danh sách mua sắm");
       } else {
         Alert.alert("Lỗi", "Không thể thêm vào danh sách mua sắm");
       }
@@ -182,13 +182,17 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
   const handleRemoveItem = async (itemId: number, recipeId?: number | null) => {
     if (recipeId) {
       // If item belongs to a recipe, show option to remove entire recipe group
-      Alert.alert("Xóa nguyên liệu", "Bạn có chắc chắc không muốn mua món này!", [
-        { text: "Hủy", style: "cancel" },
-        {
-          text: "Có",
-          onPress: () => removeSingleItem(itemId),
-        }
-      ]);
+      Alert.alert(
+        "Xóa nguyên liệu",
+        "Bạn có chắc chắc không muốn mua món này!",
+        [
+          { text: "Hủy", style: "cancel" },
+          {
+            text: "Có",
+            onPress: () => removeSingleItem(itemId),
+          },
+        ]
+      );
     } else {
       // Single item removal
       Alert.alert("Xóa nguyên liệu", "Bạn có chắc muốn xóa nguyên liệu này?", [
@@ -209,8 +213,9 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
       if (success) {
         await loadShoppingList();
         // Toast-style alert instead of blocking alert
-        setTimeout(() => {
-          Alert.alert("", "Đã xóa nguyên liệu")});
+        // setTimeout(() => {
+        //   Alert.alert("", "Đã xóa nguyên liệu");
+        // });
       } else {
         Alert.alert("Lỗi", "Không thể xóa nguyên liệu");
       }
@@ -414,7 +419,7 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
             {/* Header */}
             <View style={floatingStyles.modalHeader}>
               <Text style={floatingStyles.modalTitle}>
-                🛒 Danh sách mua sắm ({totalItems})
+                Danh sách mua sắm ({totalItems})
               </Text>
               <View style={floatingStyles.headerActions}>
                 {checkedItemsCount > 0 && (
@@ -541,7 +546,7 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
         ]}
       >
         <TouchableOpacity onPress={handleButtonPress}>
-          <Text style={floatingStyles.buttonIcon}>🛒</Text>
+          <Text style={floatingStyles.buttonIcon}>📃</Text>
           {totalItems > 0 && (
             <View style={floatingStyles.badge}>
               <Text style={floatingStyles.badgeText}>
