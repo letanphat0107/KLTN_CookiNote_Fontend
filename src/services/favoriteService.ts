@@ -122,36 +122,37 @@ export const getCookedHistory = async (
   }
 };
 
-// Add recipe to cooked history
-export const addToCookedHistory = async (
-  recipeId: number,
-  rating?: number,
-  note?: string
+export const markRecipeAsCooked = async (
+  recipeId: number
 ): Promise<boolean> => {
   try {
-    console.log("Adding to cooked history:", { recipeId, rating, note });
+    console.log("Marking recipe as cooked:", recipeId);
 
     const response = await fetchWithAuth(
-      `${API_CONFIG.BASE_URL}/cookinote/cooked-history`,
+      `${API_CONFIG.BASE_URL}/cookinote/cooked-history/recipes/${recipeId}/cooked`,
       {
         method: "POST",
-        body: JSON.stringify({
-          recipeId,
-          rating,
-          note,
-        }),
-      }
+      },
+      true,
+      false
     );
 
     const result = await response.json();
-    console.log("Add to cooked history response:", result);
+    console.log("Mark as cooked response:", result);
 
-    return response.ok && result.code === 200;
+    if (response.ok && result.code === 200) {
+      return true;
+    } else {
+      console.error("Failed to mark recipe as cooked:", result.message);
+      return false;
+    }
   } catch (error) {
-    console.error("Error adding to cooked history:", error);
+    console.error("Error marking recipe as cooked:", error);
     return false;
   }
 };
+
+
 
 // Remove from cooked history
 export const removeFromCookedHistory = async (

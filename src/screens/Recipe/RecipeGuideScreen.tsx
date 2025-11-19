@@ -8,9 +8,11 @@ import {
   Modal,
   TextInput,
   Animated,
+  Alert,
 } from "react-native";
 import { recipeStyles } from "./styles";
 import { RecipeStep } from "../../types/recipe";
+import { markRecipeAsCooked } from "../../services/favoriteService";
 
 interface RecipeGuideScreenProps {
   route?: {
@@ -39,6 +41,7 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
   const [customTime, setCustomTime] = useState("");
   const [countdownTimer, setCountdownTimer] = useState(0); // For auto-next countdown
   const [isCountingDown, setIsCountingDown] = useState(false);
+  const [isMarkingCooked, setIsMarkingCooked] = useState(false);
 
   // Toast message state
   const [toastMessage, setToastMessage] = useState("");
@@ -263,25 +266,109 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
     }
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    setIsMarkingCooked(true);
+
+    // Show initial completion message
     showToastMessage(
       `🎉 Hoàn thành! Chúc mừng bạn đã hoàn thành món ${recipeTitle}!`,
       4000
     );
 
-    setTimeout(() => {
-      if (navigation) {
-        navigation.reset({
-          index: 0,
-          routes: [
-            {
-              name: "MainTabs",
-              params: { recipeId },
-            },
-          ],
-        });
+    try {
+      // Mark recipe as cooked if recipeId exists
+      if (recipeId) {
+        const numericRecipeId =
+          typeof recipeId === "string"
+            ? parseInt(recipeId, 10)
+            : recipeId;
+
+        console.log("Marking recipe as cooked:", numericRecipeId);
+        const success = await markRecipeAsCooked(numericRecipeId);
+
+        if (success) {
+          console.log("Recipe marked as cooked successfully");
+        } else {
+          console.warn("Failed to mark recipe as cooked, but continuing...");
+          // Don't block navigation even if marking failed
+        }
       }
-    }, 2000);
+    } catch (error) {
+      console.error("Error marking recipe as cooked:", error);
+      // Don't block navigation even if there's an error
+    } finally {
+      setIsMarkingCooked(false);
+
+      // Navigate back after delay
+      setTimeout(() => {
+        if (navigation) {
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: "MainTabs",
+                params: {
+                  screen: "Favorite",
+                  params: {
+                    recipeId,
+                    fromGuide: true,
+                  },
+                },
+              },
+            ],
+          });
+        }
+      }, 4000);
+    }
+  };
+
+  // Render step images with horizontal scroll
+  // src/screens/Recipe/RecipeGuideScreen.tsx
+  // Cập nhật renderStepImages function
+
+  const renderStepImages = (images?: string[]) => {
+    if (!images || images.length === 0) return null;
+
+    return (
+      <View style={recipeStyles.stepImagesWrapper}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={recipeStyles.stepImagesContainer}
+          contentContainerStyle={{ paddingRight: 15 }}
+        >
+          {images.map((imageUrl, index) => (
+            <View
+              key={index}
+              style={[
+                recipeStyles.stepImageContainer,
+                index === 0 && { marginLeft: 0 },
+              ]}
+            >
+              <Image
+                source={{ uri: imageUrl }}
+                style={recipeStyles.stepImage} // Changed from stepGuideImage to stepImage
+                resizeMode="cover"
+              />
+
+              {/* Image counter */}
+              <View style={recipeStyles.imageCounter}>
+                <Text style={recipeStyles.imageCounterText}>
+                  {index + 1}/{images.length}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+
+        {/* Instructions for multiple images */}
+        {images.length > 1 && (
+          <Text style={recipeStyles.scrollHint}>
+            📸 Lướt để xem {images.length} ảnh hướng dẫn
+          </Text>
+        )}
+      </View>
+    );
   };
 
   const handleBack = () => {
@@ -289,55 +376,6 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
       navigation.goBack();
     }
   };
-
-  // Render step images with horizontal scroll
-// src/screens/Recipe/RecipeGuideScreen.tsx
-// Cập nhật renderStepImages function
-
-const renderStepImages = (images?: string[]) => {
-  if (!images || images.length === 0) return null;
-
-  return (
-    <View style={recipeStyles.stepImagesWrapper}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={recipeStyles.stepImagesContainer}
-        contentContainerStyle={{ paddingRight: 15 }}
-      >
-        {images.map((imageUrl, index) => (
-          <View
-            key={index}
-            style={[
-              recipeStyles.stepImageContainer,
-              index === 0 && { marginLeft: 0 },
-            ]}
-          >
-            <Image
-              source={{ uri: imageUrl }}
-              style={recipeStyles.stepImage} // Changed from stepGuideImage to stepImage
-              resizeMode="cover"
-            />
-            
-            {/* Image counter */}
-            <View style={recipeStyles.imageCounter}>
-              <Text style={recipeStyles.imageCounterText}>
-                {index + 1}/{images.length}
-              </Text>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-
-      {/* Instructions for multiple images */}
-      {images.length > 1 && (
-        <Text style={recipeStyles.scrollHint}>
-          📸 Lướt để xem {images.length} ảnh hướng dẫn
-        </Text>
-      )}
-    </View>
-  );
-};
 
   return (
     <View style={recipeStyles.container}>
@@ -508,15 +546,16 @@ const renderStepImages = (images?: string[]) => {
           style={[
             recipeStyles.navButton,
             recipeStyles.prevButton,
-            (isFirstStep || isCountingDown) && recipeStyles.disabledButton,
+            (isFirstStep || isCountingDown || isMarkingCooked) &&
+              recipeStyles.disabledButton,
           ]}
           onPress={handlePrevious}
-          disabled={isFirstStep || isCountingDown}
+          disabled={isFirstStep || isCountingDown || isMarkingCooked}
         >
           <Text
             style={[
               recipeStyles.navButtonText,
-              (isFirstStep || isCountingDown) &&
+              (isFirstStep || isCountingDown || isMarkingCooked) &&
                 recipeStyles.disabledButtonText,
             ]}
           >
@@ -528,18 +567,23 @@ const renderStepImages = (images?: string[]) => {
           style={[
             recipeStyles.navButton,
             isLastStep ? recipeStyles.completeButton : recipeStyles.nextButton,
-            isCountingDown && recipeStyles.disabledButton,
+            (isCountingDown || isMarkingCooked) && recipeStyles.disabledButton,
           ]}
           onPress={isLastStep ? handleComplete : handleNext}
-          disabled={isCountingDown}
+          disabled={isCountingDown || isMarkingCooked}
         >
           <Text
             style={[
               recipeStyles.navButtonText,
-              isCountingDown && recipeStyles.disabledButtonText,
+              (isCountingDown || isMarkingCooked) &&
+                recipeStyles.disabledButtonText,
             ]}
           >
-            {isLastStep ? "🎉 Hoàn thành" : "Bước tiếp →"}
+            {isLastStep
+              ? isMarkingCooked
+                ? "⏳ Đang lưu..."
+                : "🎉 Hoàn thành"
+              : "Bước tiếp →"}
           </Text>
         </TouchableOpacity>
       </View>

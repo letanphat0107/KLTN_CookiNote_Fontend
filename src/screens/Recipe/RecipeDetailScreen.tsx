@@ -520,9 +520,7 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
             >
               ✏️ Chỉnh sửa
             </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
+          </TouchableOpacity><TouchableOpacity // <--- Đặt liền kề ngay sau thẻ đóng của nút trước
             style={[
               recipeStyles.addToCartButton,
               !isAuthenticated && recipeStyles.disabledButton,
