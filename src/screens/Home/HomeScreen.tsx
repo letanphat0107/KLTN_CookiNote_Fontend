@@ -400,6 +400,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           )}
         </View>
 
+        <TouchableOpacity
+          style={homeStyles.qrScanButton}
+          onPress={() => navigation?.navigate("QRScanner")}
+        >
+          <Text style={homeStyles.qrScanButtonText}>[ l ]</Text>
+        </TouchableOpacity>
+
         {/* Back button when viewing category or search results */}
         {(selectedCategory || showSearchResults) && (
           <TouchableOpacity

@@ -28,6 +28,7 @@ export type RootStackParamList = {
   EmailChangeOTP: {
     newEmail: string;
   };
+  QRScanner: undefined;
 
   // Admin
   AdminDashboard: undefined;

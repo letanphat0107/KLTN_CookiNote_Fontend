@@ -24,6 +24,9 @@ import {
   forkRecipe,
 } from "../../services/recipeActionService";
 
+import { shareRecipe, ShareRecipeResponse } from "../../services/shareService";
+import ShareQRModal from "../Recipe/ShareQRModal";
+
 interface RecipeDetailScreenProps {
   route?: {
     params?: {
@@ -59,6 +62,11 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+
+  // Share modal state
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareData, setShareData] = useState<ShareRecipeResponse | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
 
   // Fetch recipe details when component mounts
   useEffect(() => {
@@ -243,9 +251,41 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
     }
   };
 
-  const handleShare = () => {
-    showToastMessage("📤 Đang chia sẻ công thức...", 2000);
-    console.log("Share recipe");
+  const handleShare = async () => {
+    if (!isAuthenticated) {
+      showToastMessage("🔐 Vui lòng đăng nhập để chia sẻ công thức!", 3000);
+      setTimeout(() => {
+        if (navigation) {
+          navigation.navigate("Login");
+        }
+      }, 2000);
+      return;
+    }
+
+    if (!recipe?.id) {
+      showToastMessage("❌ Không thể chia sẻ công thức này!", 2000);
+      return;
+    }
+
+    setIsSharing(true);
+    showToastMessage("📤 Đang tạo mã chia sẻ...", 2000);
+
+    try {
+      const result = await shareRecipe(recipe.id);
+
+      if (result) {
+        setShareData(result);
+        setShowShareModal(true);
+        showToastMessage("✅ Tạo mã QR thành công!", 2000);
+      } else {
+        showToastMessage("❌ Không thể tạo mã chia sẻ. Thử lại sau!", 3000);
+      }
+    } catch (error) {
+      console.error("Error sharing recipe:", error);
+      showToastMessage("❌ Đã xảy ra lỗi. Vui lòng thử lại!", 3000);
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   const handleRetry = () => {
@@ -520,7 +560,8 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
             >
               ✏️ Chỉnh sửa
             </Text>
-          </TouchableOpacity><TouchableOpacity // <--- Đặt liền kề ngay sau thẻ đóng của nút trước
+          </TouchableOpacity>
+          <TouchableOpacity // <--- Đặt liền kề ngay sau thẻ đóng của nút trước
             style={[
               recipeStyles.addToCartButton,
               !isAuthenticated && recipeStyles.disabledButton,
@@ -640,10 +681,18 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={recipeStyles.shareButton}
+          style={[
+            recipeStyles.shareButton,
+            isSharing && recipeStyles.disabledButton,
+          ]}
           onPress={handleShare}
+          disabled={isSharing}
         >
-          <Text style={recipeStyles.shareButtonText}>📤 Chia sẻ</Text>
+          {isSharing ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <Text style={recipeStyles.shareButtonText}>📤 Chia sẻ</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -663,6 +712,13 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
           </Text>
         </TouchableOpacity>
       </View>
+
+      <ShareQRModal
+        visible={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        shareData={shareData}
+        recipeTitle={recipe?.title || ""}
+      />
 
       {/* Edit Recipe Modal */}
       {recipe && (

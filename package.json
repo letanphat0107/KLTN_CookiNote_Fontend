@@ -15,6 +15,7 @@
     "@react-navigation/stack": "^7.4.8",
     "@reduxjs/toolkit": "^2.9.0",
     "expo": "~54.0.20",
+    "expo-camera": "~17.0.9",
     "expo-file-system": "~19.0.17",
     "expo-image-picker": "~17.0.8",
     "expo-sharing": "~14.0.7",

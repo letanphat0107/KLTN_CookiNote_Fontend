@@ -28,6 +28,7 @@ import ManageRecipeScreen from "../screens/Admin/ManageRecipesScreen";
 import CreateRecipeScreen from "../screens/Admin/CreateRecipeScreen";
 import EditRecipeScreen from "../screens/Admin/EditRecipeScreen";
 import DailySuggestionsScreen from "../screens/Home/DailySuggestionsScreen";
+import QRScannerScreen from "../screens/QRScanner/QRScannerScreen";
 
 import { RootStackParamList } from "./types";
 
@@ -161,10 +162,16 @@ const RootNavigator = () => {
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="NewPassword" component={NewPasswordScreen} />
           <Stack.Screen name="SharedAccount" component={SharedAccountScreen} />
+          
           <Stack.Screen
             name="OTPVerification"
             component={OTPVerificationScreen}
           />
+
+<Stack.Screen 
+  name="QRScanner" 
+  component={QRScannerScreen}
+/>
 
           {/* Authentication screens (for logout/re-login) */}
           <Stack.Screen name="Login" component={LoginScreen} />
