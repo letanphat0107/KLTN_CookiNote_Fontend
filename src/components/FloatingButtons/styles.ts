@@ -158,6 +158,7 @@ export const floatingStyles = StyleSheet.create({
   messageContainer: {
     marginVertical: 5,
     maxWidth: "80%",
+    paddingBottom: 20,
   },
 
   userMessage: {

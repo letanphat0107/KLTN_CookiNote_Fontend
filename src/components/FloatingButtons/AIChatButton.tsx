@@ -55,7 +55,8 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
   navigation,
   isAdminMode = false,
 }) => {
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const userId = user?.userId || "guest"; // Fallback to 'guest' nếu chưa login
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -111,24 +112,26 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
 
   // Load chat history when component mounts or when opened
   useEffect(() => {
-    if (isOpen && isAuthenticated) {
+    if (isOpen && isAuthenticated && userId) {
       loadStoredChatHistory();
     }
-  }, [isOpen, isAuthenticated]);
+  }, [isOpen, isAuthenticated, userId]);
 
   // Save messages to storage whenever messages change
   useEffect(() => {
-    if (messages.length > 0 && isAuthenticated) {
+    if (messages.length > 0 && isAuthenticated && userId) {
       // Filter out loading messages before saving
       const messagesToSave = messages.filter((msg) => !msg.isLoading);
-      saveChatHistory(messagesToSave);
+      saveChatHistory(messagesToSave, userId);
     }
-  }, [messages, isAuthenticated]);
+  }, [messages, isAuthenticated, userId]);
 
   const loadStoredChatHistory = async () => {
+    if (!userId) return;
+
     setIsLoadingHistory(true);
     try {
-      const storedMessages = await loadChatHistory();
+      const storedMessages = await loadChatHistory(userId);
       setMessages(storedMessages);
 
       // Scroll to bottom after loading
@@ -141,7 +144,6 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
       setIsLoadingHistory(false);
     }
   };
-
 
   const handleIngredientSuggestion = () => {
     setShowIngredientSelector(true);
@@ -242,7 +244,7 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
           style: "destructive",
           onPress: async () => {
             try {
-              await clearChatHistory();
+              await clearChatHistory(userId);
               await loadStoredChatHistory(); // Reload with welcome message
             } catch (error) {
               console.error("Error clearing chat history:", error);
@@ -304,123 +306,128 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
   };
 
   const isRecipeGenerationRequest = (message: string): boolean => {
-  const keywords = [
-    "tạo công thức",
-    "tạo món",
-    "hướng dẫn nấu",
-    "cách làm",
-    "làm món",
-    "nấu món",
-    "hãy tạo",
-  ];
-  return keywords.some((keyword) =>
-    message.toLowerCase().includes(keyword.toLowerCase())
-  );
-};
-
-// Extract dish name from message
-const extractDishName = (message: string): string => {
-  // Remove common prefixes
-  let dishName = message
-    .toLowerCase()
-    .replace(/^(hãy tạo|tạo công thức|cách làm|hướng dẫn nấu|làm món|nấu món)\s+(giúp tôi\s+)?(cho tôi\s+)?(món\s+)?/i, "")
-    .trim();
-
-  return dishName || message;
-};
-
-const handleSendMessage = async () => {
-  if (!inputMessage.trim()) return;
-
-  const userMessage: ChatMessage = {
-    id: Date.now().toString(),
-    message: inputMessage.trim(),
-    isUser: true,
-    timestamp: new Date(),
+    const keywords = [
+      "tạo công thức",
+      "tạo món",
+      "hướng dẫn nấu",
+      "cách làm",
+      "làm món",
+      "nấu món",
+      "hãy tạo",
+    ];
+    return keywords.some((keyword) =>
+      message.toLowerCase().includes(keyword.toLowerCase())
+    );
   };
 
-  const loadingMessage: ChatMessage = {
-    id: (Date.now() + 1).toString(),
-    message: "",
-    isUser: false,
-    timestamp: new Date(),
-    isLoading: true,
+  // Extract dish name from message
+  const extractDishName = (message: string): string => {
+    // Remove common prefixes
+    let dishName = message
+      .toLowerCase()
+      .replace(
+        /^(hãy tạo|tạo công thức|cách làm|hướng dẫn nấu|làm món|nấu món)\s+(giúp tôi\s+)?(cho tôi\s+)?(món\s+)?/i,
+        ""
+      )
+      .trim();
+
+    return dishName || message;
   };
 
-  setMessages((prev) => [...prev, userMessage, loadingMessage]);
-  const currentInput = inputMessage.trim();
-  setInputMessage("");
-  setIsLoading(true);
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim()) return;
 
-  try {
-    // Check if this is a recipe generation request
-    if (isRecipeGenerationRequest(currentInput)) {
-      const dishName = extractDishName(currentInput);
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      message: inputMessage.trim(),
+      isUser: true,
+      timestamp: new Date(),
+    };
 
-      const generatedRecipe = await generateRecipe(dishName);
+    const loadingMessage: ChatMessage = {
+      id: (Date.now() + 1).toString(),
+      message: "",
+      isUser: false,
+      timestamp: new Date(),
+      isLoading: true,
+    };
 
-      if (generatedRecipe) {
-        const recipeMessage: ChatMessage = {
-          id: loadingMessage.id,
-          message: `Tôi đã tạo công thức cho "${generatedRecipe.title}". Hãy xem chi tiết bên dưới:`,
-          isUser: false,
-          timestamp: new Date(),
-          isLoading: false,
-          generatedRecipe,
-        };
+    setMessages((prev) => [...prev, userMessage, loadingMessage]);
+    const currentInput = inputMessage.trim();
+    setInputMessage("");
+    setIsLoading(true);
 
-        setMessages((prev) =>
-          prev.map((msg) => (msg.id === loadingMessage.id ? recipeMessage : msg))
-        );
+    try {
+      // Check if this is a recipe generation request
+      if (isRecipeGenerationRequest(currentInput)) {
+        const dishName = extractDishName(currentInput);
+
+        const generatedRecipe = await generateRecipe(dishName);
+
+        if (generatedRecipe) {
+          const recipeMessage: ChatMessage = {
+            id: loadingMessage.id,
+            message: `Tôi đã tạo công thức cho "${generatedRecipe.title}". Hãy xem chi tiết bên dưới:`,
+            isUser: false,
+            timestamp: new Date(),
+            isLoading: false,
+            generatedRecipe,
+          };
+
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === loadingMessage.id ? recipeMessage : msg
+            )
+          );
+        } else {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === loadingMessage.id
+                ? {
+                    ...msg,
+                    message:
+                      "Xin lỗi, tôi không thể tạo công thức này. Vui lòng thử lại với 'Hãy tạo cho tôi công thức ....'",
+                    isLoading: false,
+                  }
+                : msg
+            )
+          );
+        }
       } else {
+        // Normal chat message
+        const aiResponse = await sendAIChatMessage(currentInput);
+
         setMessages((prev) =>
           prev.map((msg) =>
             msg.id === loadingMessage.id
-              ? {
-                  ...msg,
-                  message:
-                    "Xin lỗi, tôi không thể tạo công thức này. Vui lòng thử lại với 'Hãy tạo cho tôi công thức ....'",
-                  isLoading: false,
-                }
+              ? { ...msg, message: aiResponse, isLoading: false }
               : msg
           )
         );
       }
-    } else {
-      // Normal chat message
-      const aiResponse = await sendAIChatMessage(currentInput);
-
+    } catch (error) {
+      console.error("Error sending message:", error);
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === loadingMessage.id
-            ? { ...msg, message: aiResponse, isLoading: false }
+            ? {
+                ...msg,
+                message:
+                  "Xin lỗi, tôi không thể trả lời ngay bây giờ. Vui lòng thử lại sau.",
+                isLoading: false,
+              }
             : msg
         )
       );
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
     }
-  } catch (error) {
-    console.error("Error sending message:", error);
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg.id === loadingMessage.id
-          ? {
-              ...msg,
-              message:
-                "Xin lỗi, tôi không thể trả lời ngay bây giờ. Vui lòng thử lại sau.",
-              isLoading: false,
-            }
-          : msg
-      )
-    );
-  } finally {
-    setIsLoading(false);
-    setTimeout(() => {
-      scrollViewRef.current?.scrollToEnd({ animated: true });
-    }, 100);
-  }
-};
+  };
 
-const handleSaveRecipe = async (recipe: AIGeneratedRecipe) => {
+  const handleSaveRecipe = async (recipe: AIGeneratedRecipe) => {
     const privacyText = isAdminMode ? "công khai" : "riêng tư";
 
     Alert.alert(
@@ -461,10 +468,7 @@ const handleSaveRecipe = async (recipe: AIGeneratedRecipe) => {
                   ]
                 );
               } else {
-                Alert.alert(
-                  "Lỗi",
-                  result.message || "Không thể lưu công thức"
-                );
+                Alert.alert("Lỗi", result.message || "Không thể lưu công thức");
               }
             } catch (error) {
               console.error("Error in handleSaveRecipe:", error);
@@ -478,80 +482,80 @@ const handleSaveRecipe = async (recipe: AIGeneratedRecipe) => {
     );
   };
 
-// Add new component to render generated recipe
-const renderGeneratedRecipe = (recipe: AIGeneratedRecipe) => (
-  <View style={floatingStyles.generatedRecipeContainer}>
-    {/* Recipe Header */}
-    <View style={floatingStyles.generatedRecipeHeader}>
-      <Text style={floatingStyles.generatedRecipeTitle}>{recipe.title}</Text>
-      <Text style={floatingStyles.generatedRecipeDescription}>
-        {recipe.description}
-      </Text>
-    </View>
-
-    {/* Recipe Meta Info */}
-    <View style={floatingStyles.generatedRecipeMeta}>
-      <View style={floatingStyles.metaItem}>
-        <Text style={floatingStyles.metaIcon}>⏱️</Text>
-        <Text style={floatingStyles.metaText}>
-          {recipe.prepareTime + recipe.cookTime} phút
+  // Add new component to render generated recipe
+  const renderGeneratedRecipe = (recipe: AIGeneratedRecipe) => (
+    <View style={floatingStyles.generatedRecipeContainer}>
+      {/* Recipe Header */}
+      <View style={floatingStyles.generatedRecipeHeader}>
+        <Text style={floatingStyles.generatedRecipeTitle}>{recipe.title}</Text>
+        <Text style={floatingStyles.generatedRecipeDescription}>
+          {recipe.description}
         </Text>
       </View>
-      <View
-        style={[
-          floatingStyles.difficultyBadge,
-          { backgroundColor: formatDifficulty(recipe.difficulty).color },
-        ]}
-      >
-        <Text style={floatingStyles.difficultyText}>
-          {formatDifficulty(recipe.difficulty).text}
-        </Text>
-      </View>
-    </View>
 
-    {/* Ingredients */}
-    <View style={floatingStyles.generatedRecipeSection}>
-      <Text style={floatingStyles.generatedSectionTitle}>
-        🥄 Nguyên liệu ({recipe.ingredients.length})
-      </Text>
-      {recipe.ingredients.map((ingredient, index) => (
-        <View key={index} style={floatingStyles.ingredientRow}>
-          <Text style={floatingStyles.ingredientBullet}>•</Text>
-          <Text style={floatingStyles.ingredientText}>
-            {ingredient.name}: {ingredient.quantity}
+      {/* Recipe Meta Info */}
+      <View style={floatingStyles.generatedRecipeMeta}>
+        <View style={floatingStyles.metaItem}>
+          <Text style={floatingStyles.metaIcon}>⏱️</Text>
+          <Text style={floatingStyles.metaText}>
+            {recipe.prepareTime + recipe.cookTime} phút
           </Text>
         </View>
-      ))}
-    </View>
+        <View
+          style={[
+            floatingStyles.difficultyBadge,
+            { backgroundColor: formatDifficulty(recipe.difficulty).color },
+          ]}
+        >
+          <Text style={floatingStyles.difficultyText}>
+            {formatDifficulty(recipe.difficulty).text}
+          </Text>
+        </View>
+      </View>
 
-    {/* Steps */}
-    <View style={floatingStyles.generatedRecipeSection}>
-      <Text style={floatingStyles.generatedSectionTitle}>
-        👨‍🍳 Các bước thực hiện ({recipe.steps.length})
-      </Text>
-      {recipe.steps.map((step) => (
-        <View key={step.stepNo} style={floatingStyles.stepContainer}>
-          <View style={floatingStyles.stepHeader}>
-            <Text style={floatingStyles.stepNumber}>Bước {step.stepNo}</Text>
-            {step.suggestedTime && (
-              <Text style={floatingStyles.stepTime}>
-                ⏱️ {step.suggestedTime} phút
-              </Text>
+      {/* Ingredients */}
+      <View style={floatingStyles.generatedRecipeSection}>
+        <Text style={floatingStyles.generatedSectionTitle}>
+          🥄 Nguyên liệu ({recipe.ingredients.length})
+        </Text>
+        {recipe.ingredients.map((ingredient, index) => (
+          <View key={index} style={floatingStyles.ingredientRow}>
+            <Text style={floatingStyles.ingredientBullet}>•</Text>
+            <Text style={floatingStyles.ingredientText}>
+              {ingredient.name}: {ingredient.quantity}
+            </Text>
+          </View>
+        ))}
+      </View>
+
+      {/* Steps */}
+      <View style={floatingStyles.generatedRecipeSection}>
+        <Text style={floatingStyles.generatedSectionTitle}>
+          👨‍🍳 Các bước thực hiện ({recipe.steps.length})
+        </Text>
+        {recipe.steps.map((step) => (
+          <View key={step.stepNo} style={floatingStyles.stepContainer}>
+            <View style={floatingStyles.stepHeader}>
+              <Text style={floatingStyles.stepNumber}>Bước {step.stepNo}</Text>
+              {step.suggestedTime && (
+                <Text style={floatingStyles.stepTime}>
+                  ⏱️ {step.suggestedTime} phút
+                </Text>
+              )}
+            </View>
+            <Text style={floatingStyles.stepContent}>{step.content}</Text>
+            {step.tips && (
+              <View style={floatingStyles.stepTips}>
+                <Text style={floatingStyles.stepTipsIcon}>💡</Text>
+                <Text style={floatingStyles.stepTipsText}>{step.tips}</Text>
+              </View>
             )}
           </View>
-          <Text style={floatingStyles.stepContent}>{step.content}</Text>
-          {step.tips && (
-            <View style={floatingStyles.stepTips}>
-              <Text style={floatingStyles.stepTipsIcon}>💡</Text>
-              <Text style={floatingStyles.stepTipsText}>{step.tips}</Text>
-            </View>
-          )}
-        </View>
-      ))}
-    </View>
+        ))}
+      </View>
 
-    {/* Action Button */}
-    <TouchableOpacity
+      {/* Action Button */}
+      <TouchableOpacity
         style={[
           floatingStyles.saveRecipeButton,
           isSavingRecipe && floatingStyles.disabledButton,
@@ -562,9 +566,7 @@ const renderGeneratedRecipe = (recipe: AIGeneratedRecipe) => (
         {isSavingRecipe ? (
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             <ActivityIndicator size="small" color="#FFFFFF" />
-            <Text style={floatingStyles.saveRecipeButtonText}>
-              Đang lưu...
-            </Text>
+            <Text style={floatingStyles.saveRecipeButtonText}>Đang lưu...</Text>
           </View>
         ) : (
           <Text style={floatingStyles.saveRecipeButtonText}>
@@ -572,57 +574,58 @@ const renderGeneratedRecipe = (recipe: AIGeneratedRecipe) => (
           </Text>
         )}
       </TouchableOpacity>
-  </View>
-);
+    </View>
+  );
 
-const renderChatMessage = (message: ChatMessage) => (
-  <View
-    key={message.id}
-    style={[
-      floatingStyles.messageContainer,
-      message.isUser ? floatingStyles.userMessage : floatingStyles.aiMessage,
-    ]}
-  >
-    {message.isLoading ? (
-      <View style={floatingStyles.loadingMessage}>
-        <ActivityIndicator size="small" color="#FF6B35" />
-        <Text style={floatingStyles.loadingMessageText}>
-          AI đang suy nghĩ...
-        </Text>
-      </View>
-    ) : (
-      <>
-        <Text
-          style={[
-            floatingStyles.messageText,
-            message.isUser
-              ? floatingStyles.userMessageText
-              : floatingStyles.aiMessageText,
-          ]}
-        >
-          {message.message}
-        </Text>
+  const renderChatMessage = (message: ChatMessage) => (
+    <View
+      key={message.id}
+      style={[
+        floatingStyles.messageContainer,
+        message.isUser ? floatingStyles.userMessage : floatingStyles.aiMessage,
+      ]}
+    >
+      {message.isLoading ? (
+        <View style={floatingStyles.loadingMessage}>
+          <ActivityIndicator size="small" color="#FF6B35" />
+          <Text style={floatingStyles.loadingMessageText}>
+            AI đang suy nghĩ...
+          </Text>
+        </View>
+      ) : (
+        <>
+          <Text
+            style={[
+              floatingStyles.messageText,
+              message.isUser
+                ? floatingStyles.userMessageText
+                : floatingStyles.aiMessageText,
+            ]}
+          >
+            {message.message}
+          </Text>
 
-        {/* Generated Recipe */}
-        {message.generatedRecipe && renderGeneratedRecipe(message.generatedRecipe)}
+          {/* Generated Recipe */}
+          {message.generatedRecipe &&
+            renderGeneratedRecipe(message.generatedRecipe)}
 
-        {/* Recipe Suggestions */}
-        {message.suggestions && message.suggestions.length > 0 && (
-          <View style={floatingStyles.suggestionsContainer}>
-            {message.suggestions.map(renderRecipeSuggestion)}
-          </View>
-        )}
+          {/* Recipe Suggestions */}
+          {message.suggestions && message.suggestions.length > 0 && (
+            <View style={floatingStyles.suggestionsContainer}>
+              {message.suggestions.map(renderRecipeSuggestion)}
+            </View>
+          )}
 
-        <Text style={floatingStyles.messageTime}>
-          {message.timestamp.toLocaleTimeString("vi-VN", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </Text>
-      </>
-    )}
-  </View>
-);
+          <Text style={floatingStyles.messageTime}>
+            {message.timestamp.toLocaleTimeString("vi-VN", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </Text>
+        </>
+      )}
+    </View>
+  );
 
   const renderRecipeSuggestion = (suggestion: RecipeSuggestion) => (
     <TouchableOpacity
@@ -671,7 +674,6 @@ const renderChatMessage = (message: ChatMessage) => (
       </View>
     </TouchableOpacity>
   );
-
 
   const renderIngredientSelector = () => (
     <Modal

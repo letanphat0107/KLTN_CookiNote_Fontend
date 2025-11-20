@@ -10,11 +10,14 @@ interface ChatMessage {
   suggestions?: any[];
 }
 
-const CHAT_STORAGE_KEY = "ai_chat_history";
+const getChatStorageKey = (userId: string | number): string => {
+  return `ai_chat_history_${userId}`;
+};
 
 // Save chat messages to local storage
 export const saveChatHistory = async (
-  messages: ChatMessage[]
+  messages: ChatMessage[],
+  userId: string | number
 ): Promise<void> => {
   try {
     const serializedMessages = messages.map((msg) => ({
@@ -24,19 +27,23 @@ export const saveChatHistory = async (
     }));
 
     await AsyncStorage.setItem(
-      CHAT_STORAGE_KEY,
+      getChatStorageKey(userId),
       JSON.stringify(serializedMessages)
     );
-    console.log("Chat history saved successfully");
+    console.log("Chat history saved successfully for user:", userId);
   } catch (error) {
     console.error("Error saving chat history:", error);
   }
 };
 
 // Load chat messages from local storage
-export const loadChatHistory = async (): Promise<ChatMessage[]> => {
+export const loadChatHistory = async (
+  userId: string | number
+): Promise<ChatMessage[]> => {
   try {
-    const storedMessages = await AsyncStorage.getItem(CHAT_STORAGE_KEY);
+    const storedMessages = await AsyncStorage.getItem(
+      getChatStorageKey(userId)
+    );
 
     if (!storedMessages) {
       return getDefaultWelcomeMessage();
@@ -64,10 +71,12 @@ export const loadChatHistory = async (): Promise<ChatMessage[]> => {
 };
 
 // Clear all chat history
-export const clearChatHistory = async (): Promise<void> => {
+export const clearChatHistory = async (
+  userId: string | number
+): Promise<void> => {
   try {
-    await AsyncStorage.removeItem(CHAT_STORAGE_KEY);
-    console.log("Chat history cleared successfully");
+    await AsyncStorage.removeItem(getChatStorageKey(userId));
+    console.log("Chat history cleared successfully for user:", userId);
   } catch (error) {
     console.error("Error clearing chat history:", error);
   }
@@ -86,12 +95,13 @@ const getDefaultWelcomeMessage = (): ChatMessage[] => [
 
 // Add single message to existing history
 export const addMessageToHistory = async (
-  newMessage: ChatMessage
+  newMessage: ChatMessage,
+  userId: string | number
 ): Promise<void> => {
   try {
-    const existingMessages = await loadChatHistory();
+    const existingMessages = await loadChatHistory(userId);
     const updatedMessages = [...existingMessages, newMessage];
-    await saveChatHistory(updatedMessages);
+    await saveChatHistory(updatedMessages, userId);
   } catch (error) {
     console.error("Error adding message to history:", error);
   }
@@ -100,14 +110,15 @@ export const addMessageToHistory = async (
 // Update specific message in history (for loading states)
 export const updateMessageInHistory = async (
   messageId: string,
-  updates: Partial<ChatMessage>
+  updates: Partial<ChatMessage>,
+  userId: string | number
 ): Promise<void> => {
   try {
-    const existingMessages = await loadChatHistory();
+    const existingMessages = await loadChatHistory(userId);
     const updatedMessages = existingMessages.map((msg) =>
       msg.id === messageId ? { ...msg, ...updates } : msg
     );
-    await saveChatHistory(updatedMessages);
+    await saveChatHistory(updatedMessages, userId);
   } catch (error) {
     console.error("Error updating message in history:", error);
   }
