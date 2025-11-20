@@ -192,6 +192,7 @@ export const addToFavorites = async (recipeId: number): Promise<boolean> => {
     console.log("Add to favorites response:", result);
 
     if (response.ok && result.code === 200) {
+      clearFavoritesCache();
       return true;
     } else {
       console.error("Failed to add to favorites:", result.message);
@@ -222,6 +223,7 @@ export const removeFromFavorites = async (
     console.log("Remove from favorites response:", result);
 
     if (response.ok && result.code === 200) {
+      clearFavoritesCache();
       return true;
     } else {
       console.error("Failed to remove from favorites:", result.message);
@@ -233,6 +235,19 @@ export const removeFromFavorites = async (
   }
 };
 
+// Add cache at module level
+let favoritesCache: {
+  items: Recipe[];
+  timestamp: number;
+} | null = null;
+
+const CACHE_DURATION = 30000; // 30 seconds
+
+// ✅ Giảm API calls
+// ✅ Tự động invalidate sau 30s
+// ✅ Clear cache sau add/remove để đồng bộ
+// ✅ Phù hợp cho hầu hết use cases
+
 // Check if recipe is in favorites
 export const checkFavoriteStatus = async (
   recipeId: number
@@ -240,22 +255,47 @@ export const checkFavoriteStatus = async (
   try {
     console.log("Checking favorite status for recipe:", recipeId);
 
-    const url = buildApiUrl(API_CONFIG.ENDPOINTS.RECIPE.ADD_FAVORITE, {
-      id: recipeId,
-    });
+    const now = Date.now();
+    
+    // Use cache if valid
+    if (
+      favoritesCache && 
+      now - favoritesCache.timestamp < CACHE_DURATION
+    ) {
+      console.log("Using cached favorites list");
+      const isFavorited = favoritesCache.items.some(
+        (recipe) => recipe.id === recipeId
+      );
+      return isFavorited;
+    }
 
-    const response = await fetchWithAuth(url, {
-      method: "GET",
-    });
+    // Fetch fresh data
+    console.log("Fetching fresh favorites list");
+    const favoriteResponse = await getFavoriteRecipes(0, 100);
+    
+    // Update cache
+    favoritesCache = {
+      items: favoriteResponse.items,
+      timestamp: now,
+    };
 
-    const result: FavoriteResponse = await response.json();
-    console.log("Check favorite status response:", result);
+    // Check if recipeId exists in the favorites list
+    const isFavorited = favoriteResponse.items.some(
+      (recipe) => recipe.id === recipeId
+    );
 
-    return response.ok && result.code === 200;
+    console.log(`Recipe ${recipeId} is ${isFavorited ? '' : 'not '}favorited`);
+    
+    return isFavorited;
   } catch (error) {
     console.error("Error checking favorite status:", error);
     return false;
   }
+};
+
+// Clear cache (call this after add/remove favorites)
+export const clearFavoritesCache = () => {
+  favoritesCache = null;
 };
 
 // Get user's favorite recipes
