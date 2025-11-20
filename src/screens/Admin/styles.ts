@@ -981,19 +981,6 @@ export const adminStyles = StyleSheet.create({
     marginBottom: 12,
   },
 
-  modernImagePlaceholder: {
-    width: "100%",
-    height: 200,
-    borderRadius: 12,
-    backgroundColor: "#F8F9FA",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#E0E0E0",
-    borderStyle: "dashed",
-    marginBottom: 12,
-  },
-
   imagePlaceholderText: {
     marginTop: 8,
     fontSize: 14,
@@ -1028,22 +1015,6 @@ export const adminStyles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  modernInput: {
-    backgroundColor: "#F8F9FA",
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: "#2C3E50",
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-  },
-
-  modernTextArea: {
-    height: 120,
-    paddingTop: 14,
-  },
-
   modernModalFooter: {
     flexDirection: "row",
     paddingHorizontal: 20,
@@ -1066,23 +1037,6 @@ export const adminStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#7F8C8D",
-  },
-
-  modernSubmitButton: {
-    flex: 1,
-    flexDirection: "row",
-    paddingVertical: 14,
-    borderRadius: 10,
-    backgroundColor: "#FF6B6B",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-
-  modernSubmitButtonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#FFFFFF",
   },
 
   modernButtonDisabled: {
@@ -1475,4 +1429,447 @@ export const adminStyles = StyleSheet.create({
     fontWeight: "600",
     color: "#2C3E50",
   },
+
+  // Add these modern form styles
+
+// Modern Form
+modernFormHeader: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  paddingHorizontal: 20,
+  paddingVertical: 16,
+  backgroundColor: "#FFFFFF",
+  borderBottomWidth: 1,
+  borderBottomColor: "#F0F0F0",
+  marginTop: 40,
+},
+
+modernBackButton: {
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  backgroundColor: "#F8F9FA",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+modernFormTitle: {
+  fontSize: 20,
+  fontWeight: "bold",
+  color: "#2C3E50",
+},
+
+modernFormContent: {
+  flex: 1,
+  backgroundColor: "#F8F9FA",
+},
+
+modernSection: {
+  backgroundColor: "#FFFFFF",
+  marginTop: 12,
+  paddingHorizontal: 20,
+  paddingVertical: 20,
+},
+
+modernSectionTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+  color: "#2C3E50",
+  marginBottom: 16,
+},
+
+modernSectionHeader: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 16,
+},
+
+modernAddButton: {
+  padding: 4,
+},
+
+// Image Picker
+modernImagePicker: {
+  width: "100%",
+  borderRadius: 12,
+  overflow: "hidden",
+},
+
+modernImagePreviewContainer: {
+  position: "relative",
+  width: "100%",
+  height: 220,
+},
+
+modernCoverPreview: {
+  width: "100%",
+  height: "100%",
+},
+
+modernImageRemoveButton: {
+  position: "absolute",
+  top: 12,
+  right: 12,
+  backgroundColor: "rgba(0, 0, 0, 0.6)",
+  borderRadius: 16,
+},
+
+modernImagePlaceholder: {
+  width: "100%",
+  height: 220,
+  backgroundColor: "#F8F9FA",
+  borderRadius: 12,
+  borderWidth: 2,
+  borderColor: "#E0E0E0",
+  borderStyle: "dashed",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+modernImagePlaceholderText: {
+  marginTop: 12,
+  fontSize: 14,
+  color: "#95A5A6",
+  fontWeight: "600",
+},
+
+// Form Groups
+modernFormGroup: {
+  marginBottom: 10,
+  flexDirection: "column",
+},
+
+modernRowGroup: {
+  flexDirection: "column",
+  gap: 12,
+},
+
+modernLabel: {
+  fontSize: 14,
+  fontWeight: "600",
+  color: "#2C3E50",
+  marginBottom: 8,
+},
+
+modernInput: {
+  backgroundColor: "#F8F9FA",
+  borderRadius: 10,
+  paddingHorizontal: 16,
+  paddingVertical: 14,
+  fontSize: 16,
+  color: "#2C3E50",
+  borderWidth: 1,
+  borderColor: "#E0E0E0",
+},
+
+modernTextArea: {
+  height: 120,
+  paddingTop: 14,
+  textAlignVertical: "top",
+},
+
+// Category Picker
+categoryScrollPicker: {
+  flexDirection: "row",
+},
+
+modernCategoryChip: {
+  paddingHorizontal: 16,
+  paddingVertical: 10,
+  borderRadius: 20,
+  backgroundColor: "#F8F9FA",
+  borderWidth: 1.5,
+  borderColor: "#E0E0E0",
+  marginRight: 8,
+},
+
+modernCategoryChipActive: {
+  backgroundColor: "#FF6B6B",
+  borderColor: "#FF6B6B",
+},
+
+modernCategoryChipText: {
+  fontSize: 14,
+  fontWeight: "600",
+  color: "#7F8C8D",
+},
+
+modernCategoryChipTextActive: {
+  color: "#FFFFFF",
+},
+
+// Difficulty Picker
+modernDifficultyPicker: {
+  flexDirection: "row",
+  gap: 12,
+},
+
+modernDifficultyChip: {
+  flex: 1,
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 12,
+  borderRadius: 10,
+  backgroundColor: "#F8F9FA",
+  borderWidth: 1.5,
+  borderColor: "#E0E0E0",
+  gap: 6,
+},
+
+modernDifficultyChipActive: {
+  borderColor: "transparent",
+},
+
+modernDifficultyChipText: {
+  fontSize: 14,
+  fontWeight: "600",
+  color: "#7F8C8D",
+},
+
+modernDifficultyChipTextActive: {
+  color: "#FFFFFF",
+},
+
+// Privacy Picker
+modernPrivacyPicker: {
+  flexDirection: "row",
+  gap: 12,
+},
+
+modernPrivacyChip: {
+  flex: 1,
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 12,
+  borderRadius: 10,
+  backgroundColor: "#F8F9FA",
+  borderWidth: 1.5,
+  borderColor: "#E0E0E0",
+  gap: 6,
+},
+
+modernPrivacyChipActive: {
+  backgroundColor: "#4A90E2",
+  borderColor: "#4A90E2",
+},
+
+modernPrivacyChipText: {
+  fontSize: 14,
+  fontWeight: "600",
+  color: "#7F8C8D",
+},
+
+modernPrivacyChipTextActive: {
+  color: "#FFFFFF",
+},
+
+// Ingredients
+modernIngredientItem: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 12,
+  marginBottom: 12,
+},
+
+modernIngredientNumber: {
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+  backgroundColor: "#FF6B6B",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+modernIngredientNumberText: {
+  fontSize: 14,
+  fontWeight: "bold",
+  color: "#FFFFFF",
+},
+
+modernIngredientInputs: {
+  flex: 1,
+  flexDirection: "row",
+  gap: 8,
+},
+
+modernRemoveButton: {
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  backgroundColor: "#FFEBEE",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+// Steps
+modernStepCard: {
+  backgroundColor: "#F8F9FA",
+  borderRadius: 12,
+  padding: 16,
+  marginBottom: 16,
+  borderWidth: 1,
+  borderColor: "#E0E0E0",
+},
+
+modernStepHeader: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 16,
+},
+
+modernStepBadge: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#FF6B6B",
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 20,
+  gap: 6,
+},
+
+modernStepBadgeText: {
+  fontSize: 14,
+  fontWeight: "bold",
+  color: "#FFFFFF",
+},
+
+modernStepRemoveButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 4,
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 8,
+  backgroundColor: "#FFEBEE",
+},
+
+modernStepRemoveText: {
+  fontSize: 13,
+  fontWeight: "600",
+  color: "#E74C3C",
+},
+
+// Step Images
+modernImagePickerButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 12,
+  borderRadius: 10,
+  backgroundColor: "#FFFFFF",
+  borderWidth: 1.5,
+  borderColor: "#FF6B6B",
+  borderStyle: "dashed",
+  gap: 8,
+},
+
+modernImagePickerButtonText: {
+  fontSize: 14,
+  fontWeight: "600",
+  color: "#FF6B6B",
+},
+
+modernStepImagesGrid: {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  gap: 10,
+  marginTop: 12,
+},
+
+modernStepImageItem: {
+  position: "relative",
+  width: 100,
+  height: 100,
+  borderRadius: 8,
+  overflow: "hidden",
+},
+
+modernStepImagePreview: {
+  width: "100%",
+  height: "100%",
+},
+
+modernStepImageRemove: {
+  position: "absolute",
+  top: 4,
+  right: 4,
+  backgroundColor: "rgba(0, 0, 0, 0.6)",
+  borderRadius: 12,
+},
+
+modernStepImageBadge: {
+  position: "absolute",
+  bottom: 4,
+  left: 4,
+  backgroundColor: "rgba(0, 0, 0, 0.6)",
+  paddingHorizontal: 8,
+  paddingVertical: 4,
+  borderRadius: 12,
+},
+
+modernStepImageBadgeText: {
+  fontSize: 12,
+  fontWeight: "bold",
+  color: "#FFFFFF",
+},
+
+// Footer
+modernFormFooter: {
+  padding: 20,
+  backgroundColor: "#FFFFFF",
+  borderTopWidth: 1,
+  borderTopColor: "#F0F0F0",
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: -2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 8,
+  elevation: 8,
+},
+
+modernSubmitButton: {
+  flexDirection: "row",
+  backgroundColor: "#FF6B6B",
+  paddingVertical: 16,
+  borderRadius: 12,
+  justifyContent: "center",
+  alignItems: "center",
+  gap: 10,
+  shadowColor: "#FF6B6B",
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.3,
+  shadowRadius: 8,
+  elevation: 4,
+},
+
+modernSubmitButtonText: {
+  fontSize: 18,
+  fontWeight: "bold",
+  color: "#FFFFFF",
+},
+
+modernNewImageBadge: {
+  position: "absolute",
+  top: 8,
+  left: 8,
+  backgroundColor: "#4CAF50",
+  paddingHorizontal: 8,
+  paddingVertical: 4,
+  borderRadius: 12,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.3,
+  shadowRadius: 4,
+  elevation: 4,
+},
+
+modernNewImageBadgeText: {
+  fontSize: 10,
+  fontWeight: "bold",
+  color: "#FFFFFF",
+},
 });

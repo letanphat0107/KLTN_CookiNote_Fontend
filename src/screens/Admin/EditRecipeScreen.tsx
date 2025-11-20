@@ -12,24 +12,27 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { useAppSelector } from "../../store/hooks";
-import adminService, { CreateRecipeData } from "../../services/adminService";
-import { useRecipe } from "../../hooks/useRecipe";
+import adminService, { UpdateRecipeData } from "../../services/adminService";
 import { adminStyles } from "./styles";
+import { Ionicons } from "@expo/vector-icons";
+import { getCategories } from "../../services/categoryService";
+import { Category } from "../../types/recipe";
+import { useRecipe } from "../../hooks/useRecipe";
 
 interface Ingredient {
-  id?: number; // Add ID to track existing ingredients
+  id?: number;
   name: string;
   quantity: string;
 }
 
 interface Step {
-  id?: number; // Add ID to track existing steps
+  id?: number;
   stepNo: number;
   content: string;
   suggestedTime: number;
   tips?: string;
-  images?: string[];
-  newImages?: string[]; // Track newly added images
+  images?: string[]; // Existing images from server
+  newImages?: string[]; // New images to upload
 }
 
 const EditRecipeScreen = () => {
@@ -41,6 +44,7 @@ const EditRecipeScreen = () => {
 
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   // Basic info
   const [categoryId, setCategoryId] = useState("1");
@@ -48,18 +52,14 @@ const EditRecipeScreen = () => {
   const [description, setDescription] = useState("");
   const [prepareTime, setPrepareTime] = useState("");
   const [cookTime, setCookTime] = useState("");
-  const [difficulty, setDifficulty] = useState("");
+  const [difficulty, setDifficulty] = useState<"EASY" | "MEDIUM" | "HARD">(
+    "MEDIUM"
+  );
   const [privacy, setPrivacy] = useState<"PUBLIC" | "PRIVATE">("PUBLIC");
 
-  const [deletedIngredients, setDeletedIngredients] = useState<number[]>([]);
-  const [deletedSteps, setDeletedSteps] = useState<number[]>([]);
-  const [coverImageChanged, setCoverImageChanged] = useState(false);
-  const [originalCoverImage, setOriginalCoverImage] = useState<string | null>(
-    null
-  );
-
   // Cover image
-  const [coverImageUri, setCoverImageUri] = useState<string | null>(null);
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+  const [newCoverImageUri, setNewCoverImageUri] = useState<string | null>(null);
 
   // Ingredients
   const [ingredients, setIngredients] = useState<Ingredient[]>([
@@ -68,37 +68,48 @@ const EditRecipeScreen = () => {
 
   // Steps
   const [steps, setSteps] = useState<Step[]>([
-    { stepNo: 1, content: "", suggestedTime: 0, tips: "", images: [] },
+    {
+      stepNo: 1,
+      content: "",
+      suggestedTime: 0,
+      tips: "",
+      images: [],
+      newImages: [],
+    },
   ]);
 
-  // Fetch recipe details when component mounts
   useEffect(() => {
-    fetchRecipeDetails();
+    loadCategories();
+    loadRecipeData();
   }, [recipeId]);
 
-  const fetchRecipeDetails = async () => {
+  const loadCategories = async () => {
+    try {
+      const data = await getCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error("Error loading categories:", error);
+    }
+  };
+
+  const loadRecipeData = async () => {
     try {
       setInitialLoading(true);
-      console.log("Fetching recipe details for ID:", recipeId);
+      const recipe = await getRecipeDetails(recipeId);
 
-      const recipeData = await getRecipeDetails(Number(recipeId));
+      if (recipe) {
+        setCategoryId(recipe.categoryId?.toString() || "1");
+        setTitle(recipe.title);
+        setDescription(recipe.description || "");
+        setPrepareTime(recipe.prepareTime?.toString() || "0");
+        setCookTime(recipe.cookTime?.toString() || "0");
+        setDifficulty(recipe.difficulty as any);
+        setPrivacy((recipe.privacy as any) || "PUBLIC");
+        setCoverImageUrl(recipe.imageUrl || null);
 
-      if (recipeData) {
-        // Fill form with existing data
-        setCategoryId(recipeData.categoryId?.toString() || "1");
-        setTitle(recipeData.title);
-        setDescription(recipeData.description || "");
-        setPrepareTime(recipeData.prepareTime?.toString() || "");
-        setCookTime(recipeData.cookTime?.toString() || "");
-        setDifficulty(recipeData.difficulty);
-        setPrivacy(recipeData.privacy || "PUBLIC");
-        setCoverImageUri(recipeData.imageUrl || null);
-        setOriginalCoverImage(recipeData.imageUrl || null);
-
-        // Fill ingredients with IDs
-        if (recipeData.ingredients && recipeData.ingredients.length > 0) {
+        if (recipe.ingredients && recipe.ingredients.length > 0) {
           setIngredients(
-            recipeData.ingredients.map((ing) => ({
+            recipe.ingredients.map((ing: any) => ({
               id: ing.id,
               name: ing.name,
               quantity: ing.quantity,
@@ -106,36 +117,36 @@ const EditRecipeScreen = () => {
           );
         }
 
-        // Fill steps with IDs
-        if (recipeData.steps && recipeData.steps.length > 0) {
+        if (recipe.steps && recipe.steps.length > 0) {
           setSteps(
-            recipeData.steps.map((step) => ({
+            recipe.steps.map((step: any) => ({
               id: step.id,
-              stepNo: step.stepNo || step.step_no || 0,
+              stepNo: step.stepNo,
               content: step.content,
               suggestedTime: step.suggestedTime || 0,
               tips: step.tips || "",
-              images: step.images?.map((img) => img) || [],
+              images: step.images?.map((img: any) => img.imageUrl) || [],
               newImages: [],
             }))
           );
         }
-
-        console.log("Recipe details loaded:", recipeData.title);
-      } else {
-        Alert.alert("Lỗi", "Không thể tải thông tin món ăn");
-        navigation.goBack();
       }
     } catch (error) {
-      console.error("Error fetching recipe:", error);
-      Alert.alert("Lỗi", "Đã xảy ra lỗi khi tải công thức");
-      navigation.goBack();
+      console.error("Error loading recipe:", error);
+      Alert.alert("Lỗi", "Không thể tải thông tin công thức");
     } finally {
       setInitialLoading(false);
     }
   };
 
   const pickCoverImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert("Lỗi", "Cần cấp quyền truy cập thư viện ảnh");
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -144,8 +155,8 @@ const EditRecipeScreen = () => {
     });
 
     if (!result.canceled) {
-      setCoverImageUri(result.assets[0].uri);
-      setCoverImageChanged(true);
+      setNewCoverImageUri(result.assets[0].uri);
+      setCoverImageUrl(null); // Clear old image when new one is selected
     }
   };
 
@@ -167,7 +178,7 @@ const EditRecipeScreen = () => {
     }
   };
 
-  const removeStepImage = (stepIndex: number, imageIndex: number) => {
+  const removeExistingStepImage = (stepIndex: number, imageIndex: number) => {
     const newSteps = [...steps];
     const currentImages = newSteps[stepIndex].images || [];
     newSteps[stepIndex].images = currentImages.filter(
@@ -178,8 +189,8 @@ const EditRecipeScreen = () => {
 
   const removeNewStepImage = (stepIndex: number, imageIndex: number) => {
     const newSteps = [...steps];
-    const currentNewImages = newSteps[stepIndex].newImages || [];
-    newSteps[stepIndex].newImages = currentNewImages.filter(
+    const currentImages = newSteps[stepIndex].newImages || [];
+    newSteps[stepIndex].newImages = currentImages.filter(
       (_, idx) => idx !== imageIndex
     );
     setSteps(newSteps);
@@ -195,6 +206,7 @@ const EditRecipeScreen = () => {
     value: Ingredient[K]
   ) => {
     const newIngredients = [...ingredients];
+    // create a new ingredient object to keep immutability and satisfy TS
     newIngredients[index] = {
       ...newIngredients[index],
       [field]: value,
@@ -203,9 +215,9 @@ const EditRecipeScreen = () => {
   };
 
   const removeIngredient = (index: number) => {
-    const ingredient = ingredients[index];
-    if (ingredient.id) {
-      setDeletedIngredients([...deletedIngredients, ingredient.id]);
+    if (ingredients.length === 1) {
+      Alert.alert("Lỗi", "Phải có ít nhất một nguyên liệu");
+      return;
     }
     setIngredients(ingredients.filter((_, i) => i !== index));
   };
@@ -235,12 +247,11 @@ const EditRecipeScreen = () => {
   };
 
   const removeStep = (index: number) => {
-    const step = steps[index];
-    if (step.id) {
-      setDeletedSteps([...deletedSteps, step.id]);
+    if (steps.length === 1) {
+      Alert.alert("Lỗi", "Phải có ít nhất một bước thực hiện");
+      return;
     }
     const newSteps = steps.filter((_, i) => i !== index);
-    // Re-number steps
     newSteps.forEach((step, i) => {
       step.stepNo = i + 1;
     });
@@ -281,389 +292,598 @@ const EditRecipeScreen = () => {
       return;
     }
 
-    console.log("Submit ne");
+    if (!validateForm()) return;
 
-    // if (!validateForm()) return;
-    console.log("Validate  ne");
-    setLoading(true);
+    Alert.alert("Xác nhận", "Bạn có chắc muốn cập nhật công thức này?", [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Cập nhật",
+        onPress: async () => {
+          setLoading(true);
 
-    try {
-      // 1. Update basic recipe info INCLUDING ingredients
-      const recipeData = {
-        categoryId: parseInt(categoryId),
-        title: title.trim(),
-        description: description.trim(),
-        prepareTime: parseInt(prepareTime),
-        cookTime: parseInt(cookTime),
-        difficulty,
-        privacy,
-        // Include all current ingredients (existing + new)
-        ingredients: ingredients
-          .filter((ing) => ing.id) // Only existing ingredients
-          .map((ing) => ({
-            name: ing.name.trim(),
-            quantity: ing.quantity.trim(),
-          })),
-      };
-      await adminService.updateRecipe(Number(recipeId), recipeData);
+          try {
+            const recipeData: UpdateRecipeData = {
+              categoryId: parseInt(categoryId),
+              title: title.trim(),
+              description: description.trim(),
+              prepareTime: parseInt(prepareTime),
+              cookTime: parseInt(cookTime),
+              difficulty,
+              privacy,
+              ingredients: ingredients.map((ing) => ({
+                id: ing.id,
+                name: ing.name.trim(),
+                quantity: ing.quantity.trim(),
+              })),
+              steps: steps.map((step) => ({
+                id: step.id,
+                stepNo: step.stepNo,
+                content: step.content.trim(),
+                suggestedTime: step.suggestedTime,
+                tips: step.tips?.trim(),
+              })),
+            };
 
-      // 2. Update cover image if changed
-      if (
-        coverImageChanged &&
-        coverImageUri &&
-        coverImageUri !== originalCoverImage
-      ) {
-        await adminService.updateRecipeCover(Number(recipeId), coverImageUri);
-      }
+            const stepImages = steps
+              .filter((step) => step.newImages && step.newImages.length > 0)
+              .map((step) => ({
+                stepNo: step.stepNo,
+                imageUris: step.newImages!,
+              }));
 
-      // 3. Delete removed ingredients (bulk delete)
-      if (deletedIngredients.length > 0) {
-        await adminService.deleteIngredients(
-          Number(recipeId),
-          deletedIngredients
-        );
-      }
+            await adminService.updateRecipe(
+              recipeId,
+              recipeData,
+            );
 
-      // 4. Add new ingredients (ones without ID)
-      const newIngredients = ingredients.filter((ing) => !ing.id);
-      if (newIngredients.length > 0) {
-        await adminService.addIngredients(Number(recipeId), newIngredients);
-      }
-
-      // 5. Delete removed steps (bulk delete)
-      if (deletedSteps.length > 0) {
-        await adminService.deleteSteps(Number(recipeId), deletedSteps);
-      }
-
-      // 6. Update existing steps and add new images
-      const existingSteps = steps.filter((step) => step.id);
-      for (const step of existingSteps) {
-        if (step.id) {
-          await adminService.updateStep(
-            Number(recipeId),
-            step.id,
-            {
-              content: step.content,
-              stepNo: step.stepNo,
-              suggestedTime: step.suggestedTime,
-              tips: step.tips,
-            },
-            step.newImages // Add new images if any
-          );
-        }
-      }
-
-      // 7. Add new steps (ones without ID) with images
-      const newSteps = steps.filter((step) => !step.id);
-      for (const step of newSteps) {
-        await adminService.addStep(
-          Number(recipeId),
-          {
-            content: step.content,
-            suggestedTime: step.suggestedTime,
-            tips: step.tips,
-          },
-          step.newImages || [] // Include images when creating new step
-        );
-      }
-
-      // 8. Reorder steps if needed
-      const stepsWithId = steps.filter((step) => step.id);
-      if (stepsWithId.length > 0) {
-        const reorderData = stepsWithId.map((step, index) => ({
-          stepId: step.id!,
-          newStepNo: index + 1,
-        }));
-        await adminService.reorderSteps(Number(recipeId), reorderData);
-      }
-
-      Alert.alert("Thành công", "Đã cập nhật công thức", [
-        {
-          text: "OK",
-          onPress: () => navigation.goBack(),
+            Alert.alert("Thành công", "Đã cập nhật công thức", [
+              {
+                text: "OK",
+                onPress: () => navigation.goBack(),
+              },
+            ]);
+          } catch (error: any) {
+            console.error("Error updating recipe:", error);
+            Alert.alert("Lỗi", error.message || "Không thể cập nhật công thức");
+          } finally {
+            setLoading(false);
+          }
         },
-      ]);
-    } catch (error: any) {
-      console.error("Error updating recipe:", error);
-      Alert.alert("Lỗi", error.message || "Không thể cập nhật công thức");
-    } finally {
-      setLoading(false);
+      },
+    ]);
+  };
+
+  const getDifficultyColor = (diff: string) => {
+    switch (diff) {
+      case "EASY":
+        return "#4CAF50";
+      case "MEDIUM":
+        return "#FF9800";
+      case "HARD":
+        return "#F44336";
+      default:
+        return "#757575";
+    }
+  };
+
+  const getDifficultyIcon = (diff: string) => {
+    switch (diff) {
+      case "EASY":
+        return "leaf-outline";
+      case "MEDIUM":
+        return "flame-outline";
+      case "HARD":
+        return "flash-outline";
+      default:
+        return "help-outline";
     }
   };
 
   if (initialLoading) {
     return (
-      <View style={adminStyles.loadingContainer}>
+      <View style={[adminStyles.container, adminStyles.loadingContainer]}>
         <ActivityIndicator size="large" color="#FF6B6B" />
-        <Text style={{ marginTop: 16, color: "#6C757D" }}>Đang tải...</Text>
+        <Text style={{ marginTop: 16, color: "#7F8C8D" }}>
+          Đang tải dữ liệu...
+        </Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={adminStyles.addContainer}>
-      <Text style={adminStyles.sectionTitle}>Chỉnh sửa món ăn</Text>
-
-      {/* Cover Image */}
-      <TouchableOpacity
-        style={adminStyles.imagePickerButton}
-        onPress={pickCoverImage}
+    <View style={adminStyles.container}>
+      <ScrollView
+        style={adminStyles.modernFormContent}
+        showsVerticalScrollIndicator={false}
       >
-        {coverImageUri ? (
-          <View
-            style={{
-              position: "relative",
-              width: "100%",
-              height: 200,
-              borderRadius: 8,
-            }}
+        {/* Cover Image Section */}
+        <View style={adminStyles.modernSection}>
+          <Text style={adminStyles.modernSectionTitle}>
+            <Ionicons name="image-outline" size={20} color="#FF6B6B" /> Ảnh bìa
+          </Text>
+          <TouchableOpacity
+            style={adminStyles.modernImagePicker}
+            onPress={pickCoverImage}
           >
-            <Image
-              source={{ uri: coverImageUri }}
-              style={adminStyles.coverPreview}
+            {newCoverImageUri || coverImageUrl ? (
+              <View style={adminStyles.modernImagePreviewContainer}>
+                <Image
+                  source={{ uri: newCoverImageUri || coverImageUrl || "" }}
+                  style={adminStyles.modernCoverPreview}
+                />
+                <TouchableOpacity
+                  style={adminStyles.modernImageRemoveButton}
+                  onPress={() => {
+                    setNewCoverImageUri(null);
+                    setCoverImageUrl(null);
+                  }}
+                >
+                  <Ionicons name="close-circle" size={32} color="#FFF" />
+                </TouchableOpacity>
+                {newCoverImageUri && (
+                  <View style={adminStyles.modernNewImageBadge}>
+                    <Text style={adminStyles.modernNewImageBadgeText}>MỚI</Text>
+                  </View>
+                )}
+              </View>
+            ) : (
+              <View style={adminStyles.modernImagePlaceholder}>
+                <Ionicons name="camera-outline" size={48} color="#95A5A6" />
+                <Text style={adminStyles.modernImagePlaceholderText}>
+                  Chọn ảnh bìa
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        {/* Basic Info Section */}
+        <View style={adminStyles.modernSection}>
+          <Text style={adminStyles.modernSectionTitle}>
+            <Ionicons
+              name="information-circle-outline"
+              size={20}
+              color="#FF6B6B"
+            />{" "}
+            Thông tin cơ bản
+          </Text>
+
+          <View style={adminStyles.modernFormGroup}>
+            <Text style={adminStyles.modernLabel}>Tên món ăn *</Text>
+            <TextInput
+              style={adminStyles.modernInput}
+              placeholder="Nhập tên món ăn"
+              value={title}
+              onChangeText={setTitle}
+              placeholderTextColor="#95A5A6"
             />
-            <TouchableOpacity
-              style={adminStyles.imageRemoveButton}
-              onPress={() => {
-                setCoverImageUri(null);
-                setCoverImageChanged(true);
-              }}
+          </View>
+
+          <View style={adminStyles.modernFormGroup}>
+            <Text style={adminStyles.modernLabel}>Mô tả *</Text>
+            <TextInput
+              style={[adminStyles.modernInput, adminStyles.modernTextArea]}
+              placeholder="Nhập mô tả món ăn"
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+              placeholderTextColor="#95A5A6"
+            />
+          </View>
+
+          <View style={adminStyles.modernFormGroup}>
+            <Text style={adminStyles.modernLabel}>Danh mục *</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={adminStyles.categoryScrollPicker}
             >
-              <Text style={adminStyles.imageRemoveButtonText}>✕</Text>
+              {categories.map((cat) => (
+                <TouchableOpacity
+                  key={cat.id}
+                  style={[
+                    adminStyles.modernCategoryChip,
+                    categoryId === cat.id.toString() &&
+                      adminStyles.modernCategoryChipActive,
+                  ]}
+                  onPress={() => setCategoryId(cat.id.toString())}
+                >
+                  <Text
+                    style={[
+                      adminStyles.modernCategoryChipText,
+                      categoryId === cat.id.toString() &&
+                        adminStyles.modernCategoryChipTextActive,
+                    ]}
+                  >
+                    {cat.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+
+          <View style={adminStyles.modernRowGroup}>
+            <View style={[adminStyles.modernFormGroup, { flex: 1 }]}>
+              <Text style={adminStyles.modernLabel}>
+                <Ionicons name="time-outline" size={16} color="#7F8C8D" /> Chuẩn
+                bị (phút) *
+              </Text>
+              <TextInput
+                style={adminStyles.modernInput}
+                placeholder="0"
+                value={prepareTime}
+                onChangeText={setPrepareTime}
+                keyboardType="numeric"
+                placeholderTextColor="#95A5A6"
+              />
+            </View>
+
+            <View style={[adminStyles.modernFormGroup, { flex: 1 }]}>
+              <Text style={adminStyles.modernLabel}>
+                <Ionicons name="flame-outline" size={16} color="#7F8C8D" /> Nấu
+                (phút) *
+              </Text>
+              <TextInput
+                style={adminStyles.modernInput}
+                placeholder="0"
+                value={cookTime}
+                onChangeText={setCookTime}
+                keyboardType="numeric"
+                placeholderTextColor="#95A5A6"
+              />
+            </View>
+          </View>
+
+          <View style={adminStyles.modernFormGroup}>
+            <Text style={adminStyles.modernLabel}>Độ khó *</Text>
+            <View style={adminStyles.modernDifficultyPicker}>
+              {(["EASY", "MEDIUM", "HARD"] as const).map((diff) => (
+                <TouchableOpacity
+                  key={diff}
+                  style={[
+                    adminStyles.modernDifficultyChip,
+                    difficulty === diff &&
+                      adminStyles.modernDifficultyChipActive,
+                    difficulty === diff && {
+                      backgroundColor: getDifficultyColor(diff),
+                    },
+                  ]}
+                  onPress={() => setDifficulty(diff)}
+                >
+                  <Ionicons
+                    name={getDifficultyIcon(diff) as any}
+                    size={18}
+                    color={difficulty === diff ? "#FFF" : "#7F8C8D"}
+                  />
+                  <Text
+                    style={[
+                      adminStyles.modernDifficultyChipText,
+                      difficulty === diff &&
+                        adminStyles.modernDifficultyChipTextActive,
+                    ]}
+                  >
+                    {diff === "EASY"
+                      ? "Dễ"
+                      : diff === "MEDIUM"
+                      ? "Trung bình"
+                      : "Khó"}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <View style={adminStyles.modernFormGroup}>
+            <Text style={adminStyles.modernLabel}>Quyền riêng tư</Text>
+            <View style={adminStyles.modernPrivacyPicker}>
+              <TouchableOpacity
+                style={[
+                  adminStyles.modernPrivacyChip,
+                  privacy === "PUBLIC" && adminStyles.modernPrivacyChipActive,
+                ]}
+                onPress={() => setPrivacy("PUBLIC")}
+              >
+                <Ionicons
+                  name="earth-outline"
+                  size={18}
+                  color={privacy === "PUBLIC" ? "#FFF" : "#7F8C8D"}
+                />
+                <Text
+                  style={[
+                    adminStyles.modernPrivacyChipText,
+                    privacy === "PUBLIC" &&
+                      adminStyles.modernPrivacyChipTextActive,
+                  ]}
+                >
+                  Công khai
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  adminStyles.modernPrivacyChip,
+                  privacy === "PRIVATE" && adminStyles.modernPrivacyChipActive,
+                ]}
+                onPress={() => setPrivacy("PRIVATE")}
+              >
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={18}
+                  color={privacy === "PRIVATE" ? "#FFF" : "#7F8C8D"}
+                />
+                <Text
+                  style={[
+                    adminStyles.modernPrivacyChipText,
+                    privacy === "PRIVATE" &&
+                      adminStyles.modernPrivacyChipTextActive,
+                  ]}
+                >
+                  Riêng tư
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        {/* Ingredients Section */}
+        <View style={adminStyles.modernSection}>
+          <View style={adminStyles.modernSectionHeader}>
+            <Text style={adminStyles.modernSectionTitle}>
+              <Ionicons name="nutrition-outline" size={20} color="#FF6B6B" />{" "}
+              Nguyên liệu ({ingredients.length})
+            </Text>
+            <TouchableOpacity
+              style={adminStyles.modernAddButton}
+              onPress={addIngredient}
+            >
+              <Ionicons name="add-circle" size={24} color="#FF6B6B" />
             </TouchableOpacity>
           </View>
-        ) : (
-          <Text>📷 Chọn ảnh bìa</Text>
-        )}
-      </TouchableOpacity>
 
-      {/* Title */}
-      <TextInput
-        style={adminStyles.input}
-        placeholder="Tên món ăn *"
-        value={title}
-        onChangeText={setTitle}
-      />
+          {ingredients.map((ing, index) => (
+            <View key={index} style={adminStyles.modernIngredientItem}>
+              <View style={adminStyles.modernIngredientNumber}>
+                <Text style={adminStyles.modernIngredientNumberText}>
+                  {index + 1}
+                </Text>
+              </View>
 
-      {/* Description */}
-      <TextInput
-        style={[adminStyles.input, { height: 100 }]}
-        placeholder="Mô tả *"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-        numberOfLines={4}
-      />
+              <View style={adminStyles.modernIngredientInputs}>
+                <TextInput
+                  style={[adminStyles.modernInput, { flex: 2 }]}
+                  placeholder="Tên nguyên liệu"
+                  value={ing.name}
+                  onChangeText={(text) => updateIngredient(index, "name", text)}
+                  placeholderTextColor="#95A5A6"
+                />
 
-      {/* Category */}
-      <TextInput
-        style={adminStyles.input}
-        placeholder="ID danh mục *"
-        value={categoryId}
-        onChangeText={setCategoryId}
-        keyboardType="numeric"
-      />
+                <TextInput
+                  style={[adminStyles.modernInput, { flex: 1 }]}
+                  placeholder="Số lượng"
+                  value={ing.quantity}
+                  onChangeText={(text) =>
+                    updateIngredient(index, "quantity", text)
+                  }
+                  placeholderTextColor="#95A5A6"
+                />
+              </View>
 
-      {/* Times */}
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        <TextInput
-          style={[adminStyles.input, { flex: 1 }]}
-          placeholder="Thời gian chuẩn bị (phút) *"
-          value={prepareTime}
-          onChangeText={setPrepareTime}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={[adminStyles.input, { flex: 1 }]}
-          placeholder="Thời gian nấu (phút) *"
-          value={cookTime}
-          onChangeText={setCookTime}
-          keyboardType="numeric"
-        />
-      </View>
-
-      {/* Difficulty */}
-      <View style={adminStyles.filterContainer}>
-        {["EASY", "MEDIUM", "HARD"].map((diff) => (
-          <TouchableOpacity
-            key={diff}
-            style={[
-              adminStyles.filterButton,
-              difficulty === diff && adminStyles.filterButtonActive,
-            ]}
-            onPress={() => setDifficulty(diff as any)}
-          >
-            <Text
-              style={[
-                adminStyles.filterButtonText,
-                difficulty === diff && adminStyles.filterButtonTextActive,
-              ]}
-            >
-              {diff === "EASY" ? "Dễ" : diff === "MEDIUM" ? "TB" : "Khó"}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Ingredients */}
-      <Text style={adminStyles.sectionTitle}>Nguyên liệu</Text>
-      {ingredients.map((ing, index) => (
-        <View
-          key={index}
-          style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}
-        >
-          <TextInput
-            style={[adminStyles.input, { flex: 2 }]}
-            placeholder="Tên nguyên liệu"
-            value={ing.name}
-            onChangeText={(text) => updateIngredient(index, "name", text)}
-          />
-          <TextInput
-            style={[adminStyles.input, { flex: 1 }]}
-            placeholder="Số lượng"
-            value={ing.quantity}
-            onChangeText={(text) => updateIngredient(index, "quantity", text)}
-          />
-          {ingredients.length > 1 && (
-            <TouchableOpacity onPress={() => removeIngredient(index)}>
-              <Text style={{ fontSize: 24, color: "red" }}>✕</Text>
-            </TouchableOpacity>
-          )}
+              {ingredients.length > 1 && (
+                <TouchableOpacity
+                  style={adminStyles.modernRemoveButton}
+                  onPress={() => removeIngredient(index)}
+                >
+                  <Ionicons name="trash-outline" size={20} color="#E74C3C" />
+                </TouchableOpacity>
+              )}
+            </View>
+          ))}
         </View>
-      ))}
-      <TouchableOpacity style={adminStyles.addButton} onPress={addIngredient}>
-        <Text style={adminStyles.addButtonText}>+ Thêm nguyên liệu</Text>
-      </TouchableOpacity>
 
-      {/* Steps */}
-      <Text style={adminStyles.sectionTitle}>Các bước thực hiện</Text>
-      {steps.map((step, index) => (
-        <View key={index} style={adminStyles.stepContainer}>
-          <Text style={adminStyles.stepNumber}>Bước {step.stepNo}</Text>
-
-          <TextInput
-            style={[adminStyles.input, { height: 80 }]}
-            placeholder="Nội dung bước *"
-            value={step.content}
-            onChangeText={(text) => updateStep(index, "content", text)}
-            multiline
-          />
-
-          <TextInput
-            style={adminStyles.input}
-            placeholder="Thời gian gợi ý (phút)"
-            value={step.suggestedTime.toString()}
-            onChangeText={(text) =>
-              updateStep(index, "suggestedTime", parseInt(text) || 0)
-            }
-            keyboardType="numeric"
-          />
-
-          <TextInput
-            style={[adminStyles.input, { height: 60 }]}
-            placeholder="Mẹo (tùy chọn)"
-            value={step.tips}
-            onChangeText={(text) => updateStep(index, "tips", text)}
-            multiline
-          />
-
-          <TouchableOpacity
-            style={adminStyles.imagePickerButton}
-            onPress={() => pickStepImages(index)}
-          >
-            <Text>
-              📷 Thêm ảnh cho bước này
-              {step.images?.length || step.newImages?.length
-                ? ` (${
-                    (step.images?.length || 0) + (step.newImages?.length || 0)
-                  })`
-                : ""}
+        {/* Steps Section */}
+        <View style={adminStyles.modernSection}>
+          <View style={adminStyles.modernSectionHeader}>
+            <Text style={adminStyles.modernSectionTitle}>
+              <Ionicons name="list-outline" size={20} color="#FF6B6B" /> Các
+              bước thực hiện ({steps.length})
             </Text>
-          </TouchableOpacity>
-
-          {/* Existing images */}
-          {step.images && step.images.length > 0 && (
-            <View style={adminStyles.stepImagesContainer}>
-              <Text style={{ fontSize: 12, color: "#666", marginBottom: 8 }}>
-                Ảnh hiện có:
-              </Text>
-              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-                {step.images.map((uri, imgIndex) => (
-                  <View key={imgIndex} style={adminStyles.stepImageWrapper}>
-                    <Image
-                      source={{ uri }}
-                      style={adminStyles.stepImagePreview}
-                    />
-                    <TouchableOpacity
-                      style={adminStyles.stepImageRemoveButton}
-                      onPress={() => removeStepImage(index, imgIndex)}
-                    >
-                      <Text style={adminStyles.stepImageRemoveButtonText}>
-                        ✕
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
-
-          {/* New images */}
-          {step.newImages && step.newImages.length > 0 && (
-            <View style={adminStyles.stepImagesContainer}>
-              <Text style={{ fontSize: 12, color: "#FF6B35", marginBottom: 8 }}>
-                Ảnh mới thêm:
-              </Text>
-              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-                {step.newImages.map((uri, imgIndex) => (
-                  <View key={imgIndex} style={adminStyles.stepImageWrapper}>
-                    <Image
-                      source={{ uri }}
-                      style={adminStyles.stepImagePreview}
-                    />
-                    <TouchableOpacity
-                      style={adminStyles.stepImageRemoveButton}
-                      onPress={() => removeNewStepImage(index, imgIndex)}
-                    >
-                      <Text style={adminStyles.stepImageRemoveButtonText}>
-                        ✕
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
-
-          {steps.length > 1 && (
             <TouchableOpacity
-              style={adminStyles.removeButton}
-              onPress={() => removeStep(index)}
+              style={adminStyles.modernAddButton}
+              onPress={addStep}
             >
-              <Text style={{ color: "red" }}>Xóa bước này</Text>
+              <Ionicons name="add-circle" size={24} color="#FF6B6B" />
             </TouchableOpacity>
-          )}
+          </View>
+
+          {steps.map((step, index) => (
+            <View key={index} style={adminStyles.modernStepCard}>
+              <View style={adminStyles.modernStepHeader}>
+                <View style={adminStyles.modernStepBadge}>
+                  <Ionicons name="footsteps-outline" size={16} color="#FFF" />
+                  <Text style={adminStyles.modernStepBadgeText}>
+                    Bước {step.stepNo}
+                  </Text>
+                </View>
+
+                {steps.length > 1 && (
+                  <TouchableOpacity
+                    style={adminStyles.modernStepRemoveButton}
+                    onPress={() => removeStep(index)}
+                  >
+                    <Ionicons name="trash-outline" size={18} color="#E74C3C" />
+                    <Text style={adminStyles.modernStepRemoveText}>Xóa</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              <View style={adminStyles.modernFormGroup}>
+                <Text style={adminStyles.modernLabel}>Nội dung *</Text>
+                <TextInput
+                  style={[adminStyles.modernInput, adminStyles.modernTextArea]}
+                  placeholder="Mô tả chi tiết cách thực hiện..."
+                  value={step.content}
+                  onChangeText={(text) => updateStep(index, "content", text)}
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                  placeholderTextColor="#95A5A6"
+                />
+              </View>
+
+              <View style={adminStyles.modernRowGroup}>
+                <View style={[adminStyles.modernFormGroup, { flex: 1 }]}>
+                  <Text style={adminStyles.modernLabel}>
+                    <Ionicons name="timer-outline" size={16} color="#7F8C8D" />{" "}
+                    Thời gian (phút)
+                  </Text>
+                  <TextInput
+                    style={adminStyles.modernInput}
+                    placeholder="0"
+                    value={step.suggestedTime.toString()}
+                    onChangeText={(text) =>
+                      updateStep(index, "suggestedTime", parseInt(text) || 0)
+                    }
+                    keyboardType="numeric"
+                    placeholderTextColor="#95A5A6"
+                  />
+                </View>
+
+                <View style={[adminStyles.modernFormGroup, { flex: 1 }]}>
+                  <Text style={adminStyles.modernLabel}>
+                    <Ionicons name="bulb-outline" size={16} color="#7F8C8D" />{" "}
+                    Mẹo
+                  </Text>
+                  <TextInput
+                    style={adminStyles.modernInput}
+                    placeholder="Gợi ý hữu ích..."
+                    value={step.tips}
+                    onChangeText={(text) => updateStep(index, "tips", text)}
+                    placeholderTextColor="#95A5A6"
+                  />
+                </View>
+              </View>
+
+              {/* Step Images */}
+              <View style={adminStyles.modernFormGroup}>
+                <TouchableOpacity
+                  style={adminStyles.modernImagePickerButton}
+                  onPress={() => pickStepImages(index)}
+                >
+                  <Ionicons name="images-outline" size={20} color="#FF6B6B" />
+                  <Text style={adminStyles.modernImagePickerButtonText}>
+                    Thêm ảnh mới (
+                    {(step.images?.length || 0) + (step.newImages?.length || 0)}
+                    )
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Existing Images */}
+                {step.images && step.images.length > 0 && (
+                  <View style={adminStyles.modernStepImagesGrid}>
+                    {step.images.map((url, imgIndex) => (
+                      <View
+                        key={`old-${imgIndex}`}
+                        style={adminStyles.modernStepImageItem}
+                      >
+                        <Image
+                          source={{ uri: url }}
+                          style={adminStyles.modernStepImagePreview}
+                        />
+                        <TouchableOpacity
+                          style={adminStyles.modernStepImageRemove}
+                          onPress={() =>
+                            removeExistingStepImage(index, imgIndex)
+                          }
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={24}
+                            color="#FFF"
+                          />
+                        </TouchableOpacity>
+                        <View style={adminStyles.modernStepImageBadge}>
+                          <Text style={adminStyles.modernStepImageBadgeText}>
+                            {imgIndex + 1}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {/* New Images */}
+                {step.newImages && step.newImages.length > 0 && (
+                  <View style={adminStyles.modernStepImagesGrid}>
+                    {step.newImages.map((uri, imgIndex) => (
+                      <View
+                        key={`new-${imgIndex}`}
+                        style={adminStyles.modernStepImageItem}
+                      >
+                        <Image
+                          source={{ uri }}
+                          style={adminStyles.modernStepImagePreview}
+                        />
+                        <TouchableOpacity
+                          style={adminStyles.modernStepImageRemove}
+                          onPress={() => removeNewStepImage(index, imgIndex)}
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={24}
+                            color="#FFF"
+                          />
+                        </TouchableOpacity>
+                        <View style={adminStyles.modernNewImageBadge}>
+                          <Text style={adminStyles.modernNewImageBadgeText}>
+                            MỚI
+                          </Text>
+                        </View>
+                        <View style={adminStyles.modernStepImageBadge}>
+                          <Text style={adminStyles.modernStepImageBadgeText}>
+                            {(step.images?.length || 0) + imgIndex + 1}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            </View>
+          ))}
         </View>
-      ))}
-      <TouchableOpacity style={adminStyles.addButton} onPress={addStep}>
-        <Text style={adminStyles.addButtonText}>+ Thêm bước</Text>
-      </TouchableOpacity>
 
-      {/* Submit Button */}
-      <TouchableOpacity
-        style={[adminStyles.submitButton, loading && { opacity: 0.6 }]}
-        onPress={handleSubmit}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={adminStyles.submitButtonText}>Cập nhật công thức</Text>
-        )}
-      </TouchableOpacity>
+        <View style={{ height: 100 }} />
+      </ScrollView>
 
-      <View style={{ height: 50 }} />
-    </ScrollView>
+      {/* Fixed Bottom Submit Button */}
+      <View style={adminStyles.modernFormFooter}>
+        <TouchableOpacity
+          style={[
+            adminStyles.modernSubmitButton,
+            loading && adminStyles.modernButtonDisabled,
+          ]}
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <>
+              <Ionicons
+                name="checkmark-circle-outline"
+                size={24}
+                color="#FFF"
+              />
+              <Text style={adminStyles.modernSubmitButtonText}>
+                Cập nhật công thức
+              </Text>
+            </>
+          )}
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 

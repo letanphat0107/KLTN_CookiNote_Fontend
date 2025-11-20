@@ -61,6 +61,28 @@ export interface CreateRecipeResponse {
   title: string;
 }
 
+export interface UpdateRecipeData {
+  categoryId: number;
+  title: string;
+  description: string;
+  prepareTime: number;
+  cookTime: number;
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  privacy: "PUBLIC" | "PRIVATE";
+  ingredients: Array<{
+    id?: number;
+    name: string;
+    quantity: string;
+  }>;
+  steps: Array<{
+    id?: number;
+    stepNo: number;
+    content: string;
+    suggestedTime?: number;
+    tips?: string;
+  }>;
+}
+
 class AdminService {
   // Get dashboard statistics
   async getDashboardStats(): Promise<DashboardStats> {
