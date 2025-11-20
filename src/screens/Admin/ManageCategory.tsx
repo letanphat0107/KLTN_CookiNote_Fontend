@@ -574,6 +574,39 @@ const ManageCategory = () => {
             </Text>
           </View>
 
+          
+
+          {/* Recipe list */}
+          <View style={adminStyles.recipeListSection}>
+            <Text style={adminStyles.sectionTitle}>
+              Danh sách công thức (Nhấn để chọn)
+            </Text>
+            {loadingRecipes ? (
+              <View style={adminStyles.loadingContainer}>
+                <ActivityIndicator size="large" color="#FF6B6B" />
+              </View>
+            ) : (
+              <FlatList
+                data={categoryRecipes}
+                renderItem={renderRecipeItem}
+                keyExtractor={(item) => item.id.toString()}
+                style={adminStyles.recipeList}
+                ListEmptyComponent={
+                  <View style={adminStyles.emptyRecipeList}>
+                    <Ionicons
+                      name="restaurant-outline"
+                      size={50}
+                      color="#CCC"
+                    />
+                    <Text style={adminStyles.emptyRecipeText}>
+                      Chưa có công thức nào
+                    </Text>
+                  </View>
+                }
+              />
+            )}
+          </View>
+
           {/* Move section */}
           {selectedRecipes.length > 0 && (
             <View style={adminStyles.moveSection}>
@@ -634,37 +667,6 @@ const ManageCategory = () => {
               </TouchableOpacity>
             </View>
           )}
-
-          {/* Recipe list */}
-          <View style={adminStyles.recipeListSection}>
-            <Text style={adminStyles.sectionTitle}>
-              Danh sách công thức (Nhấn để chọn)
-            </Text>
-            {loadingRecipes ? (
-              <View style={adminStyles.loadingContainer}>
-                <ActivityIndicator size="large" color="#FF6B6B" />
-              </View>
-            ) : (
-              <FlatList
-                data={categoryRecipes}
-                renderItem={renderRecipeItem}
-                keyExtractor={(item) => item.id.toString()}
-                style={adminStyles.recipeList}
-                ListEmptyComponent={
-                  <View style={adminStyles.emptyRecipeList}>
-                    <Ionicons
-                      name="restaurant-outline"
-                      size={50}
-                      color="#CCC"
-                    />
-                    <Text style={adminStyles.emptyRecipeText}>
-                      Chưa có công thức nào
-                    </Text>
-                  </View>
-                }
-              />
-            )}
-          </View>
         </View>
       </View>
     </Modal>
