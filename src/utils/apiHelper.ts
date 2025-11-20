@@ -34,13 +34,13 @@ export const fetchWithAuth = async (
       };
     }
 
-    console.log("Fetch with auth:", {
-      url,
-      method: options.method,
-      isFormData,
-      hasBody: !!options.body,
-      headers: isFormData ? { Authorization: "Bearer ***" } : headers,
-    });
+    // console.log("Fetch with auth:", {
+    //   url,
+    //   method: options.method,
+    //   isFormData,
+    //   hasBody: !!options.body,
+    //   headers: isFormData ? { Authorization: "Bearer ***" } : headers,
+    // });
 
     // Make request
     const response = await fetch(url, {

@@ -79,7 +79,7 @@ export const getCookedHistory = async (
     );
 
     const result = await response.json();
-    console.log("Get cooked history API response:", result);
+
 
     if (response.ok && result.code === 200) {
       // If result.data is array, use it directly
@@ -87,8 +87,6 @@ export const getCookedHistory = async (
       const items = Array.isArray(result.data)
         ? result.data
         : result.data?.items || [];
-
-      console.log("Parsed cooked history items:", items);
 
       return {
         page: result.data?.page || 0,
@@ -169,7 +167,6 @@ export const removeFromCookedHistory = async (
     );
 
     const result = await response.json();
-    console.log("Remove from cooked history response:", result);
 
     return response.ok && result.code === 200;
   } catch (error) {
@@ -283,7 +280,6 @@ export const getFavoriteRecipes = async (
     );
 
     const result: FavoriteResponse = await response.json();
-    console.log("Get favorite recipes response:", result);
 
     if (response.ok && result.code === 200) {
       const items = Array.isArray(result.data)
@@ -345,7 +341,6 @@ export const getMyRecipes = async (
     );
 
     const result: FavoriteResponse = await response.json();
-    console.log("Get my recipes response:", result);
 
     if (response.ok && result.code === 200) {
       return {
@@ -404,7 +399,6 @@ export const getDeletedRecipes = async (
     );
 
     const result: FavoriteResponse = await response.json();
-    console.log("Get deleted recipes response:", result);
 
     if (response.ok && result.code === 200) {
       return {
