@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -9,16 +7,18 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
+  Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { logoutUser } from "../../store/authSlice";
 import adminService, { DashboardStats } from "../../services/adminService";
 import { adminStyles } from "./styles";
+import { Ionicons } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
 
-// Sử dụng Legacy API để giữ hàm downloadAsync
-import * as FileSystem from 'expo-file-system/legacy';
-import * as Sharing from 'expo-sharing';
+const { width } = Dimensions.get("window");
 
 const AdminDashboardScreen = () => {
   const navigation = useNavigation();
@@ -28,13 +28,14 @@ const AdminDashboardScreen = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [exportingReport, setExportingReport] = useState(false);
 
   const defaultStats: DashboardStats = {
-  totalUsers: 0,
-  totalRecipes: 0,
-  activeUsers: 0,
-  newUsersToday: 0,
-};
+    totalUsers: 0,
+    totalRecipes: 0,
+    activeUsers: 0,
+    newUsersToday: 0,
+  };
 
   const fetchStats = async () => {
     if (!tokens?.accessToken) return;
@@ -59,70 +60,63 @@ const AdminDashboardScreen = () => {
     fetchStats();
   };
 
- const handleExportReport = async () => {
-  if (!tokens?.accessToken) {
-    Alert.alert("Lỗi", "Vui lòng đăng nhập để thực hiện chức năng này.");
-    return;
-  }
+  const handleExportReport = async () => {
+    if (!tokens?.accessToken) {
+      Alert.alert("Lỗi", "Vui lòng đăng nhập để thực hiện chức năng này.");
+      return;
+    }
 
-  Alert.alert("Xuất báo cáo", "Bạn có muốn xuất báo cáo người dùng?", [
-    { text: "Hủy", style: "cancel" },
-    {
-      text: "Xuất",
-      onPress: async () => {
-        let isSuccess = false;
-        try {
-          // 1. GỌI API & NHẬN URL TẢI XUỐNG
-          const fileDownloadUrl = await adminService.exportUserReport(
-            tokens.accessToken
-          );
-          
-          if (!fileDownloadUrl) {
+    Alert.alert("Xuất báo cáo", "Bạn có muốn xuất báo cáo người dùng?", [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Xuất",
+        onPress: async () => {
+          setExportingReport(true);
+          try {
+            const fileDownloadUrl = await adminService.exportUserReport(
+              tokens.accessToken
+            );
+
+            if (!fileDownloadUrl) {
               throw new Error("Không nhận được đường dẫn tải tệp từ máy chủ.");
-          }
+            }
 
-          // 2. TẢI TỆP VỀ THIẾT BỊ
-          const fileName = `user_report_${Date.now()}.xlsx`; 
-          const fileUri = FileSystem.documentDirectory + fileName; 
-          
-          Alert.alert("Đang xử lý", "Đang tải báo cáo về thiết bị...", [{ text: "OK" }]);
+            const fileName = `user_report_${Date.now()}.xlsx`;
+            const fileUri = FileSystem.documentDirectory + fileName;
 
-          // Hàm downloadAsync này không còn bị cảnh báo deprecated nữa!
-          const downloadResult = await FileSystem.downloadAsync(
-            fileDownloadUrl,
-            fileUri
-          );
+            const downloadResult = await FileSystem.downloadAsync(
+              fileDownloadUrl,
+              fileUri
+            );
 
-          if (downloadResult.status !== 200) {
-            throw new Error(`Tải tệp thất bại: Trạng thái ${downloadResult.status}`);
-          }
-          
-          // 3. CHIA SẺ/MỞ TỆP
-          if (await Sharing.isAvailableAsync()) {
+            if (downloadResult.status !== 200) {
+              throw new Error(
+                `Tải tệp thất bại: Trạng thái ${downloadResult.status}`
+              );
+            }
+
+            if (await Sharing.isAvailableAsync()) {
               await Sharing.shareAsync(downloadResult.uri);
-              Alert.alert("Thành công", `Báo cáo đã được tải về và mở.`);
-          } else {
-              Alert.alert("Thành công", "Báo cáo đã được tải về. Tính năng chia sẻ không khả dụng.");
+              Alert.alert("Thành công", "Báo cáo đã được tải về và mở.");
+            } else {
+              Alert.alert(
+                "Thành công",
+                "Báo cáo đã được tải về. Tính năng chia sẻ không khả dụng."
+              );
+            }
+          } catch (error) {
+            const errorMessage =
+              error instanceof Error
+                ? error.message
+                : "Đã xảy ra lỗi không xác định.";
+            Alert.alert("Lỗi", `Không thể xuất báo cáo: ${errorMessage}`);
+          } finally {
+            setExportingReport(false);
           }
-          
-          isSuccess = true;
-
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : "Đã xảy ra lỗi không xác định.";
-          Alert.alert("Lỗi", `Không thể xuất báo cáo: ${errorMessage}`);
-        }
+        },
       },
-    },
-  ]);
-};
-
-  if (loading) {
-    return (
-      <View style={adminStyles.loadingContainer}>
-        <ActivityIndicator size="large" color="#FF6B6B" />
-      </View>
-    );
-  }
+    ]);
+  };
 
   const handleLogout = () => {
     Alert.alert("Đăng xuất", "Bạn có chắc muốn đăng xuất?", [
@@ -132,14 +126,12 @@ const AdminDashboardScreen = () => {
         style: "destructive",
         onPress: async () => {
           try {
-            // Dispatch logout thunk
             const result = await dispatch(logoutUser());
 
             if (
               logoutUser.fulfilled.match(result) ||
               logoutUser.rejected.match(result)
             ) {
-              // Navigate to login screen after logout (successful or failed)
               if (navigation) {
                 navigation.reset({
                   index: 0,
@@ -149,7 +141,6 @@ const AdminDashboardScreen = () => {
             }
           } catch (error) {
             console.error("Logout error:", error);
-            // Even if logout fails, still navigate to login
             if (navigation) {
               navigation.reset({
                 index: 0,
@@ -162,125 +153,361 @@ const AdminDashboardScreen = () => {
     ]);
   };
 
+  if (loading) {
+    return (
+      <View style={adminStyles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FF6B6B" />
+        <Text style={{ marginTop: 16, color: "#7F8C8D" }}>Đang tải...</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView
       style={adminStyles.container}
+      showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
           colors={["#FF6B6B"]}
+          tintColor="#FF6B6B"
         />
       }
     >
-      {/* Header */}
-      <View style={adminStyles.header}>
-        <Text style={adminStyles.headerTitle}>Trang quản trị</Text>
-        <Text style={adminStyles.headerSubtitle}>
-          Quản lý hệ thống CookiNote
-        </Text>
-      </View>
-
-      {/* Stats Cards */}
-      <View style={adminStyles.statsContainer}>
-        <View style={adminStyles.statCard}>
-          <Text style={{ fontSize: 28 }}>👥</Text>
-          <Text style={adminStyles.statNumber}>{stats?.totalUsers || 0}</Text>
-          <Text style={adminStyles.statLabel}>Tổng người dùng</Text>
-        </View>
-
-        <View style={adminStyles.statCard}>
-          <Text style={{ fontSize: 28 }}>🍲</Text>
-          <Text style={adminStyles.statNumber}>{stats?.totalRecipes || 0}</Text>
-          <Text style={adminStyles.statLabel}>Tổng món ăn</Text>
-        </View>
-
-        <View style={adminStyles.statCard}>
-          <Text style={{ fontSize: 28 }}>✅</Text>
-          <Text style={adminStyles.statNumber}>{stats?.activeUsers || 0}</Text>
-          <Text style={adminStyles.statLabel}>Hoạt động</Text>
-        </View>
-
-        <View style={adminStyles.statCard}>
-          <Text style={{ fontSize: 28 }}>🆕</Text>
-          <Text style={adminStyles.statNumber}>
-            {stats?.newUsersToday || 0}
-          </Text>
-          <Text style={adminStyles.statLabel}>Mới hôm nay</Text>
-        </View>
-      </View>
-
-      {/* Quick Actions */}
-      <View style={adminStyles.section}>
-        <Text style={adminStyles.sectionTitle}>Thao tác nhanh</Text>
-
-        <TouchableOpacity
-          style={adminStyles.actionButton}
-          onPress={handleExportReport}
-        >
-          <Text style={adminStyles.actionIcon}>📄</Text>
-          <View style={adminStyles.actionContent}>
-            <Text style={adminStyles.actionTitle}>Xuất báo cáo</Text>
-            <Text style={adminStyles.actionSubtitle}>
-              Xuất báo cáo người dùng và hoạt động
+      {/* Modern Header */}
+      <View style={adminStyles.modernDashboardHeader}>
+        <View style={adminStyles.modernDashboardHeaderContent}>
+          <View style={adminStyles.modernDashboardHeaderIcon}>
+            <Ionicons name="shield-checkmark" size={32} color="#FF6B6B" />
+          </View>
+          <View style={adminStyles.modernDashboardHeaderText}>
+            <Text style={adminStyles.modernDashboardTitle}>Quản trị viên</Text>
+            <Text style={adminStyles.modernDashboardSubtitle}>
+              CookiNote Admin Panel
             </Text>
           </View>
-          <Text style={adminStyles.actionArrow}>›</Text>
-        </TouchableOpacity>
+        </View>
 
         <TouchableOpacity
-          style={adminStyles.actionButton}
-          onPress={() => navigation.navigate("ManageUsers" as never)}
-        >
-          <Text style={adminStyles.actionIcon}>👤</Text>
-          <View style={adminStyles.actionContent}>
-            <Text style={adminStyles.actionTitle}>Quản lý người dùng</Text>
-            <Text style={adminStyles.actionSubtitle}>
-              Xem và quản lý tài khoản người dùng
-            </Text>
-          </View>
-          <Text style={adminStyles.actionArrow}>›</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={adminStyles.actionButton}
-          onPress={() => navigation.navigate("ManageRecipe" as never)}
-        >
-          <Text style={adminStyles.actionIcon}>🍳</Text>
-          <View style={adminStyles.actionContent}>
-            <Text style={adminStyles.actionTitle}>Quản lý món ăn</Text>
-            <Text style={adminStyles.actionSubtitle}>
-              Tạo, chỉnh sửa và xóa món ăn
-            </Text>
-          </View>
-          <Text style={adminStyles.actionArrow}>›</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={adminStyles.actionButton}
+          style={adminStyles.modernDashboardLogoutButton}
           onPress={handleLogout}
         >
-          <Text style={adminStyles.actionIcon}>🚪</Text>
-          <View style={adminStyles.actionContent}>
-            <Text style={adminStyles.actionTitle}>Đăng xuất</Text>
-            <Text style={adminStyles.actionSubtitle}>
-              Thoát khỏi tài khoản quản trị
-            </Text>
-          </View>
-          <Text style={adminStyles.actionArrow}>›</Text>
+          <Ionicons name="log-out-outline" size={22} color="#E74C3C" />
         </TouchableOpacity>
       </View>
 
-      {/* Recent Activity */}
-      <View style={adminStyles.section}>
-        <Text style={adminStyles.sectionTitle}>Hoạt động gần đây</Text>
-        <View style={adminStyles.activityCard}>
-          <Text style={{ marginRight: 6 }}>🕒</Text>
-          <Text style={adminStyles.activityText}>
-            Chức năng đang phát triển...
+      {/* Modern Stats Cards */}
+      <View style={adminStyles.modernStatsGrid}>
+        <View
+          style={[adminStyles.modernStatCard, { backgroundColor: "#FFE5E5" }]}
+        >
+          <View style={adminStyles.modernStatCardHeader}>
+            <View
+              style={[
+                adminStyles.modernStatCardIcon,
+                { backgroundColor: "#FF6B6B" },
+              ]}
+            >
+              <Ionicons name="people" size={24} color="#FFFFFF" />
+            </View>
+            <View style={adminStyles.modernStatCardTrend}>
+              <Ionicons name="trending-up" size={14} color="#FF6B6B" />
+            </View>
+          </View>
+          <Text style={adminStyles.modernStatCardNumber}>
+            {stats?.totalUsers || 0}
+          </Text>
+          <Text style={[adminStyles.modernStatCardLabel, { color: "#FF6B6B" }]}>
+            Tổng người dùng
+          </Text>
+        </View>
+
+        <View
+          style={[adminStyles.modernStatCard, { backgroundColor: "#E8F5E9" }]}
+        >
+          <View style={adminStyles.modernStatCardHeader}>
+            <View
+              style={[
+                adminStyles.modernStatCardIcon,
+                { backgroundColor: "#4CAF50" },
+              ]}
+            >
+              <Ionicons name="restaurant" size={24} color="#FFFFFF" />
+            </View>
+            <View style={adminStyles.modernStatCardTrend}>
+              <Ionicons name="trending-up" size={14} color="#4CAF50" />
+            </View>
+          </View>
+          <Text style={adminStyles.modernStatCardNumber}>
+            {stats?.totalRecipes || 0}
+          </Text>
+          <Text style={[adminStyles.modernStatCardLabel, { color: "#4CAF50" }]}>
+            Tổng công thức
+          </Text>
+        </View>
+
+        <View
+          style={[adminStyles.modernStatCard, { backgroundColor: "#E3F2FD" }]}
+        >
+          <View style={adminStyles.modernStatCardHeader}>
+            <View
+              style={[
+                adminStyles.modernStatCardIcon,
+                { backgroundColor: "#2196F3" },
+              ]}
+            >
+              <Ionicons name="pulse" size={24} color="#FFFFFF" />
+            </View>
+            <View style={adminStyles.modernStatCardTrend}>
+              <Ionicons name="trending-up" size={14} color="#2196F3" />
+            </View>
+          </View>
+          <Text style={adminStyles.modernStatCardNumber}>
+            {stats?.activeUsers || 0}
+          </Text>
+          <Text style={[adminStyles.modernStatCardLabel, { color: "#2196F3" }]}>
+            Đang hoạt động
+          </Text>
+        </View>
+
+        <View
+          style={[adminStyles.modernStatCard, { backgroundColor: "#FFF3E0" }]}
+        >
+          <View style={adminStyles.modernStatCardHeader}>
+            <View
+              style={[
+                adminStyles.modernStatCardIcon,
+                { backgroundColor: "#FF9800" },
+              ]}
+            >
+              <Ionicons name="star" size={24} color="#FFFFFF" />
+            </View>
+            <View style={adminStyles.modernStatCardTrend}>
+              <Ionicons name="trending-up" size={14} color="#FF9800" />
+            </View>
+          </View>
+          <Text style={adminStyles.modernStatCardNumber}>
+            {stats?.newUsersToday || 0}
+          </Text>
+          <Text style={[adminStyles.modernStatCardLabel, { color: "#FF9800" }]}>
+            Mới hôm nay
           </Text>
         </View>
       </View>
+
+      {/* Quick Actions Section */}
+      <View style={adminStyles.modernDashboardSection}>
+        <View style={adminStyles.modernSectionHeader}>
+          <Text style={adminStyles.modernSectionTitle}>
+            <Ionicons name="flash" size={20} color="#FF6B6B" /> Thao tác nhanh
+          </Text>
+        </View>
+
+        <View style={adminStyles.modernActionsGrid}>
+          <TouchableOpacity
+            style={adminStyles.modernActionCard}
+            onPress={handleExportReport}
+            disabled={exportingReport}
+          >
+            <View
+              style={[
+                adminStyles.modernActionCardIcon,
+                { backgroundColor: "#E3F2FD" },
+              ]}
+            >
+              {exportingReport ? (
+                <ActivityIndicator size="small" color="#2196F3" />
+              ) : (
+                <Ionicons name="document-text" size={28} color="#2196F3" />
+              )}
+            </View>
+            <Text style={adminStyles.modernActionCardTitle}>Xuất báo cáo</Text>
+            <Text style={adminStyles.modernActionCardSubtitle}>
+              Tải về Excel
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={adminStyles.modernActionCard}
+            onPress={() => navigation.navigate("ManageUsers" as never)}
+          >
+            <View
+              style={[
+                adminStyles.modernActionCardIcon,
+                { backgroundColor: "#FFE5E5" },
+              ]}
+            >
+              <Ionicons name="people" size={28} color="#FF6B6B" />
+            </View>
+            <Text style={adminStyles.modernActionCardTitle}>Người dùng</Text>
+            <Text style={adminStyles.modernActionCardSubtitle}>
+              Quản lý tài khoản
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={adminStyles.modernActionCard}
+            onPress={() => navigation.navigate("ManageCategory" as never)}
+          >
+            <View
+              style={[
+                adminStyles.modernActionCardIcon,
+                { backgroundColor: "#F3E5F5" },
+              ]}
+            >
+              <Ionicons name="albums" size={28} color="#9C27B0" />
+            </View>
+            <Text style={adminStyles.modernActionCardTitle}>Danh mục</Text>
+            <Text style={adminStyles.modernActionCardSubtitle}>
+              Quản lý phân loại
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={adminStyles.modernActionCard}
+            onPress={() => navigation.navigate("ManageRecipe" as never)}
+          >
+            <View
+              style={[
+                adminStyles.modernActionCardIcon,
+                { backgroundColor: "#E8F5E9" },
+              ]}
+            >
+              <Ionicons name="restaurant" size={28} color="#4CAF50" />
+            </View>
+            <Text style={adminStyles.modernActionCardTitle}>Món ăn</Text>
+            <Text style={adminStyles.modernActionCardSubtitle}>
+              Quản lý công thức
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* System Info Section */}
+      <View style={adminStyles.modernDashboardSection}>
+        <View style={adminStyles.modernSectionHeader}>
+          <Text style={adminStyles.modernSectionTitle}>
+            <Ionicons name="information-circle" size={20} color="#FF6B6B" />{"  "}
+            Thông tin hệ thống
+          </Text>
+        </View>
+
+        <View style={adminStyles.modernSystemInfoCard}>
+          <View style={adminStyles.modernSystemInfoRow}>
+            <View style={adminStyles.modernSystemInfoItem}>
+              <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+              <Text style={adminStyles.modernSystemInfoLabel}>Trạng thái</Text>
+              <Text
+                style={[
+                  adminStyles.modernSystemInfoValue,
+                  { color: "#4CAF50" },
+                ]}
+              >
+                Hoạt động
+              </Text>
+            </View>
+
+            <View style={adminStyles.modernSystemInfoDivider} />
+
+            <View style={adminStyles.modernSystemInfoItem}>
+              <Ionicons name="server" size={20} color="#2196F3" />
+              <Text style={adminStyles.modernSystemInfoLabel}>Máy chủ</Text>
+              <Text
+                style={[
+                  adminStyles.modernSystemInfoValue,
+                  { color: "#2196F3" },
+                ]}
+              >
+                Online
+              </Text>
+            </View>
+
+            <View style={adminStyles.modernSystemInfoDivider} />
+
+            <View style={adminStyles.modernSystemInfoItem}>
+              <Ionicons name="shield-checkmark" size={20} color="#9C27B0" />
+              <Text style={adminStyles.modernSystemInfoLabel}>Bảo mật</Text>
+              <Text
+                style={[
+                  adminStyles.modernSystemInfoValue,
+                  { color: "#9C27B0" },
+                ]}
+              >
+                An toàn
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Recent Activity Preview */}
+      <View style={adminStyles.modernDashboardSection}>
+        <View style={adminStyles.modernSectionHeader}>
+          <Text style={adminStyles.modernSectionTitle}>
+            <Ionicons name="time" size={20} color="#FF6B6B" />  Hoạt động gần đây
+          </Text>
+        </View>
+
+        <View style={adminStyles.modernActivityPreview}>
+          <View style={adminStyles.modernActivityItem}>
+            <View
+              style={[
+                adminStyles.modernActivityIcon,
+                { backgroundColor: "#E3F2FD" },
+              ]}
+            >
+              <Ionicons name="person-add" size={20} color="#2196F3" />
+            </View>
+            <View style={adminStyles.modernActivityContent}>
+              <Text style={adminStyles.modernActivityTitle}>
+                {stats?.newUsersToday || 0} người dùng mới
+              </Text>
+              <Text style={adminStyles.modernActivityTime}>Hôm nay</Text>
+            </View>
+          </View>
+
+          <View style={adminStyles.modernActivityDivider} />
+
+          <View style={adminStyles.modernActivityItem}>
+            <View
+              style={[
+                adminStyles.modernActivityIcon,
+                { backgroundColor: "#E8F5E9" },
+              ]}
+            >
+              <Ionicons name="restaurant-outline" size={20} color="#4CAF50" />
+            </View>
+            <View style={adminStyles.modernActivityContent}>
+              <Text style={adminStyles.modernActivityTitle}>
+                Tổng {stats?.totalRecipes || 0} công thức
+              </Text>
+              <Text style={adminStyles.modernActivityTime}>Trong hệ thống</Text>
+            </View>
+          </View>
+
+          <View style={adminStyles.modernActivityDivider} />
+
+          <View style={adminStyles.modernActivityItem}>
+            <View
+              style={[
+                adminStyles.modernActivityIcon,
+                { backgroundColor: "#FFF3E0" },
+              ]}
+            >
+              <Ionicons name="pulse-outline" size={20} color="#FF9800" />
+            </View>
+            <View style={adminStyles.modernActivityContent}>
+              <Text style={adminStyles.modernActivityTitle}>
+                {stats?.activeUsers || 0} người hoạt động
+              </Text>
+              <Text style={adminStyles.modernActivityTime}>Hiện tại</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      <View style={{ height: 30 }} />
     </ScrollView>
   );
 };

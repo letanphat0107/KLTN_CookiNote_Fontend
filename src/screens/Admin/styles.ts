@@ -2163,4 +2163,252 @@ modernUserRecipeDate: {
   fontSize: 11,
   color: "#95A5A6",
 },
+
+// Add these modern dashboard styles
+
+// Modern Dashboard Header
+modernDashboardHeader: {
+  backgroundColor: "#FFFFFF",
+  paddingHorizontal: 20,
+  paddingTop: 20,
+  paddingBottom: 20,
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  borderBottomWidth: 1,
+  borderBottomColor: "#F0F0F0",
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.05,
+  shadowRadius: 8,
+  elevation: 2,
+},
+
+modernDashboardHeaderContent: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 16,
+},
+
+modernDashboardHeaderIcon: {
+  width: 56,
+  height: 56,
+  borderRadius: 28,
+  backgroundColor: "#FFE5E5",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+modernDashboardHeaderText: {
+  gap: 4,
+},
+
+modernDashboardTitle: {
+  fontSize: 24,
+  fontWeight: "bold",
+  color: "#2C3E50",
+},
+
+modernDashboardSubtitle: {
+  fontSize: 14,
+  color: "#7F8C8D",
+},
+
+modernDashboardLogoutButton: {
+  width: 44,
+  height: 44,
+  borderRadius: 22,
+  backgroundColor: "#FFEBEE",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+// Modern Stats Grid
+modernStatsGrid: {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  padding: 16,
+  gap: 12,
+},
+
+modernStatCard: {
+  width: 80,
+  backgroundColor: "#FFFFFF",
+  borderRadius: 16,
+  padding: 16,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.08,
+  shadowRadius: 8,
+  elevation: 3,
+},
+
+modernStatCardHeader: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 12,
+},
+
+modernStatCardIcon: {
+  width: 48,
+  height: 48,
+  borderRadius: 24,
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+modernStatCardTrend: {
+  width: 28,
+  height: 28,
+  borderRadius: 14,
+  backgroundColor: "#FFFFFF",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+modernStatCardNumber: {
+  fontSize: 24,
+  fontWeight: "bold",
+  color: "#2C3E50",
+  marginBottom: 4,
+},
+
+modernStatCardLabel: {
+  fontSize: 13,
+  fontWeight: "600",
+},
+
+// Modern Dashboard Section
+modernDashboardSection: {
+  marginTop: 12,
+  backgroundColor: "#FFFFFF",
+  paddingVertical: 20,
+  paddingHorizontal: 6,
+},
+
+// Modern Actions Grid
+modernActionsGrid: {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  paddingHorizontal: 16,
+  gap: 12,
+},
+
+modernActionCard: {
+  width: 80,
+  backgroundColor: "#F8F9FA",
+  borderRadius: 16,
+  padding: 20,
+  alignItems: "center",
+  borderWidth: 1,
+  borderColor: "#E0E0E0",
+},
+
+modernActionCardIcon: {
+  width: 64,
+  height: 64,
+  borderRadius: 32,
+  justifyContent: "center",
+  alignItems: "center",
+  marginBottom: 12,
+},
+
+modernActionCardTitle: {
+  fontSize: 14,
+  fontWeight: "bold",
+  color: "#2C3E50",
+  marginBottom: 4,
+  textAlign: "center",
+},
+
+modernActionCardSubtitle: {
+  fontSize: 11,
+  color: "#7F8C8D",
+  textAlign: "center",
+},
+
+// System Info
+modernSystemInfoCard: {
+  marginHorizontal: 16,
+  backgroundColor: "#F8F9FA",
+  borderRadius: 16,
+  padding: 20,
+  borderWidth: 1,
+  borderColor: "#E0E0E0",
+},
+
+modernSystemInfoRow: {
+  flexDirection: "row",
+  alignItems: "center",
+},
+
+modernSystemInfoItem: {
+  flex: 1,
+  alignItems: "center",
+  gap: 8,
+},
+
+modernSystemInfoDivider: {
+  width: 1,
+  height: 60,
+  backgroundColor: "#E0E0E0",
+},
+
+modernSystemInfoLabel: {
+  fontSize: 12,
+  color: "#7F8C8D",
+  marginTop: 4,
+},
+
+modernSystemInfoValue: {
+  fontSize: 14,
+  fontWeight: "bold",
+},
+
+// Activity Preview
+modernActivityPreview: {
+  marginHorizontal: 16,
+  backgroundColor: "#F8F9FA",
+  borderRadius: 16,
+  padding: 16,
+  borderWidth: 1,
+  borderColor: "#E0E0E0",
+},
+
+modernActivityItem: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 12,
+},
+
+modernActivityIcon: {
+  width: 44,
+  height: 44,
+  borderRadius: 22,
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+modernActivityContent: {
+  flex: 1,
+  gap: 4,
+},
+
+modernActivityTitle: {
+  fontSize: 15,
+  fontWeight: "600",
+  color: "#2C3E50",
+},
+
+modernActivityTime: {
+  fontSize: 12,
+  color: "#95A5A6",
+},
+
+modernActivityDivider: {
+  height: 1,
+  backgroundColor: "#E0E0E0",
+  marginVertical: 12,
+},
 });

@@ -24,6 +24,7 @@ import SharedAccountScreen from "../screens/Account/SharedAccountScreen";
 
 import AdminTabNavigator from "./AdminTabNavigator";
 import ManageUsersScreen from "../screens/Admin/ManageUsersScreen";
+import ManageCategoryScreen from "../screens/Admin/ManageCategory";
 import ManageRecipeScreen from "../screens/Admin/ManageRecipesScreen";
 import CreateRecipeScreen from "../screens/Admin/CreateRecipeScreen";
 import EditRecipeScreen from "../screens/Admin/EditRecipeScreen";
@@ -131,6 +132,14 @@ const RootNavigator = () => {
                 options={{
                   headerShown: true,
                   title: "Quản lý món ăn",
+                }}
+              />
+              <Stack.Screen
+                name="ManageCategory"
+                component={ManageCategoryScreen}
+                options={{
+                  headerShown: true,
+                  title: "Quản lý danh mục",
                 }}
               />
               <Stack.Screen

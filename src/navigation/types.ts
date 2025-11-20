@@ -34,6 +34,7 @@ export type RootStackParamList = {
   AdminDashboard: undefined;
   ManageUsers: undefined;
   ManageRecipe: undefined;
+  ManageCategory: undefined;
   CreateRecipe: undefined;
   EditRecipe: { recipeId: string };
 };
