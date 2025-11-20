@@ -616,10 +616,11 @@ export const recipeStyles = StyleSheet.create({
     fontSize: 14,
     color: "#FFFFFF",
     fontWeight: "500",
-    lineHeight: 20,
+    lineHeight: 30,
+    marginLeft: 8,
   },
   toastCloseButton: {
-    marginLeft: 12,
+    marginLeft: 16,
     padding: 4,
   },
   toastCloseText: {

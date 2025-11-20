@@ -35,7 +35,7 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<TabType>("favorites");
+  const [activeTab, setActiveTab] = useState<TabType>("cooked");
 
   // Data states
   const [favoriteRecipes, setFavoriteRecipes] = useState<Recipe[]>([]);
@@ -100,14 +100,14 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
 
     try {
       switch (activeTab) {
+        case "cooked":
+          await loadCookedHistory(isRefresh);
+          break;
         case "favorites":
           await loadFavoriteRecipes(isRefresh);
           break;
         case "myRecipes":
           await loadMyRecipes(isRefresh);
-          break;
-        case "cooked":
-          await loadCookedHistory(isRefresh);
           break;
         case "deleted":
           await loadDeletedRecipes(isRefresh);

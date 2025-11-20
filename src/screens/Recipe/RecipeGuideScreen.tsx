@@ -318,7 +318,7 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
             ],
           });
         }
-      }, 4000);
+      }, 1000);
     }
   };
 
