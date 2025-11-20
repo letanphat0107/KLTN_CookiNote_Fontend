@@ -66,9 +66,9 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
   }>({});
 
   const tabs = [
+    { key: "cooked" as TabType, label: "Đã nấu", icon: "✅" },
     { key: "favorites" as TabType, label: "Yêu thích", icon: "❤️" },
     { key: "myRecipes" as TabType, label: "Của tôi", icon: "👨‍🍳" },
-    { key: "cooked" as TabType, label: "Đã nấu", icon: "✅" },
     { key: "deleted" as TabType, label: "Đã xóa", icon: "🗑️" },
   ];
 

@@ -2,6 +2,8 @@ import { StyleSheet } from "react-native";
 import { COLORS } from "../../constants/colors";
 import { FONT_FAMILIES, FONT_SIZES, FONT_WEIGHTS } from "../../constants/fonts";
 
+
+
 export const recipeStyles = StyleSheet.create({
   // Common containers
   container: {
@@ -899,6 +901,614 @@ export const recipeStyles = StyleSheet.create({
   disabledButtonText: {
     color: '#666666',
   },
+
+  // Add these modern RecipeGuide styles to src/screens/Recipe/styles.ts
+
+// ============ MODERN RECIPE GUIDE STYLES ============
+
+// Toast
+modernToast: {
+  position: "absolute",
+  top: 60,
+  left: 20,
+  right: 20,
+  zIndex: 9999,
+  backgroundColor: "rgba(0, 0, 0, 0.9)",
+  borderRadius: 12,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.3,
+  shadowRadius: 8,
+  elevation: 8,
+},
+
+modernToastContent: {
+  flexDirection: "row",
+  alignItems: "center",
+  padding: 16,
+  gap: 12,
+},
+
+modernToastText: {
+  flex: 1,
+  fontSize: 14,
+  color: "#FFFFFF",
+  lineHeight: 20,
+},
+
+modernToastClose: {
+  padding: 4,
+},
+
+// Header
+modernGuideHeader: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  paddingHorizontal: 20,
+  paddingTop: 60,
+  paddingBottom: 16,
+  backgroundColor: "#FFFFFF",
+  borderBottomWidth: 1,
+  borderBottomColor: "#F0F0F0",
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.05,
+  shadowRadius: 8,
+  elevation: 2,
+},
+
+modernHeaderButton: {
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  backgroundColor: "#F8F9FA",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+modernHeaderCenter: {
+  flex: 1,
+  alignItems: "center",
+  paddingHorizontal: 16,
+},
+
+modernGuideTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+  color: "#2C3E50",
+  textAlign: "center",
+  marginBottom: 4,
+},
+
+modernGuideSubtitle: {
+  fontSize: 14,
+  color: "#7F8C8D",
+  textAlign: "center",
+},
+
+// Progress Bar
+modernProgressContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  paddingHorizontal: 20,
+  paddingVertical: 12,
+  backgroundColor: "#FFFFFF",
+  gap: 12,
+},
+
+modernProgressBar: {
+  flex: 1,
+  height: 8,
+  backgroundColor: "#E0E0E0",
+  borderRadius: 4,
+  overflow: "hidden",
+},
+
+modernProgressFill: {
+  height: "100%",
+  backgroundColor: "#FF6B6B",
+  borderRadius: 4,
+},
+
+modernProgressText: {
+  fontSize: 14,
+  fontWeight: "bold",
+  color: "#FF6B6B",
+  minWidth: 45,
+  textAlign: "right",
+},
+
+// Timer Section
+modernTimerSection: {
+  backgroundColor: "#FFFFFF",
+  paddingVertical: 16,
+  borderBottomWidth: 1,
+  borderBottomColor: "#F0F0F0",
+},
+
+modernTimerDisplay: {
+  flexDirection: "row",
+  alignItems: "center",
+  paddingHorizontal: 20,
+  marginBottom: 12,
+  gap: 16,
+},
+
+modernTimerIconWrapper: {
+  width: 56,
+  height: 56,
+  borderRadius: 28,
+  backgroundColor: "#FFF5F5",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+modernTimerInfo: {
+  flex: 1,
+},
+
+modernTimerText: {
+  fontSize: 32,
+  fontWeight: "bold",
+  color: "#2C3E50",
+  letterSpacing: 2,
+  fontVariant: ["tabular-nums"],
+},
+
+modernTimerStatus: {
+  fontSize: 13,
+  color: "#7F8C8D",
+  marginTop: 2,
+},
+
+modernTimerToggle: {
+  width: 56,
+  height: 56,
+  borderRadius: 28,
+  backgroundColor: "#95A5A6",
+  justifyContent: "center",
+  alignItems: "center",
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.2,
+  shadowRadius: 4,
+  elevation: 4,
+},
+
+modernTimerToggleActive: {
+  backgroundColor: "#FF6B6B",
+},
+
+modernCountdownBanner: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 8,
+  paddingHorizontal: 20,
+  backgroundColor: "#FFF3E0",
+  gap: 8,
+  marginHorizontal: 20,
+  marginBottom: 12,
+  borderRadius: 8,
+},
+
+modernCountdownText: {
+  fontSize: 13,
+  color: "#F57C00",
+  fontWeight: "600",
+},
+
+modernTimerQuickActions: {
+  maxHeight: 50,
+},
+
+modernTimerPreset: {
+  flexDirection: "row",
+  alignItems: "center",
+  paddingHorizontal: 16,
+  paddingVertical: 10,
+  backgroundColor: "#F8F9FA",
+  borderRadius: 20,
+  marginRight: 8,
+  gap: 6,
+  borderWidth: 1,
+  borderColor: "#E0E0E0",
+},
+
+modernTimerPresetReset: {
+  backgroundColor: "#FFEBEE",
+  borderColor: "#FFCDD2",
+},
+
+modernTimerPresetText: {
+  fontSize: 14,
+  fontWeight: "600",
+  color: "#FF6B6B",
+},
+
+// Step Content
+modernStepContent: {
+  flex: 1,
+  backgroundColor: "#F8F9FA",
+},
+
+modernStepCard: {
+  backgroundColor: "#FFFFFF",
+  margin: 20,
+  borderRadius: 16,
+  padding: 20,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 8,
+  elevation: 4,
+},
+
+modernStepHeader: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  marginBottom: 16,
+},
+
+modernStepBadge: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#FF6B6B",
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 16,
+  gap: 6,
+},
+
+modernStepBadgeText: {
+  fontSize: 13,
+  fontWeight: "bold",
+  color: "#FFFFFF",
+},
+
+modernStepTimeBadge: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#FFF3E0",
+  paddingHorizontal: 10,
+  paddingVertical: 6,
+  borderRadius: 12,
+  gap: 4,
+},
+
+modernStepTimeBadgeText: {
+  fontSize: 12,
+  fontWeight: "600",
+  color: "#F57C00",
+},
+
+// Step Images
+modernStepImagesWrapper: {
+  marginBottom: 16,
+},
+
+modernStepImagesScroll: {
+  marginHorizontal: -20,
+},
+
+
+modernStepImage: {
+  width: "100%",
+  height: 200,
+  borderRadius: 12,
+  backgroundColor: "#F0F0F0",
+},
+
+modernImageBadge: {
+  position: "absolute",
+  top: 12,
+  right: 12,
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "rgba(0, 0, 0, 0.7)",
+  paddingHorizontal: 10,
+  paddingVertical: 6,
+  borderRadius: 12,
+  gap: 4,
+},
+
+modernImageBadgeText: {
+  fontSize: 12,
+  fontWeight: "bold",
+  color: "#FFFFFF",
+},
+
+modernScrollHint: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  marginTop: 8,
+  gap: 6,
+},
+
+modernScrollHintText: {
+  fontSize: 12,
+  color: "#7F8C8D",
+  fontStyle: "italic",
+},
+
+modernStepText: {
+  fontSize: 16,
+  lineHeight: 24,
+  color: "#2C3E50",
+  marginBottom: 16,
+},
+
+// Tips Card
+modernTipsCard: {
+  backgroundColor: "#FFFBF0",
+  borderRadius: 12,
+  padding: 16,
+  borderWidth: 1,
+  borderColor: "#FFE082",
+},
+
+modernTipsHeader: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 8,
+  marginBottom: 8,
+},
+
+modernTipsTitle: {
+  fontSize: 15,
+  fontWeight: "bold",
+  color: "#F57C00",
+},
+
+modernTipsText: {
+  fontSize: 14,
+  lineHeight: 20,
+  color: "#6D4C41",
+},
+
+// Navigation
+modernNavigation: {
+  flexDirection: "row",
+  padding: 20,
+  gap: 12,
+  backgroundColor: "#FFFFFF",
+  borderTopWidth: 1,
+  borderTopColor: "#F0F0F0",
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: -2 },
+  shadowOpacity: 0.05,
+  shadowRadius: 8,
+  elevation: 8,
+},
+
+modernNavButton: {
+  flex: 1,
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 14,
+  borderRadius: 12,
+  gap: 8,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.15,
+  shadowRadius: 4,
+  elevation: 3,
+},
+
+modernNavButtonPrev: {
+  backgroundColor: "#F8F9FA",
+  borderWidth: 1,
+  borderColor: "#E0E0E0",
+},
+
+modernNavButtonNext: {
+  backgroundColor: "#4A90E2",
+},
+
+modernNavButtonComplete: {
+  backgroundColor: "#4CAF50",
+},
+
+modernNavButtonDisabled: {
+  backgroundColor: "#E0E0E0",
+  shadowOpacity: 0,
+  elevation: 0,
+},
+
+modernNavButtonText: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#2C3E50",
+},
+
+modernNavButtonTextDisabled: {
+  color: "#BDC3C7",
+},
+
+modernNavButtonTextWhite: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#FFFFFF",
+},
+
+// Error Screen
+modernErrorContainer: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  padding: 40,
+  backgroundColor: "#F8F9FA",
+},
+
+modernErrorIcon: {
+  width: 120,
+  height: 120,
+  borderRadius: 60,
+  backgroundColor: "#F5F5F5",
+  justifyContent: "center",
+  alignItems: "center",
+  marginBottom: 24,
+},
+
+modernErrorTitle: {
+  fontSize: 20,
+  fontWeight: "bold",
+  color: "#2C3E50",
+  marginBottom: 8,
+  textAlign: "center",
+},
+
+modernErrorMessage: {
+  fontSize: 14,
+  color: "#7F8C8D",
+  textAlign: "center",
+  marginBottom: 24,
+  lineHeight: 20,
+},
+
+modernRetryButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#FF6B6B",
+  paddingHorizontal: 24,
+  paddingVertical: 12,
+  borderRadius: 24,
+  gap: 8,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.2,
+  shadowRadius: 4,
+  elevation: 4,
+},
+
+modernRetryButtonText: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#FFFFFF",
+},
+
+// Modal
+modernModalOverlay: {
+  flex: 1,
+  backgroundColor: "rgba(0, 0, 0, 0.6)",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: 20,
+},
+
+modernModalContainer: {
+  width: "100%",
+  maxWidth: 400,
+  backgroundColor: "#FFFFFF",
+  borderRadius: 20,
+  overflow: "hidden",
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.3,
+  shadowRadius: 12,
+  elevation: 8,
+},
+
+modernModalHeader: {
+  flexDirection: "row",
+  alignItems: "center",
+  padding: 20,
+  borderBottomWidth: 1,
+  borderBottomColor: "#F0F0F0",
+  gap: 12,
+},
+
+modernModalTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+  color: "#2C3E50",
+  flex: 1,
+},
+
+modernModalBody: {
+  padding: 20,
+},
+
+modernModalLabel: {
+  fontSize: 14,
+  fontWeight: "600",
+  color: "#2C3E50",
+  marginBottom: 12,
+},
+
+modernModalInputWrapper: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#F8F9FA",
+  borderRadius: 12,
+  paddingHorizontal: 16,
+  borderWidth: 1,
+  borderColor: "#E0E0E0",
+  gap: 12,
+},
+
+modernModalInput: {
+  flex: 1,
+  fontSize: 16,
+  color: "#2C3E50",
+  paddingVertical: 14,
+},
+
+modernModalInputUnit: {
+  fontSize: 14,
+  fontWeight: "600",
+  color: "#7F8C8D",
+},
+
+modernModalFooter: {
+  flexDirection: "row",
+  padding: 20,
+  gap: 12,
+  borderTopWidth: 1,
+  borderTopColor: "#F0F0F0",
+},
+
+modernModalButtonCancel: {
+  flex: 1,
+  paddingVertical: 14,
+  borderRadius: 12,
+  backgroundColor: "#F8F9FA",
+  borderWidth: 1,
+  borderColor: "#E0E0E0",
+  alignItems: "center",
+},
+
+modernModalButtonCancelText: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#7F8C8D",
+},
+
+modernModalButtonConfirm: {
+  flex: 1,
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 14,
+  borderRadius: 12,
+  backgroundColor: "#FF6B6B",
+  gap: 8,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.2,
+  shadowRadius: 4,
+  elevation: 4,
+},
+
+modernModalButtonConfirmText: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#FFFFFF",
+},
 });
 
 export default recipeStyles;
