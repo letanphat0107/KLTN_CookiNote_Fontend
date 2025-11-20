@@ -454,7 +454,7 @@ const [isLoadingShare, setIsLoadingShare] = useState(false);
       recipeTitle = recipe.title;
       recipeImageUrl = recipe.imageUrl || "";
       difficulty = recipe.difficulty;
-      totalTime = (recipe.prepare_time || 0) + (recipe.cook_time || 0);
+      totalTime = (recipe.prepareTime || 0) + (recipe.cookTime || 0);
       viewCount = recipe.view;
       description = recipe.description;
     }

@@ -627,7 +627,7 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
                   {renderStepImages(step.images)}
 
                   {/* Suggested Time */}
-                  {step.suggestedTime && (
+                  {step.suggestedTime != null && (
                     <View style={recipeStyles.stepTimeContainer}>
                       <Text style={recipeStyles.stepTimeText}>
                         ⏱️ Thời gian gợi ý: {step.suggestedTime} phút

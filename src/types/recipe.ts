@@ -13,6 +13,8 @@ export interface Recipe {
   image_url?: string;
   prepare_time?: number;
   cook_time?: number;
+  prepareTime: number;
+  cookTime: number;
   category_id?: number;
   user_id?: number;
   created_at?: string;
