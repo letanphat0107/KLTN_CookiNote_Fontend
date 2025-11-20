@@ -48,7 +48,7 @@ export const API_CONFIG = {
       CREATE: "/cookinote/categories/create",
       UPDATE: "/cookinote/categories",
       SEARCH: "/cookinote/categories/search",
-      CHANGECATEGORY: "cookinote/categories/move-recipes",
+      CHANGECATEGORY: "/cookinote/categories/move-recipes",
     },
     UPLOAD: {
       IMAGE: "/cookinote/upload/image",

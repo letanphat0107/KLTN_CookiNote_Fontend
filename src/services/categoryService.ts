@@ -1,7 +1,7 @@
 // src/services/categoryService.ts
 import { fetchWithAuth } from "../utils/apiHelper";
 import { API_URLS, buildApiUrl, API_CONFIG } from "../config/api";
-import { Category } from "../types/recipe";
+import { Category, Recipe } from "../types/recipe";
 
 export interface CategoryResponse {
   code: number;
@@ -9,22 +9,16 @@ export interface CategoryResponse {
   data: Category[];
 }
 
-export interface CategoryCreateRequest {
-  name: string;
-  description: string;
-  imageUrl?: string;
+export interface SingleCategoryResponse {
+  code: number;
+  message: string;
+  data: Category;
 }
 
-export interface CategoryUpdateRequest {
-  id: number;
-  name?: string;
-  description?: string;
-  imageUrl?: string;
-}
-
-export interface MoveCategoryRequest {
-  fromCategoryId: number;
-  toCategoryId: number;
+export interface MoveRecipesRequest {
+  sourceCategoryId: number;
+  destinationCategoryId: number;
+  recipeIds: number[];
 }
 
 // Get all categories (public access)
@@ -49,16 +43,23 @@ export const getCategories = async (): Promise<Category[]> => {
       return [];
     }
   } catch (error) {
+    console.error("Error fetching categories:", error);
     return [];
   }
 };
 
-// Search categories (public access)
-export const searchCategories = async (query: string): Promise<Category[]> => {
+// Search categories by name
+export const searchCategories = async (
+  categoryName: string
+): Promise<Category[]> => {
   try {
-    const searchUrl = `${buildApiUrl(
-      API_CONFIG.ENDPOINTS.CATEGORY.SEARCH
-    )}?q=${encodeURIComponent(query)}`;
+    console.log("Searching categories:", categoryName);
+
+    const searchUrl = `${
+      API_CONFIG.BASE_URL
+    }/cookinote/categories/search?categoryName=${encodeURIComponent(
+      categoryName
+    )}`;
 
     const response = await fetch(searchUrl, {
       method: "GET",
@@ -82,123 +83,252 @@ export const searchCategories = async (query: string): Promise<Category[]> => {
   }
 };
 
-// Admin only functions - require authentication and ADMIN role
-
-// Create category (ADMIN only)
+// Create category with image (ADMIN only)
 export const createCategory = async (
-  categoryData: CategoryCreateRequest
-): Promise<boolean> => {
+  name: string,
+  description: string,
+  imageFile?: {
+    uri: string;
+    type: string;
+    name: string;
+  }
+): Promise<{ success: boolean; message?: string; data?: Category }> => {
   try {
-    console.log("Creating category:", categoryData);
+    console.log("Creating category:", {
+      name,
+      description,
+      hasImage: !!imageFile,
+    });
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("description", description);
+
+    if (imageFile) {
+      formData.append("image", {
+        uri: imageFile.uri,
+        type: imageFile.type || "image/jpeg",
+        name: imageFile.name || "category-image.jpg",
+      } as any);
+    }
 
     const response = await fetchWithAuth(
-      buildApiUrl(API_CONFIG.ENDPOINTS.CATEGORY.CREATE),
+      `${API_CONFIG.BASE_URL}/cookinote/categories/create`,
       {
         method: "POST",
-        body: JSON.stringify(categoryData),
-      }
+        body: formData,
+        headers: {
+          // Don't set Content-Type, let browser set it with boundary for FormData
+        },
+      },
+      true,
+      true // multipart
     );
 
     const result = await response.json();
     console.log("Create category response:", result);
 
     if (response.ok && result.code === 200) {
-      return true;
+      return {
+        success: true,
+        message: result.message || "Tạo danh mục thành công",
+        data: result.data,
+      };
     } else {
-      console.error("Failed to create category:", result.message);
-      return false;
+      return {
+        success: false,
+        message: result.message || "Không thể tạo danh mục",
+      };
     }
   } catch (error) {
     console.error("Error creating category:", error);
-    return false;
+    return {
+      success: false,
+      message: "Đã xảy ra lỗi khi tạo danh mục",
+    };
   }
 };
 
 // Update category (ADMIN only)
 export const updateCategory = async (
-  categoryData: CategoryUpdateRequest
-): Promise<boolean> => {
+  categoryId: number,
+  name?: string,
+  description?: string,
+  imageFile?: {
+    uri: string;
+    type: string;
+    name: string;
+  }
+): Promise<{ success: boolean; message?: string; data?: Category }> => {
   try {
-    console.log("Updating category:", categoryData);
-
-    const updateUrl = buildApiUrl(API_CONFIG.ENDPOINTS.CATEGORY.UPDATE, {
-      id: categoryData.id,
+    console.log("Updating category:", {
+      categoryId,
+      name,
+      description,
+      hasImage: !!imageFile,
     });
 
-    const response = await fetchWithAuth(updateUrl, {
-      method: "PUT",
-      body: JSON.stringify(categoryData),
-    });
+    const formData = new FormData();
+
+    if (name) {
+      formData.append("name", name);
+    }
+    if (description) {
+      formData.append("description", description);
+    }
+    if (imageFile) {
+      formData.append("image", {
+        uri: imageFile.uri,
+        type: imageFile.type || "image/jpeg",
+        name: imageFile.name || "category-image.jpg",
+      } as any);
+    }
+
+    const response = await fetchWithAuth(
+      `${API_CONFIG.BASE_URL}/cookinote/categories/${categoryId}`,
+      {
+        method: "PUT",
+        body: formData,
+        headers: {
+          // Don't set Content-Type for FormData
+        },
+      },
+      true,
+      true // multipart
+    );
 
     const result = await response.json();
     console.log("Update category response:", result);
 
     if (response.ok && result.code === 200) {
-      return true;
+      return {
+        success: true,
+        message: result.message || "Cập nhật danh mục thành công",
+        data: result.data,
+      };
     } else {
-      console.error("Failed to update category:", result.message);
-      return false;
+      return {
+        success: false,
+        message: result.message || "Không thể cập nhật danh mục",
+      };
     }
   } catch (error) {
     console.error("Error updating category:", error);
-    return false;
+    return {
+      success: false,
+      message: "Đã xảy ra lỗi khi cập nhật danh mục",
+    };
   }
 };
 
 // Move recipes between categories (ADMIN only)
 export const moveRecipesBetweenCategories = async (
-  moveData: MoveCategoryRequest
-): Promise<boolean> => {
+  moveData: MoveRecipesRequest
+): Promise<{ success: boolean; message?: string }> => {
   try {
     console.log("Moving recipes between categories:", moveData);
 
     const response = await fetchWithAuth(
-      buildApiUrl(API_CONFIG.ENDPOINTS.CATEGORY.CHANGECATEGORY),
+      `${API_CONFIG.BASE_URL}/cookinote/categories/move-recipes`,
       {
         method: "POST",
         body: JSON.stringify(moveData),
+      },
+      true,
+      false
+    );
+
+    const result = await response.json();
+    console.log("Move recipes response:", result);
+
+    if (response.ok && result.code === 200) {
+      return {
+        success: true,
+        message: result.message || "Chuyển công thức thành công",
+      };
+    } else {
+      return {
+        success: false,
+        message: result.message || "Không thể chuyển công thức",
+      };
+    }
+  } catch (error) {
+    console.error("Error moving recipes:", error);
+    return {
+      success: false,
+      message: "Đã xảy ra lỗi khi chuyển công thức",
+    };
+  }
+};
+
+// Delete category (ADMIN only) - Not implemented yet
+export const deleteCategory = async (
+  categoryId: number
+): Promise<{ success: boolean; message?: string }> => {
+  // Not implemented - API not available
+  return {
+    success: false,
+    message: "Chức năng xóa danh mục chưa được hỗ trợ",
+  };
+};
+
+// Get recipes by category
+export const getRecipesByCategory = async (
+  categoryId: number,
+  page: number = 0,
+  size: number = 20,
+  sort: string = "createdAt,desc"
+): Promise<{
+  items: Recipe[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}> => {
+  try {
+    console.log("Fetching recipes for category:", categoryId);
+
+    const params = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString(),
+      sort: sort,
+    });
+
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/cookinote/recipes/categories/${categoryId}?${params}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
       }
     );
 
     const result = await response.json();
-    console.log("Move categories response:", result);
+    console.log("Get recipes by category response:", result);
 
     if (response.ok && result.code === 200) {
-      return true;
+      return {
+        items: result.data?.items || [],
+        totalPages: result.data?.totalPages || 0,
+        totalElements: result.data?.totalElements || 0,
+        hasNext: result.data?.hasNext || false,
+      };
     } else {
-      console.error("Failed to move categories:", result.message);
-      return false;
+      return {
+        items: [],
+        totalPages: 0,
+        totalElements: 0,
+        hasNext: false,
+      };
     }
   } catch (error) {
-    console.error("Error moving categories:", error);
-    return false;
-  }
-};
-
-// Delete category (ADMIN only)
-export const deleteCategory = async (categoryId: number): Promise<boolean> => {
-  try {
-    console.log("Deleting category:", categoryId);
-
-    const deleteUrl = buildApiUrl(API_CONFIG.ENDPOINTS.CATEGORY.UPDATE, {
-      id: categoryId,
-    });
-
-    const response = await fetchWithAuth(deleteUrl, {
-      method: "DELETE",
-    });
-
-    const result = await response.json();
-    console.log("Delete category response:", result);
-
-    if (response.ok && result.code === 200) {
-      return true;
-    } else {
-      console.error("Failed to delete category:", result.message);
-      return false;
-    }
-  } catch (error) {
-    console.error("Error deleting category:", error);
-    return false;
+    console.error("Error fetching recipes by category:", error);
+    return {
+      items: [],
+      totalPages: 0,
+      totalElements: 0,
+      hasNext: false,
+    };
   }
 };

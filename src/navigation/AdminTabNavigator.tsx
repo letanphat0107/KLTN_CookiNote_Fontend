@@ -4,6 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import AdminDashboardScreen from "../screens/Admin/AdminDashboardScreen";
 import ManageUsersScreen from "../screens/Admin/ManageUsersScreen";
 import ManageRecipesScreen from "../screens/Admin/ManageRecipesScreen";
+import ManageCategory from "../screens/Admin/ManageCategory";
 
 const AdminTabNavigator = () => {
   const [activeTab, setActiveTab] = useState("Dashboard");
@@ -14,6 +15,8 @@ const AdminTabNavigator = () => {
         return <ManageUsersScreen />;
       case "ManageRecipe":
         return <ManageRecipesScreen />;
+      case "ManageCategory":
+        return <ManageCategory />;
       default:
         return <AdminDashboardScreen />;
     }
@@ -23,7 +26,7 @@ const AdminTabNavigator = () => {
     <View style={{ flex: 1 }}>
       {/* --- Thanh Tab --- */}
       <View style={styles.tabBar}>
-        {["AdminDashboard", "ManageUsers", "ManageRecipe"].map((tab) => (
+        {["AdminDashboard", "ManageUsers", "ManageCategory", "ManageRecipe"].map((tab) => (
           <TouchableOpacity
             key={tab}
             style={[
@@ -42,6 +45,8 @@ const AdminTabNavigator = () => {
                 ? "Tổng quan"
                 : tab === "ManageUsers"
                 ? "Người dùng"
+                : tab === "ManageCategory"
+                ? "Danh mục"
                 : "Món ăn"}
             </Text>
           </TouchableOpacity>
