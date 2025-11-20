@@ -665,6 +665,41 @@ class AdminService {
       throw error;
     }
   }
+
+  async getUserRecipes(
+  userId: number,
+  page: number = 0,
+  size: number = 12
+): Promise<{
+  items: any[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}> {
+  try {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString(),
+    });
+
+    const response = await fetchWithAuth(
+      buildApiUrl(`/cookinote/recipes/users/${userId}?${params}`),
+      {
+        method: "GET",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch user recipes");
+    }
+
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error("Error fetching user recipes:", error);
+    throw error;
+  }
+}
 }
 
 export default new AdminService();

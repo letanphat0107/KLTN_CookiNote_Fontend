@@ -1872,4 +1872,295 @@ modernNewImageBadgeText: {
   fontWeight: "bold",
   color: "#FFFFFF",
 },
+
+// Add these user management styles
+
+// Modern User Card
+modernUserCard: {
+  backgroundColor: "#FFFFFF",
+  borderRadius: 16,
+  marginHorizontal: 16,
+  marginVertical: 8,
+  padding: 16,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 8,
+  elevation: 4,
+},
+
+modernUserHeader: {
+  flexDirection: "row",
+  alignItems: "flex-start",
+  marginBottom: 12,
+},
+
+modernUserAvatarWrapper: {
+  position: "relative",
+  marginRight: 12,
+},
+
+modernUserAvatar: {
+  width: 60,
+  height: 60,
+  borderRadius: 30,
+},
+
+modernUserAvatarPlaceholder: {
+  width: 60,
+  height: 60,
+  borderRadius: 30,
+  backgroundColor: "#F8F9FA",
+  justifyContent: "center",
+  alignItems: "center",
+  borderWidth: 2,
+  borderColor: "#E0E0E0",
+},
+
+modernUserDisabledBadge: {
+  position: "absolute",
+  bottom: 0,
+  right: 0,
+  width: 24,
+  height: 24,
+  borderRadius: 12,
+  backgroundColor: "#E74C3C",
+  justifyContent: "center",
+  alignItems: "center",
+  borderWidth: 2,
+  borderColor: "#FFF",
+},
+
+modernUserInfo: {
+  flex: 1,
+  marginRight: 8,
+},
+
+modernUserNameRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 6,
+  marginBottom: 4,
+},
+
+modernUserDisplayName: {
+  fontSize: 18,
+  fontWeight: "bold",
+  color: "#2C3E50",
+  flex: 1,
+},
+
+modernUserUsername: {
+  fontSize: 14,
+  color: "#7F8C8D",
+  marginBottom: 2,
+},
+
+modernUserEmail: {
+  fontSize: 13,
+  color: "#95A5A6",
+},
+
+modernRoleBadge: {
+  flexDirection: "row",
+  alignItems: "center",
+  paddingHorizontal: 10,
+  paddingVertical: 6,
+  borderRadius: 16,
+  gap: 4,
+},
+
+modernRoleBadgeText: {
+  fontSize: 11,
+  fontWeight: "bold",
+  color: "#FFFFFF",
+},
+
+modernUserStats: {
+  flexDirection: "row",
+  justifyContent: "space-around",
+  paddingTop: 12,
+  borderTopWidth: 1,
+  borderTopColor: "#F0F0F0",
+},
+
+modernUserStat: {
+  alignItems: "center",
+  gap: 4,
+},
+
+modernUserStatValue: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#2C3E50",
+},
+
+modernUserStatLabel: {
+  fontSize: 11,
+  color: "#95A5A6",
+},
+
+// User Detail Modal
+modernUserDetailInfo: {
+  padding: 20,
+  borderBottomWidth: 1,
+  borderBottomColor: "#F0F0F0",
+},
+
+modernUserDetailAvatarWrapper: {
+  alignItems: "center",
+  marginBottom: 16,
+},
+
+modernUserDetailAvatar: {
+  width: 100,
+  height: 100,
+  borderRadius: 50,
+},
+
+modernUserDetailAvatarPlaceholder: {
+  width: 100,
+  height: 100,
+  borderRadius: 50,
+  backgroundColor: "#F8F9FA",
+  justifyContent: "center",
+  alignItems: "center",
+  borderWidth: 3,
+  borderColor: "#E0E0E0",
+},
+
+modernUserDetailStats: {
+  gap: 12,
+},
+
+modernUserDetailStatItem: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 8,
+},
+
+modernUserDetailStatText: {
+  fontSize: 14,
+  color: "#2C3E50",
+},
+
+modernUserDetailActions: {
+  padding: 16,
+  borderBottomWidth: 1,
+  borderBottomColor: "#F0F0F0",
+},
+
+modernToggleButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 14,
+  borderRadius: 10,
+  gap: 8,
+},
+
+modernToggleButtonEnable: {
+  backgroundColor: "#4CAF50",
+},
+
+modernToggleButtonDisable: {
+  backgroundColor: "#E74C3C",
+},
+
+modernToggleButtonText: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#FFFFFF",
+},
+
+// User Recipes Section
+modernUserRecipesSection: {
+  flex: 1,
+  padding: 16,
+},
+
+modernUserRecipesList: {
+  flex: 1,
+},
+
+modernUserRecipesLoading: {
+  paddingVertical: 40,
+  alignItems: "center",
+  justifyContent: "center",
+},
+
+modernUserRecipesEmpty: {
+  paddingVertical: 40,
+  alignItems: "center",
+  justifyContent: "center",
+},
+
+modernUserRecipesEmptyText: {
+  marginTop: 12,
+  fontSize: 14,
+  color: "#95A5A6",
+},
+
+modernUserRecipeCard: {
+  flexDirection: "row",
+  backgroundColor: "#F8F9FA",
+  borderRadius: 12,
+  marginBottom: 12,
+  overflow: "hidden",
+  borderWidth: 1,
+  borderColor: "#E0E0E0",
+},
+
+modernUserRecipeImage: {
+  width: 120,
+  height: 90,
+},
+
+modernUserRecipeInfo: {
+  flex: 1,
+  padding: 12,
+  justifyContent: "space-between",
+},
+
+modernUserRecipeTitle: {
+  fontSize: 15,
+  fontWeight: "600",
+  color: "#2C3E50",
+  marginBottom: 8,
+},
+
+modernUserRecipeMeta: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 8,
+  flexWrap: "wrap",
+},
+
+modernUserRecipeDifficulty: {
+  paddingHorizontal: 8,
+  paddingVertical: 3,
+  borderRadius: 10,
+},
+
+modernUserRecipeDifficultyText: {
+  fontSize: 11,
+  fontWeight: "bold",
+  color: "#FFFFFF",
+},
+
+modernUserRecipeMetaItem: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 4,
+},
+
+modernUserRecipeMetaText: {
+  fontSize: 12,
+  color: "#7F8C8D",
+},
+
+modernUserRecipeDate: {
+  fontSize: 11,
+  color: "#95A5A6",
+},
 });
