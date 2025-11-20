@@ -8,9 +8,8 @@ export const adminStyles = StyleSheet.create({
   addContainer: {
     flex: 1,
     backgroundColor: "#f5f5f5",
-    padding: 20
-  }
-  ,
+    padding: 20,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -218,7 +217,6 @@ export const adminStyles = StyleSheet.create({
     marginTop: 16,
   },
 
-
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -371,13 +369,10 @@ export const adminStyles = StyleSheet.create({
     color: "#666",
   },
 
-
   // Style bổ sung cho container tổng thể của modal (nếu cần)
   modalContentContainer: {
     padding: 20,
   },
-
-  
 
   /** * Style dành riêng cho nút Xóa/Hủy (màu đỏ). */
 
@@ -446,8 +441,6 @@ export const adminStyles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-
-
   // -----------------------------------------------------------------
   // STYLE CHO CÁC DÒNG THÔNG TIN (Label-Value)
   // -----------------------------------------------------------------
@@ -474,9 +467,6 @@ export const adminStyles = StyleSheet.create({
     fontWeight: "bold",
     color: "#FFFFFF",
   },
-
-
-
 
   // Modal Styles - Full Screen
   modalOverlay: {
@@ -617,85 +607,85 @@ export const adminStyles = StyleSheet.create({
     fontSize: 16,
   },
   stepImagesContainer: {
-  flexDirection: "row",
-  flexWrap: "wrap",
-  gap: 10,
-  marginTop: 10,
-  marginBottom: 10,
-},
-stepImageWrapper: {
-  position: "relative",
-  width: 100,
-  height: 100,
-},
-stepImagePreview: {
-  width: "100%",
-  height: "100%",
-  borderRadius: 8,
-  backgroundColor: "#f0f0f0",
-},
-stepImageRemoveButton: {
-  position: "absolute",
-  top: -8,
-  right: -8,
-  backgroundColor: "#FF4444",
-  width: 24,
-  height: 24,
-  borderRadius: 12,
-  justifyContent: "center",
-  alignItems: "center",
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.25,
-  shadowRadius: 3.84,
-  elevation: 5,
-},
-stepImageRemoveButtonText: {
-  color: "#FFFFFF",
-  fontSize: 14,
-  fontWeight: "bold",
-  lineHeight: 14,
-},
-stepImageNumber: {
-  position: "absolute",
-  bottom: 4,
-  right: 4,
-  backgroundColor: "rgba(0, 0, 0, 0.6)",
-  width: 20,
-  height: 20,
-  borderRadius: 10,
-  justifyContent: "center",
-  alignItems: "center",
-},
-stepImageNumberText: {
-  color: "#FFFFFF",
-  fontSize: 11,
-  fontWeight: "bold",
-},
-imageRemoveButton: {
-  position: "absolute",
-  top: 0,
-  right: 8,
-  backgroundColor: "#FF4444",
-  width: 30,
-  height: 30,
-  borderRadius: 15,
-  justifyContent: "center",
-  alignItems: "center",
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.25,
-  shadowRadius: 3.84,
-  elevation: 5,
-},
-imageRemoveButtonText: {
-  color: "#FFFFFF",
-  fontSize: 18,
-  fontWeight: "bold",
-  lineHeight: 18,
-},
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  stepImageWrapper: {
+    position: "relative",
+    width: 100,
+    height: 100,
+  },
+  stepImagePreview: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 8,
+    backgroundColor: "#f0f0f0",
+  },
+  stepImageRemoveButton: {
+    position: "absolute",
+    top: -8,
+    right: -8,
+    backgroundColor: "#FF4444",
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  stepImageRemoveButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "bold",
+    lineHeight: 14,
+  },
+  stepImageNumber: {
+    position: "absolute",
+    bottom: 4,
+    right: 4,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  stepImageNumberText: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "bold",
+  },
+  imageRemoveButton: {
+    position: "absolute",
+    top: 0,
+    right: 8,
+    backgroundColor: "#FF4444",
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  imageRemoveButtonText: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "bold",
+    lineHeight: 18,
+  },
 
-categoryCard: {
+  categoryCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
     padding: 16,
@@ -1186,7 +1176,6 @@ categoryCard: {
     padding: 20,
   },
 
-
   recipeList: {
     flex: 1,
   },
@@ -1290,5 +1279,200 @@ categoryCard: {
 
   listContainer: {
     paddingVertical: 8,
+  },
+
+  // Modern Recipe Card
+  modernRecipeCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    marginHorizontal: 16,
+    marginVertical: 8,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+
+  modernRecipeImageWrapper: {
+    width: "100%",
+    height: 200,
+    position: "relative",
+  },
+
+  modernRecipeImage: {
+    width: "100%",
+    height: "100%",
+  },
+
+  modernDifficultyBadge: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 4,
+  },
+
+  modernDifficultyText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+
+  modernRecipeContent: {
+    padding: 16,
+  },
+
+  modernRecipeTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#2C3E50",
+    marginBottom: 12,
+  },
+
+  modernRecipeMetaRow: {
+    flexDirection: "row",
+    gap: 16,
+  },
+
+  modernRecipeMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    flex: 1,
+  },
+
+  modernRecipeMetaText: {
+    fontSize: 12,
+    color: "#7F8C8D",
+  },
+
+  modernRecipeActions: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    gap: 12,
+  },
+
+  // Modern Filter
+  modernFilterContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 8,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+  },
+
+  modernFilterButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    backgroundColor: "#F8F9FA",
+    gap: 4,
+  },
+
+  modernFilterButtonActive: {
+    backgroundColor: "#FF6B6B",
+  },
+
+  modernFilterButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#7F8C8D",
+  },
+
+  modernFilterButtonTextActive: {
+    color: "#FFFFFF",
+  },
+
+  // Detail Modal
+  detailImageSection: {
+    width: "100%",
+    height: 240,
+  },
+
+  detailRecipeImage: {
+    width: "100%",
+    height: "100%",
+  },
+
+  detailInfoRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+  },
+
+  detailInfoItem: {
+    alignItems: "center",
+    gap: 4,
+  },
+
+  detailInfoLabel: {
+    fontSize: 11,
+    color: "#95A5A6",
+    marginTop: 4,
+  },
+
+  detailInfoValue: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#2C3E50",
+  },
+
+  detailDifficultyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 12,
+  },
+
+  detailDifficultyText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  detailDescription: {
+    fontSize: 14,
+    color: "#7F8C8D",
+    lineHeight: 22,
+    marginTop: 8,
+  },
+
+  detailActionsSection: {
+    flexDirection: "row",
+    padding: 16,
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#F0F0F0",
+  },
+
+  detailActionButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: "#F8F9FA",
+    gap: 6,
+  },
+
+  detailActionButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#2C3E50",
   },
 });
