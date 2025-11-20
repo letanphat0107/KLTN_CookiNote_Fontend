@@ -276,7 +276,7 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
       if (result) {
         setShareData(result);
         setShowShareModal(true);
-        showToastMessage("✅ Tạo mã QR thành công!", 2000);
+        // showToastMessage("✅ Tạo mã QR thành công!", 2000);
       } else {
         showToastMessage("❌ Không thể tạo mã chia sẻ. Thử lại sau!", 3000);
       }

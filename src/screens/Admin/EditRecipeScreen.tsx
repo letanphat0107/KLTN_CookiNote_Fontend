@@ -282,10 +282,9 @@ const EditRecipeScreen = () => {
     }
 
     console.log("Submit ne");
-    
 
     // if (!validateForm()) return;
-console.log("Validate  ne");
+    console.log("Validate  ne");
     setLoading(true);
 
     try {
@@ -306,11 +305,7 @@ console.log("Validate  ne");
             quantity: ing.quantity.trim(),
           })),
       };
-      await adminService.updateRecipe(
-        
-        Number(recipeId),
-        recipeData
-      );
+      await adminService.updateRecipe(Number(recipeId), recipeData);
 
       // 2. Update cover image if changed
       if (
@@ -318,17 +313,12 @@ console.log("Validate  ne");
         coverImageUri &&
         coverImageUri !== originalCoverImage
       ) {
-        await adminService.updateRecipeCover(
-         
-          Number(recipeId),
-          coverImageUri
-        );
+        await adminService.updateRecipeCover(Number(recipeId), coverImageUri);
       }
 
       // 3. Delete removed ingredients (bulk delete)
       if (deletedIngredients.length > 0) {
         await adminService.deleteIngredients(
-          
           Number(recipeId),
           deletedIngredients
         );
@@ -337,20 +327,12 @@ console.log("Validate  ne");
       // 4. Add new ingredients (ones without ID)
       const newIngredients = ingredients.filter((ing) => !ing.id);
       if (newIngredients.length > 0) {
-        await adminService.addIngredients(
-        
-          Number(recipeId),
-          newIngredients
-        );
+        await adminService.addIngredients(Number(recipeId), newIngredients);
       }
 
       // 5. Delete removed steps (bulk delete)
       if (deletedSteps.length > 0) {
-        await adminService.deleteSteps(
-          
-          Number(recipeId),
-          deletedSteps
-        );
+        await adminService.deleteSteps(Number(recipeId), deletedSteps);
       }
 
       // 6. Update existing steps and add new images
@@ -358,7 +340,6 @@ console.log("Validate  ne");
       for (const step of existingSteps) {
         if (step.id) {
           await adminService.updateStep(
-            
             Number(recipeId),
             step.id,
             {
@@ -376,7 +357,6 @@ console.log("Validate  ne");
       const newSteps = steps.filter((step) => !step.id);
       for (const step of newSteps) {
         await adminService.addStep(
-        
           Number(recipeId),
           {
             content: step.content,
@@ -394,11 +374,7 @@ console.log("Validate  ne");
           stepId: step.id!,
           newStepNo: index + 1,
         }));
-        await adminService.reorderSteps(
-          
-          Number(recipeId),
-          reorderData
-        );
+        await adminService.reorderSteps(Number(recipeId), reorderData);
       }
 
       Alert.alert("Thành công", "Đã cập nhật công thức", [
@@ -434,9 +410,14 @@ console.log("Validate  ne");
         onPress={pickCoverImage}
       >
         {coverImageUri ? (
-          <View style={{ position: "relative" ,width: "100%",
-    height: 200,
-    borderRadius: 8,}}>
+          <View
+            style={{
+              position: "relative",
+              width: "100%",
+              height: 200,
+              borderRadius: 8,
+            }}
+          >
             <Image
               source={{ uri: coverImageUri }}
               style={adminStyles.coverPreview}

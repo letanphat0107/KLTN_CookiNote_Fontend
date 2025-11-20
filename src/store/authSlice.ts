@@ -92,7 +92,6 @@ export const checkAuthStatus = createAsyncThunk(
             throw new Error("Token validation failed after refresh");
           }
         } catch (refreshError) {
-          console.error("Token refresh or retry failed:", refreshError);
           // Clear expired data
           await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
           return rejectWithValue("Token refresh failed - please login again");
@@ -356,7 +355,6 @@ const authSlice = createSlice({
         console.log("Tokens refreshed successfully");
       })
       .addCase(refreshTokens.rejected, (state, action) => {
-        console.error("Token refresh failed:", action.payload);
         // Don't clear state here, let the calling function handle it
         state.error = action.payload as string;
       });
