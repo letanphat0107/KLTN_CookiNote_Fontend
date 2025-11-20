@@ -36,6 +36,7 @@ interface AIChatButtonProps {
   isOpen: boolean;
   onToggle: () => void;
   navigation?: any;
+  isAdminMode: boolean;
 }
 
 interface ChatMessage {
@@ -52,6 +53,7 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
   isOpen,
   onToggle,
   navigation,
+  isAdminMode = false,
 }) => {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -419,9 +421,11 @@ const handleSendMessage = async () => {
 };
 
 const handleSaveRecipe = async (recipe: AIGeneratedRecipe) => {
+    const privacyText = isAdminMode ? "công khai" : "riêng tư";
+
     Alert.alert(
       "Lưu công thức",
-      "Bạn có muốn lưu công thức này vào danh sách của mình?",
+      `Bạn có muốn lưu công thức này vào danh sách ${privacyText} của mình?`,
       [
         {
           text: "Hủy",
@@ -432,7 +436,7 @@ const handleSaveRecipe = async (recipe: AIGeneratedRecipe) => {
           onPress: async () => {
             setIsSavingRecipe(true);
             try {
-              const result = await saveAIRecipe(recipe);
+              const result = await saveAIRecipe(recipe, isAdminMode);
 
               if (result.success) {
                 Alert.alert(
@@ -564,7 +568,7 @@ const renderGeneratedRecipe = (recipe: AIGeneratedRecipe) => (
           </View>
         ) : (
           <Text style={floatingStyles.saveRecipeButtonText}>
-            💾 Lưu công thức này
+            💾 Lưu {isAdminMode ? "(Công khai)" : "(Riêng tư)"}
           </Text>
         )}
       </TouchableOpacity>

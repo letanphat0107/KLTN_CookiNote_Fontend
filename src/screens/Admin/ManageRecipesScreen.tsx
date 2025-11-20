@@ -15,6 +15,7 @@ import adminService from "../../services/adminService";
 import { Recipe } from "../../types/recipe";
 import { adminStyles } from "./styles";
 import { useNavigation } from "@react-navigation/native";
+import FloatingButtonsContainer from "../../components/FloatingButtons/FloatingButtonContainer";
 
 const ManageRecipesScreen = () => {
   const { tokens } = useAppSelector((state) => state.auth);
@@ -337,6 +338,12 @@ const ManageRecipesScreen = () => {
       >
         <Text style={adminStyles.fabIcon}>+</Text>
       </TouchableOpacity>
+
+      <FloatingButtonsContainer 
+      navigation={navigation} 
+      showShoppingList={false} 
+      isAdminMode={true}
+    />
     </View>
   );
 };

@@ -7,10 +7,14 @@ import { floatingStyles } from "./styles";
 
 interface FloatingButtonsContainerProps {
   navigation?: any;
+  showShoppingList?: boolean;
+  isAdminMode?: boolean;
 }
 
 const FloatingButtonsContainer: React.FC<FloatingButtonsContainerProps> = ({
   navigation,
+  showShoppingList = true,
+  isAdminMode = false,
 }) => {
   const [isShoppingListOpen, setIsShoppingListOpen] = useState(false);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
@@ -23,7 +27,7 @@ const FloatingButtonsContainer: React.FC<FloatingButtonsContainerProps> = ({
   };
 
   const handleAIChatToggle = () => {
-    if (isShoppingListOpen) {
+    if (isShoppingListOpen && showShoppingList) {
       setIsShoppingListOpen(false);
     }
     setIsAIChatOpen(!isAIChatOpen);
@@ -31,16 +35,19 @@ const FloatingButtonsContainer: React.FC<FloatingButtonsContainerProps> = ({
 
   return (
     <View style={floatingStyles.container}>
-      <ShoppingListButton
-        isOpen={isShoppingListOpen}
-        onToggle={handleShoppingListToggle}
-        navigation={navigation}
-      />
       <AIChatButton
         isOpen={isAIChatOpen}
         onToggle={handleAIChatToggle}
         navigation={navigation}
+        isAdminMode={isAdminMode}
       />
+      {showShoppingList && (
+        <ShoppingListButton
+          isOpen={isShoppingListOpen}
+          onToggle={handleShoppingListToggle}
+          navigation={navigation}
+        />
+      )}
     </View>
   );
 };

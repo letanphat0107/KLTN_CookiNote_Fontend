@@ -14,9 +14,9 @@ export const floatingStyles = StyleSheet.create({
 
   // Floating Buttons
   floatingButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     marginBottom: 15,
     elevation: 8,
     shadowColor: "#000",

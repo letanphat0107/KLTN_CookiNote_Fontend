@@ -188,14 +188,12 @@ export const generateRecipe = async (
 };
 
 export const saveAIRecipe = async (
-  recipe: AIGeneratedRecipe
+  recipe: AIGeneratedRecipe,
+  isAdmin: boolean = false
 ): Promise<{ success: boolean; recipeId?: number; message?: string }> => {
   try {
     console.log("Saving AI recipe:", recipe);
-
-    // Generate unique categoryId (use timestamp-based approach to avoid conflicts)
-    // Range: 200-999 to avoid conflicts with existing categories (1-118)
-    // const categoryId = 200 + Math.floor(Math.random() * 800);
+    
     const categoryId = 5;
 
     const recipeData = {
@@ -205,7 +203,7 @@ export const saveAIRecipe = async (
       prepareTime: recipe.prepareTime,
       cookTime: recipe.cookTime,
       difficulty: recipe.difficulty.toUpperCase(),
-      privacy: "PRIVATE" as const,
+      privacy: isAdmin ? "PUBLIC" : "PRIVATE",
       ingredients: recipe.ingredients.map((ing) => ({
         name: ing.name,
         quantity: ing.quantity,
