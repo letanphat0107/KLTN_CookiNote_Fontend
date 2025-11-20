@@ -59,16 +59,13 @@ export const getSharedRecipe = async (
     );
 
     const result = await response.json();
-    console.log("Get shared recipe response:", result);
 
     if (response.ok && result.code === 200) {
       return result.data;
     } else {
-      console.error("Failed to get shared recipe:", result.message);
       return null;
     }
   } catch (error) {
-    console.error("Error getting shared recipe:", error);
     return null;
   }
 };

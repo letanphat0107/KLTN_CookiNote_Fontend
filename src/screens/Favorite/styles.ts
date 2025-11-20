@@ -101,22 +101,6 @@ export const favoriteStyles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 12,
   },
-
-  // Search and filter
-  searchContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-  },
-  searchInput: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: FONT_SIZES.md,
-    fontFamily: FONT_FAMILIES.regular,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
   filterButtons: {
     flexDirection: "row",
     paddingHorizontal: 20,
@@ -337,6 +321,72 @@ cookedNote: {
   borderLeftWidth: 2,
   borderLeftColor: "#FF6B35",
 },
+searchContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+
+  searchInput: {
+    backgroundColor: "#F5F5F5",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: "#333",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+
+  shareCodeContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+
+  shareCodeRow: {
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
+  },
+
+  shareCodeInput: {
+    flex: 1,
+    backgroundColor: "#FFF5F0",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: "#333",
+    borderWidth: 1.5,
+    borderColor: "#FF6B35",
+  },
+
+  shareCodeButton: {
+    backgroundColor: "#FF6B35",
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    minWidth: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#FF6B35",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+
+  shareCodeButtonDisabled: {
+    backgroundColor: "#CCCCCC",
+    opacity: 0.6,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+
+  shareCodeButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
 });
 
 export default favoriteStyles;

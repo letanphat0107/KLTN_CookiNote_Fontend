@@ -70,7 +70,7 @@ const TabNavigator = () => {
         name="Favorite"
         component={isAuthenticated ? FavoriteScreen : UnauthenticatedFavorite}
         options={{
-          tabBarLabel: "Yêu thích",
+          tabBarLabel: "Công thức",
           tabBarIcon: ({ color }) => (
             <Text style={{ fontSize: 20, color }}>❤️</Text>
           ),

@@ -23,6 +23,8 @@ import {
   CookedHistoryItem,
 } from "../../services/favoriteService";
 import { useFocusEffect } from "@react-navigation/native";
+import { getSharedRecipe } from "../../services/shareService";
+
 
 interface FavoriteScreenProps {
   navigation?: any;
@@ -54,6 +56,10 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
   const [hasMoreMyRecipes, setHasMoreMyRecipes] = useState(false);
   const [hasMoreCooked, setHasMoreCooked] = useState(false);
   const [hasMoreDeleted, setHasMoreDeleted] = useState(false);
+
+  // Add state for share code input
+const [shareCode, setShareCode] = useState("");
+const [isLoadingShare, setIsLoadingShare] = useState(false);
 
   // Track favorite status for each recipe
   const [favoriteStatuses, setFavoriteStatuses] = useState<{
@@ -274,6 +280,41 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
   const handleCardPress = (recipeId: number) => {
     handleViewRecipe(recipeId);
   };
+
+  const handleShareCodeSubmit = async () => {
+  if (!shareCode.trim()) {
+    Alert.alert("Thông báo", "Vui lòng nhập mã chia sẻ");
+    return;
+  }
+
+  setIsLoadingShare(true);
+
+  try {
+    console.log("Getting shared recipe with code:", shareCode.trim());
+    const recipe = await getSharedRecipe(shareCode.trim());
+
+    if (recipe) {
+      // Clear input
+      setShareCode("");
+      
+      // Navigate to RecipeDetail with the shared recipe
+      navigation?.navigate("RecipeDetail", {
+        recipeId: recipe.id,
+        fromShare: true,
+      });
+    } else {
+      Alert.alert(
+        "Lỗi",
+        "Không thể tải công thức. Mã chia sẻ không hợp lệ hoặc đã hết hạn."
+      );
+    }
+  } catch (error) {
+    console.error("Error loading shared recipe:", error);
+    Alert.alert("Lỗi", "Đã xảy ra lỗi khi tải công thức. Vui lòng thử lại.");
+  } finally {
+    setIsLoadingShare(false);
+  }
+};
 
   // FIXED: getFilteredRecipes
   const getFilteredRecipes = (): (Recipe | CookedHistoryItem)[] => {
@@ -565,6 +606,40 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
           placeholderTextColor="#999"
         />
       </View>
+
+      {/* Share Code Input with Button */}
+    <View style={favoriteStyles.shareCodeContainer}>
+      <View style={favoriteStyles.shareCodeRow}>
+        <TextInput
+          style={favoriteStyles.shareCodeInput}
+          placeholder="Nhập mã chia sẻ"
+          value={shareCode}
+          onChangeText={setShareCode}
+          placeholderTextColor="#999"
+          autoCapitalize="none"
+          autoCorrect={false}
+          maxLength={8}
+          returnKeyType="done"
+          onSubmitEditing={handleShareCodeSubmit}
+          editable={!isLoadingShare}
+        />
+        <TouchableOpacity
+          style={[
+            favoriteStyles.shareCodeButton,
+            (!shareCode.trim() || isLoadingShare) &&
+              favoriteStyles.shareCodeButtonDisabled,
+          ]}
+          onPress={handleShareCodeSubmit}
+          disabled={!shareCode.trim() || isLoadingShare}
+        >
+          {isLoadingShare ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <Text style={favoriteStyles.shareCodeButtonText}>Mở</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </View>
 
       {/* Tab Navigation */}
       <View style={favoriteStyles.tabContainer}>

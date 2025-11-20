@@ -817,14 +817,14 @@ export const homeStyles = StyleSheet.create({
   },
 
   qrScanButton: {
-  width: 44,
-  height: 44,
-  borderRadius: 22,
+  width: 40,
+  height: 40,
+  borderRadius: 20,
   backgroundColor: "#FF6B35",
   justifyContent: "center",
   alignItems: "center",
   marginHorizontal: 8,
-  shadowColor: "#FF6B35",
+  shadowColor: "#ffffffff",
   shadowOffset: { width: 0, height: 2 },
   shadowOpacity: 0.3,
   shadowRadius: 4,
