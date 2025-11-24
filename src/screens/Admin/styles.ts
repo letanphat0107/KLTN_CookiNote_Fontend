@@ -2227,6 +2227,7 @@ modernDashboardLogoutButton: {
 modernStatsGrid: {
   flexDirection: "row",
   flexWrap: "wrap",
+  justifyContent: "space-between",
   padding: 16,
   gap: 12,
 },
@@ -2291,6 +2292,8 @@ modernDashboardSection: {
 modernActionsGrid: {
   flexDirection: "row",
   flexWrap: "wrap",
+  justifyContent: "space-between",
+
   paddingHorizontal: 16,
   gap: 12,
 },
