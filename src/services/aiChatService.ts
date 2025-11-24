@@ -23,8 +23,9 @@ export const sendAIChatMessage = async (message: string): Promise<string> => {
     const result = await response.json();
 
     if (response.ok && result.code === 200) {
+      // Return the answer from data object
       return (
-        result.data?.response || "Xin lỗi, tôi không thể trả lời câu hỏi này."
+        result.data?.answer || "Xin lỗi, tôi không thể trả lời câu hỏi này."
       );
     } else {
       console.error("Failed to send AI chat message:", result.message);
@@ -193,7 +194,7 @@ export const saveAIRecipe = async (
 ): Promise<{ success: boolean; recipeId?: number; message?: string }> => {
   try {
     console.log("Saving AI recipe:", recipe);
-    
+
     const categoryId = 5;
 
     const recipeData = {

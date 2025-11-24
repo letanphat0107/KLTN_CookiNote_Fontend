@@ -858,5 +858,24 @@ difficultyText: {
   color: "#FFFFFF",
 },
 
-// ...existing code...
+// Add styles for dish name input
+dishNameInput: {
+  backgroundColor: "#F8F9FA",
+  borderRadius: 12,
+  paddingHorizontal: 16,
+  paddingVertical: 14,
+  fontSize: 16,
+  color: "#2C3E50",
+  marginTop: 16,
+  marginBottom: 12,
+  borderWidth: 1,
+  borderColor: "#E0E0E0",
+},
+
+dishNameHint: {
+  fontSize: 13,
+  color: "#7F8C8D",
+  fontStyle: "italic",
+  marginTop: 8,
+},
 });

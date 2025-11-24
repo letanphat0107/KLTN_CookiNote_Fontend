@@ -67,6 +67,10 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
   const scrollViewRef = useRef<ScrollView>(null);
   const [isSavingRecipe, setIsSavingRecipe] = useState(false);
 
+  const [showAIRecipeCreator, setShowAIRecipeCreator] = useState(false);
+  const [dishNameInput, setDishNameInput] = useState("");
+  const [isGeneratingRecipe, setIsGeneratingRecipe] = useState(false);
+
   // Animation
   const scaleAnim = useState(new Animated.Value(1))[0];
 
@@ -358,53 +362,16 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
     setIsLoading(true);
 
     try {
-      // Check if this is a recipe generation request
-      if (isRecipeGenerationRequest(currentInput)) {
-        const dishName = extractDishName(currentInput);
+      // Send to /cookinote/ai/chat
+      const aiResponse = await sendAIChatMessage(currentInput);
 
-        const generatedRecipe = await generateRecipe(dishName);
-
-        if (generatedRecipe) {
-          const recipeMessage: ChatMessage = {
-            id: loadingMessage.id,
-            message: `Tôi đã tạo công thức cho "${generatedRecipe.title}". Hãy xem chi tiết bên dưới:`,
-            isUser: false,
-            timestamp: new Date(),
-            isLoading: false,
-            generatedRecipe,
-          };
-
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === loadingMessage.id ? recipeMessage : msg
-            )
-          );
-        } else {
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === loadingMessage.id
-                ? {
-                    ...msg,
-                    message:
-                      "Xin lỗi, tôi không thể tạo công thức này. Vui lòng thử lại với 'Hãy tạo cho tôi công thức ....'",
-                    isLoading: false,
-                  }
-                : msg
-            )
-          );
-        }
-      } else {
-        // Normal chat message
-        const aiResponse = await sendAIChatMessage(currentInput);
-
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === loadingMessage.id
-              ? { ...msg, message: aiResponse, isLoading: false }
-              : msg
-          )
-        );
-      }
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === loadingMessage.id
+            ? { ...msg, message: aiResponse, isLoading: false }
+            : msg
+        )
+      );
     } catch (error) {
       console.error("Error sending message:", error);
       setMessages((prev) =>
@@ -421,6 +388,88 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
       );
     } finally {
       setIsLoading(false);
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  };
+
+  const handleCreateAIRecipe = async () => {
+    if (!dishNameInput.trim()) {
+      Alert.alert("Thông báo", "Vui lòng nhập tên món ăn");
+      return;
+    }
+
+    setIsGeneratingRecipe(true);
+    setShowAIRecipeCreator(false);
+
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      message: `Tạo công thức cho món: ${dishNameInput.trim()}`,
+      isUser: true,
+      timestamp: new Date(),
+    };
+
+    const loadingMessage: ChatMessage = {
+      id: (Date.now() + 1).toString(),
+      message: "",
+      isUser: false,
+      timestamp: new Date(),
+      isLoading: true,
+    };
+
+    setMessages((prev) => [...prev, userMessage, loadingMessage]);
+    const dishName = dishNameInput.trim();
+    setDishNameInput("");
+
+    try {
+      const generatedRecipe = await generateRecipe(dishName);
+
+      if (generatedRecipe) {
+        const recipeMessage: ChatMessage = {
+          id: loadingMessage.id,
+          message: `Tôi đã tạo công thức cho "${generatedRecipe.title}". Hãy xem chi tiết bên dưới:`,
+          isUser: false,
+          timestamp: new Date(),
+          isLoading: false,
+          generatedRecipe,
+        };
+
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === loadingMessage.id ? recipeMessage : msg
+          )
+        );
+      } else {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === loadingMessage.id
+              ? {
+                  ...msg,
+                  message:
+                    "Xin lỗi, tôi không thể tạo công thức này. Vui lòng thử lại sau.",
+                  isLoading: false,
+                }
+              : msg
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error generating recipe:", error);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === loadingMessage.id
+            ? {
+                ...msg,
+                message:
+                  "Xin lỗi, đã xảy ra lỗi khi tạo công thức. Vui lòng thử lại sau.",
+                isLoading: false,
+              }
+            : msg
+        )
+      );
+    } finally {
+      setIsGeneratingRecipe(false);
       setTimeout(() => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }, 100);
@@ -792,6 +841,15 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
                 🥄 Gợi ý từ nguyên liệu
               </Text>
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={floatingStyles.quickActionButton}
+              onPress={() => setShowAIRecipeCreator(true)}
+            >
+              <Text style={floatingStyles.quickActionText}>
+                ✨ Tạo công thức bằng AI
+              </Text>
+            </TouchableOpacity>
           </View>
 
           {/* Chat Messages */}
@@ -849,8 +907,80 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
 
       {/* Ingredient Selector Modal */}
       {renderIngredientSelector()}
+
+      {/* AI Recipe Creator Modal */}
+    {renderAIRecipeCreatorModal()}
     </Modal>
   );
+
+  const renderAIRecipeCreatorModal = () => (
+  <Modal
+    visible={showAIRecipeCreator}
+    transparent={true}
+    animationType="fade"
+  >
+    <View style={floatingStyles.ingredientModalOverlay}>
+      <View style={floatingStyles.ingredientModal}>
+        <View style={floatingStyles.ingredientHeader}>
+          <Text style={floatingStyles.ingredientTitle}>
+            ✨ Tạo công thức bằng AI
+          </Text>
+          <TouchableOpacity onPress={() => setShowAIRecipeCreator(false)}>
+            <Text style={floatingStyles.closeButton}>✕</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={{ padding: 20 }}>
+          <Text style={floatingStyles.ingredientSubtitle}>
+            Nhập tên món ăn bạn muốn tạo công thức
+          </Text>
+
+          <TextInput
+            style={floatingStyles.dishNameInput}
+            placeholder="Ví dụ: Phở bò, Bánh xèo, Cơm tấm..."
+            value={dishNameInput}
+            onChangeText={setDishNameInput}
+            placeholderTextColor="#999"
+            autoFocus={true}
+            maxLength={100}
+          />
+
+          <Text style={floatingStyles.dishNameHint}>
+            💡 Mẹo: Tên món càng chi tiết càng tốt (ví dụ: "Phở bò Nam Định")
+          </Text>
+        </View>
+
+        <View style={floatingStyles.ingredientActions}>
+          <TouchableOpacity
+            style={floatingStyles.cancelButton}
+            onPress={() => {
+              setShowAIRecipeCreator(false);
+              setDishNameInput("");
+            }}
+          >
+            <Text style={floatingStyles.cancelButtonText}>Hủy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              floatingStyles.getSuggestionsButton,
+              !dishNameInput.trim() && floatingStyles.disabledButton,
+            ]}
+            onPress={handleCreateAIRecipe}
+            disabled={!dishNameInput.trim() || isGeneratingRecipe}
+          >
+            {isGeneratingRecipe ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text style={floatingStyles.getSuggestionsButtonText}>
+                Tạo công thức ✨
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  </Modal>
+);
 
   return (
     <>
