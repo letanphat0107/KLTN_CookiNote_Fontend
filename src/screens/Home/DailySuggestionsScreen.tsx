@@ -50,7 +50,7 @@ const DailySuggestionsScreen: React.FC<DailySuggestionsScreenProps> = ({
       case "DINNER":
         return { text: "Bữa tối", icon: "🌙" };
       default:
-        return { text: "Bữa ăn", icon: "🍽️" };
+        return { text: "Tráng miệng", icon: "🍽️" };
     }
   };
 

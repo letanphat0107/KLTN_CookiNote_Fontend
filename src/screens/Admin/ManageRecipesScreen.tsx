@@ -183,7 +183,7 @@ const ManageRecipesScreen = () => {
       <View style={adminStyles.modernRecipeImageWrapper}>
         <Image
           source={{
-            uri: item.imageUrl || "https://via.placeholder.com/400x300",
+            uri: item.imageUrl || "https://thecrites.com/sites/all/modules/cookbook/theme/images/default-recipe-big.png",
           }}
           style={adminStyles.modernRecipeImage}
         />

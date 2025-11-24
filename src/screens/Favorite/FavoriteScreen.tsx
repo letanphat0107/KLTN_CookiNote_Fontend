@@ -469,7 +469,7 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
           source={{
             uri:
               recipeImageUrl ||
-              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
+              "https://thecrites.com/sites/all/modules/cookbook/theme/images/default-recipe-big.png",
           }}
           style={favoriteStyles.recipeImage}
         />

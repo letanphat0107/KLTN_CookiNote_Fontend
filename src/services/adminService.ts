@@ -247,6 +247,7 @@ class AdminService {
       const params = new URLSearchParams({
         page: page.toString(),
         size: size.toString(),
+        deleted: "0",
       });
 
       const response = await fetchWithAuth(

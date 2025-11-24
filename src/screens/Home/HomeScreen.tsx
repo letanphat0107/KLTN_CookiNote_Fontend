@@ -421,14 +421,25 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           !showSearchResults &&
           (isAuthenticated ? (
             <TouchableOpacity onPress={handleProfilePress}>
-              <Image
-                source={{
-                  uri:
-                    user?.avatarUrl ||
-                    "https://i.pinimg.com/736x/6b/43/47/6b43478d2362f5e6ba3457abc8adcb06.jpg",
-                }}
-                style={homeStyles.userAvatar}
-              />
+              {user?.avatarUrl ? (
+                <Image
+                  source={{ uri: user.avatarUrl }}
+                  style={homeStyles.userAvatar}
+                />
+              ) : (
+                <View
+                  style={[
+                    homeStyles.userAvatar,
+                    { backgroundColor: "#BDBDBD", alignItems: "center", justifyContent: "center" },
+                  ]}
+                >
+                  <Text style={{ backgroundColor: "#FF6B35",color: "#fff", fontSize: 16, fontWeight: "700" }}>
+                    {( user?.username || "U")
+                      .charAt(0)
+                      .toUpperCase()}
+                  </Text>
+                </View>
+              )}
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
