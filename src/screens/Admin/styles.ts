@@ -2414,4 +2414,54 @@ modernActivityDivider: {
   backgroundColor: "#E0E0E0",
   marginVertical: 12,
 },
+
+modernSaveButton: {
+  width: 36,
+  height: 36,
+  borderRadius: 18,
+  backgroundColor: "#E8F5E9",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+modernReorderButton: {
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+  backgroundColor: "#E3F2FD",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+modernStepSaveButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 16,
+  backgroundColor: "#E8F5E9",
+  gap: 4,
+},
+
+modernStepSaveText: {
+  fontSize: 13,
+  fontWeight: "600",
+  color: "#4CAF50",
+},
+
+modernStepUpdateButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 16,
+  backgroundColor: "#E3F2FD",
+  gap: 4,
+},
+
+modernStepUpdateText: {
+  fontSize: 13,
+  fontWeight: "600",
+  color: "#4A90E2",
+},
 });

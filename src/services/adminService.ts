@@ -357,7 +357,6 @@ class AdminService {
 
   // For Edit Recipe Screen:
   // Cover image (Post & Put)
-  // Cover image (Post & Put)
   async updateRecipeCover(
     recipeId: number,
     imageUri: string,
@@ -440,7 +439,7 @@ class AdminService {
   async addIngredients(
     recipeId: number,
     ingredients: Array<{ name: string; quantity: string }>
-  ): Promise<void> {
+  ): Promise<Array<{ id: number; name: string; quantity: string }>> {
     try {
       const response = await fetchWithAuth(
         buildApiUrl(
@@ -456,6 +455,9 @@ class AdminService {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to add ingredients");
       }
+
+      const data = await response.json();
+      return data.data; // Return array of added ingredients with IDs
     } catch (error) {
       console.error("Error adding ingredients:", error);
       throw error;
@@ -497,9 +499,17 @@ class AdminService {
       stepNo: number;
       suggestedTime?: number;
       tips?: string;
+      keepUrls?: string;
     },
     addImageUris?: string[]
-  ): Promise<void> {
+  ): Promise<{
+    id: number;
+    stepNo: number;
+    content: string;
+    suggestedTime?: number;
+    tips?: string;
+    images: string[];
+  }> {
     try {
       const formData = new FormData();
 
@@ -510,6 +520,9 @@ class AdminService {
       }
       if (stepData.tips) {
         formData.append("tips", stepData.tips);
+      }
+      if (stepData.keepUrls) {
+        formData.append("keepUrls", stepData.keepUrls);
       }
 
       if (addImageUris && addImageUris.length > 0) {
@@ -542,6 +555,9 @@ class AdminService {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to update step");
       }
+
+      const data = await response.json();
+      return data.data; // Return updated step with all fields including images
     } catch (error) {
       console.error("Error updating step:", error);
       throw error;
@@ -578,7 +594,16 @@ class AdminService {
       tips?: string;
     },
     imageUris?: string[]
-  ): Promise<void> {
+  ): Promise<
+    Array<{
+      id: number;
+      stepNo: number;
+      content: string;
+      suggestedTime?: number;
+      tips?: string;
+      images: string[];
+    }>
+  > {
     try {
       const formData = new FormData();
 
@@ -618,6 +643,9 @@ class AdminService {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to add step");
       }
+
+      const data = await response.json();
+      return data.data; // Return array of all steps after adding
     } catch (error) {
       console.error("Error adding step:", error);
       throw error;
@@ -628,7 +656,16 @@ class AdminService {
   async reorderSteps(
     recipeId: number,
     steps: Array<{ stepId: number; newStepNo: number }>
-  ): Promise<void> {
+  ): Promise<
+    Array<{
+      id: number;
+      stepNo: number;
+      content: string;
+      suggestedTime?: number;
+      tips?: string;
+      images: string[];
+    }>
+  > {
     try {
       const response = await fetchWithAuth(
         buildApiUrl(
@@ -644,6 +681,9 @@ class AdminService {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to reorder steps");
       }
+
+      const data = await response.json();
+      return data.data; // Return array of all steps with new order
     } catch (error) {
       console.error("Error reordering steps:", error);
       throw error;

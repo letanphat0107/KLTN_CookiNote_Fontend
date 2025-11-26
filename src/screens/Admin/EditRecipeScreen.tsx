@@ -15,14 +15,15 @@ import { useAppSelector } from "../../store/hooks";
 import adminService, { UpdateRecipeData } from "../../services/adminService";
 import { adminStyles } from "./styles";
 import { Ionicons } from "@expo/vector-icons";
-import { getCategories } from "../../services/categoryService"; //Để lấy danh sách danh mục cho add/ edit recipe
+import { getCategories } from "../../services/categoryService";
 import { Category } from "../../types/recipe";
-import { useRecipe } from "../../hooks/useRecipe"; //Để lấy recipe details
+import { useRecipe } from "../../hooks/useRecipe";
 
 interface Ingredient {
   id?: number;
   name: string;
   quantity: string;
+  isNew?: boolean; // Track if it's a new ingredient not yet saved
 }
 
 interface Step {
@@ -31,8 +32,9 @@ interface Step {
   content: string;
   suggestedTime: number;
   tips?: string;
-  images?: string[]; // Existing images from server
-  newImages?: string[]; // New images to upload
+  images?: string[];
+  newImages?: string[];
+  isNew?: boolean; // Track if it's a new step not yet saved
 }
 
 const EditRecipeScreen = () => {
@@ -62,21 +64,19 @@ const EditRecipeScreen = () => {
   const [newCoverImageUri, setNewCoverImageUri] = useState<string | null>(null);
 
   // Ingredients
-  const [ingredients, setIngredients] = useState<Ingredient[]>([
-    { name: "", quantity: "" },
-  ]);
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
 
   // Steps
-  const [steps, setSteps] = useState<Step[]>([
-    {
-      stepNo: 1,
-      content: "",
-      suggestedTime: 0,
-      tips: "",
-      images: [],
-      newImages: [],
-    },
-  ]);
+  const [steps, setSteps] = useState<Step[]>([]);
+
+  // Track operations
+  const [addingIngredient, setAddingIngredient] = useState(false);
+  const [deletingIngredient, setDeletingIngredient] = useState<number | null>(
+    null
+  );
+  const [addingStep, setAddingStep] = useState(false);
+  const [deletingStep, setDeletingStep] = useState<number | null>(null);
+  const [updatingStep, setUpdatingStep] = useState<number | null>(null);
 
   useEffect(() => {
     loadCategories();
@@ -113,6 +113,7 @@ const EditRecipeScreen = () => {
               id: ing.id,
               name: ing.name,
               quantity: ing.quantity,
+              isNew: false,
             }))
           );
         }
@@ -127,6 +128,7 @@ const EditRecipeScreen = () => {
               tips: step.tips || "",
               images: step.images?.map((img: any) => img.imageUrl) || [],
               newImages: [],
+              isNew: false,
             }))
           );
         }
@@ -156,7 +158,6 @@ const EditRecipeScreen = () => {
 
     if (!result.canceled) {
       setNewCoverImageUri(result.assets[0].uri);
-      setCoverImageUrl(null); // Clear old image when new one is selected
     }
   };
 
@@ -196,8 +197,46 @@ const EditRecipeScreen = () => {
     setSteps(newSteps);
   };
 
-  const addIngredient = () => {
-    setIngredients([...ingredients, { name: "", quantity: "" }]);
+  // ========== INGREDIENTS OPERATIONS ==========
+
+  const addIngredient = async () => {
+    // Add temporary ingredient to UI
+    const tempIngredient: Ingredient = {
+      name: "",
+      quantity: "",
+      isNew: true,
+    };
+    setIngredients([...ingredients, tempIngredient]);
+  };
+
+  const saveNewIngredient = async (index: number) => {
+    const ingredient = ingredients[index];
+
+    if (!ingredient.name.trim() || !ingredient.quantity.trim()) {
+      Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin nguyên liệu");
+      return;
+    }
+
+    if (!ingredient.isNew) return; // Already saved
+
+    setAddingIngredient(true);
+    try {
+      const addedIngredients = await adminService.addIngredients(recipeId, [
+        {
+          name: ingredient.name.trim(),
+          quantity: ingredient.quantity.trim(),
+        },
+      ]);
+
+      setIngredients(addedIngredients);
+
+      Alert.alert("Thành công", "Đã thêm nguyên liệu");
+    } catch (error: any) {
+      console.error("Error adding ingredient:", error);
+      Alert.alert("Lỗi", error.message || "Không thể thêm nguyên liệu");
+    } finally {
+      setAddingIngredient(false);
+    }
   };
 
   const updateIngredient = <K extends keyof Ingredient>(
@@ -206,7 +245,6 @@ const EditRecipeScreen = () => {
     value: Ingredient[K]
   ) => {
     const newIngredients = [...ingredients];
-    // create a new ingredient object to keep immutability and satisfy TS
     newIngredients[index] = {
       ...newIngredients[index],
       [field]: value,
@@ -214,26 +252,105 @@ const EditRecipeScreen = () => {
     setIngredients(newIngredients);
   };
 
-  const removeIngredient = (index: number) => {
-    if (ingredients.length === 1) {
-      Alert.alert("Lỗi", "Phải có ít nhất một nguyên liệu");
+  const removeIngredient = async (index: number) => {
+    const ingredient = ingredients[index];
+
+    // If it's a new unsaved ingredient, just remove from UI
+    if (ingredient.isNew) {
+      setIngredients(ingredients.filter((_, i) => i !== index));
       return;
     }
-    setIngredients(ingredients.filter((_, i) => i !== index));
+
+    // If it's saved, delete from server
+    if (!ingredient.id) return;
+
+    Alert.alert(
+      "Xác nhận xóa",
+      `Bạn có chắc muốn xóa nguyên liệu "${ingredient.name}"?`,
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: async () => {
+            setDeletingIngredient(ingredient.id!);
+            try {
+              await adminService.deleteIngredients(recipeId, [ingredient.id!]);
+              setIngredients(ingredients.filter((_, i) => i !== index));
+              Alert.alert("Thành công", "Đã xóa nguyên liệu");
+            } catch (error: any) {
+              console.error("Error deleting ingredient:", error);
+              Alert.alert("Lỗi", error.message || "Không thể xóa nguyên liệu");
+            } finally {
+              setDeletingIngredient(null);
+            }
+          },
+        },
+      ]
+    );
   };
 
-  const addStep = () => {
-    setSteps([
-      ...steps,
-      {
-        stepNo: steps.length + 1,
-        content: "",
-        suggestedTime: 0,
-        tips: "",
-        images: [],
-        newImages: [],
-      },
-    ]);
+  // ========== STEPS OPERATIONS ==========
+
+  const addStep = async () => {
+    // Add temporary step to UI
+    const tempStep: Step = {
+      stepNo: steps.length + 1,
+      content: "",
+      suggestedTime: 0,
+      tips: "",
+      images: [],
+      newImages: [],
+      isNew: true,
+    };
+    setSteps([...steps, tempStep]);
+  };
+
+  const saveNewStep = async (index: number) => {
+    const step = steps[index];
+
+    if (!step.content.trim()) {
+      Alert.alert("Lỗi", "Vui lòng nhập nội dung bước");
+      return;
+    }
+
+    if (!step.isNew) return; // Already saved
+
+    setAddingStep(true);
+    try {
+      const stepData = {
+        content: step.content.trim(),
+        suggestedTime: step.suggestedTime,
+        tips: step.tips?.trim(),
+      };
+
+      const allSteps = await adminService.addStep(
+        recipeId,
+        stepData,
+        step.newImages
+      );
+
+      // Update all steps with server data
+      setSteps(
+        allSteps.map((s) => ({
+          id: s.id,
+          stepNo: s.stepNo,
+          content: s.content,
+          suggestedTime: s.suggestedTime ?? 0,
+          tips: s.tips ?? "",
+          images: s.images ?? [],
+          newImages: [],
+          isNew: false,
+        }))
+      );
+
+      Alert.alert("Thành công", "Đã thêm bước thực hiện");
+    } catch (error: any) {
+      console.error("Error adding step:", error);
+      Alert.alert("Lỗi", error.message || "Không thể thêm bước");
+    } finally {
+      setAddingStep(false);
+    }
   };
 
   const updateStep = <K extends keyof Step>(
@@ -246,17 +363,157 @@ const EditRecipeScreen = () => {
     setSteps(newSteps);
   };
 
-  const removeStep = (index: number) => {
-    if (steps.length === 1) {
-      Alert.alert("Lỗi", "Phải có ít nhất một bước thực hiện");
+  const saveStepUpdate = async (index: number) => {
+    const step = steps[index];
+
+    if (!step.id || step.isNew) return; // Not saved yet or is new
+
+    if (!step.content.trim()) {
+      Alert.alert("Lỗi", "Vui lòng nhập nội dung bước");
       return;
     }
-    const newSteps = steps.filter((_, i) => i !== index);
+
+    setUpdatingStep(step.id);
+    try {
+      const keepUrls = step.images?.join(",") || "";
+
+      const stepData = {
+        content: step.content.trim(),
+        stepNo: step.stepNo,
+        suggestedTime: step.suggestedTime,
+        tips: step.tips?.trim(),
+        keepUrls,
+      };
+
+      const updatedStep = await adminService.updateStep(
+        recipeId,
+        step.id,
+        stepData,
+        step.newImages
+      );
+
+      // Update step with server data
+      const newSteps = [...steps];
+      newSteps[index] = {
+        id: updatedStep.id,
+        stepNo: updatedStep.stepNo,
+        content: updatedStep.content,
+        suggestedTime: updatedStep.suggestedTime ?? 0,
+        tips: updatedStep.tips ?? "",
+        images: updatedStep.images ?? [],
+        newImages: [],
+        isNew: false,
+      };
+      setSteps(newSteps);
+
+      Alert.alert("Thành công", "Đã cập nhật bước");
+    } catch (error: any) {
+      Alert.alert("Lỗi", error.message || "Không thể cập nhật bước");
+    } finally {
+      setUpdatingStep(null);
+    }
+  };
+
+  const removeStep = async (index: number) => {
+    const step = steps[index];
+
+    // If it's a new unsaved step, just remove from UI
+    if (step.isNew) {
+      const newSteps = steps.filter((_, i) => i !== index);
+      newSteps.forEach((s, i) => {
+        s.stepNo = i + 1;
+      });
+      setSteps(newSteps);
+      return;
+    }
+
+    // If it's saved, delete from server
+    if (!step.id) return;
+
+    Alert.alert("Xác nhận xóa", `Bạn có chắc muốn xóa bước ${step.stepNo}?`, [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Xóa",
+        style: "destructive",
+        onPress: async () => {
+          setDeletingStep(step.id!);
+          try {
+            await adminService.deleteSteps(recipeId, [step.id!]);
+
+            // Remove and reorder steps
+            const newSteps = steps.filter((_, i) => i !== index);
+            newSteps.forEach((s, i) => {
+              s.stepNo = i + 1;
+            });
+            setSteps(newSteps);
+
+            Alert.alert("Thành công", "Đã xóa bước");
+          } catch (error: any) {
+            console.error("Error deleting step:", error);
+            Alert.alert("Lỗi", error.message || "Không thể xóa bước");
+          } finally {
+            setDeletingStep(null);
+          }
+        },
+      },
+    ]);
+  };
+
+  const reorderSteps = async (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+
+    const newSteps = [...steps];
+    const [movedStep] = newSteps.splice(fromIndex, 1);
+    newSteps.splice(toIndex, 0, movedStep);
+
+    // Update stepNo
     newSteps.forEach((step, i) => {
       step.stepNo = i + 1;
     });
+
     setSteps(newSteps);
+
+    // Save to server
+    try {
+      const reorderData = newSteps
+        .filter((s) => s.id) // Only saved steps
+        .map((s) => ({
+          stepId: s.id!,
+          newStepNo: s.stepNo,
+        }));
+
+      if (reorderData.length > 0) {
+        const reorderedSteps = await adminService.reorderSteps(
+          recipeId,
+          reorderData
+        );
+
+        // Update with server data
+        setSteps(
+          reorderedSteps.map((s) => {
+            const existingStep = newSteps.find((ns) => ns.id === s.id);
+            return {
+              id: s.id,
+              stepNo: s.stepNo,
+              content: s.content,
+              suggestedTime: s.suggestedTime ?? 0,
+              tips: s.tips ?? "",
+              images: s.images ?? [],
+              newImages: existingStep?.newImages || [],
+              isNew: false,
+            };
+          })
+        );
+      }
+    } catch (error: any) {
+      console.error("Error reordering steps:", error);
+      Alert.alert("Lỗi", error.message || "Không thể sắp xếp lại các bước");
+      // Reload to get correct order
+      loadRecipeData();
+    }
   };
+
+  // ========== SUBMIT OPERATIONS ==========
 
   const validateForm = (): boolean => {
     if (!title.trim()) {
@@ -275,14 +532,21 @@ const EditRecipeScreen = () => {
       Alert.alert("Lỗi", "Vui lòng nhập thời gian nấu hợp lệ");
       return false;
     }
-    if (ingredients.some((ing) => !ing.name.trim() || !ing.quantity.trim())) {
-      Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin nguyên liệu");
+
+    // Check for unsaved ingredients
+    const hasUnsavedIngredients = ingredients.some((ing) => ing.isNew);
+    if (hasUnsavedIngredients) {
+      Alert.alert("Lỗi", "Vui lòng lưu tất cả nguyên liệu trước khi cập nhật");
       return false;
     }
-    if (steps.some((step) => !step.content.trim())) {
-      Alert.alert("Lỗi", "Vui lòng điền đầy đủ nội dung các bước");
+
+    // Check for unsaved steps
+    const hasUnsavedSteps = steps.some((step) => step.isNew);
+    if (hasUnsavedSteps) {
+      Alert.alert("Lỗi", "Vui lòng lưu tất cả các bước trước khi cập nhật");
       return false;
     }
+
     return true;
   };
 
@@ -302,7 +566,18 @@ const EditRecipeScreen = () => {
           setLoading(true);
 
           try {
-            const recipeData: UpdateRecipeData = {
+            // 1. Update cover image if changed
+            if (newCoverImageUri) {
+              const method = coverImageUrl ? "PUT" : "POST";
+              await adminService.updateRecipeCover(
+                recipeId,
+                newCoverImageUri,
+                method
+              );
+            }
+
+            // 2. Update basic recipe info
+            const recipeData = {
               categoryId: parseInt(categoryId),
               title: title.trim(),
               description: description.trim(),
@@ -311,30 +586,12 @@ const EditRecipeScreen = () => {
               difficulty,
               privacy,
               ingredients: ingredients.map((ing) => ({
-                id: ing.id,
                 name: ing.name.trim(),
                 quantity: ing.quantity.trim(),
               })),
-              steps: steps.map((step) => ({
-                id: step.id,
-                stepNo: step.stepNo,
-                content: step.content.trim(),
-                suggestedTime: step.suggestedTime,
-                tips: step.tips?.trim(),
-              })),
             };
 
-            const stepImages = steps
-              .filter((step) => step.newImages && step.newImages.length > 0)
-              .map((step) => ({
-                stepNo: step.stepNo,
-                imageUris: step.newImages!,
-              }));
-
-            await adminService.updateRecipe(
-              recipeId,
-              recipeData,
-            );
+            await adminService.updateRecipe(recipeId, recipeData);
 
             Alert.alert("Thành công", "Đã cập nhật công thức", [
               {
@@ -415,7 +672,7 @@ const EditRecipeScreen = () => {
                   style={adminStyles.modernImageRemoveButton}
                   onPress={() => {
                     setNewCoverImageUri(null);
-                    setCoverImageUrl(null);
+                    if (!coverImageUrl) setCoverImageUrl(null);
                   }}
                 >
                   <Ionicons name="close-circle" size={32} color="#FFF" />
@@ -637,13 +894,17 @@ const EditRecipeScreen = () => {
             <TouchableOpacity
               style={adminStyles.modernAddButton}
               onPress={addIngredient}
+              disabled={addingIngredient}
             >
               <Ionicons name="add-circle" size={24} color="#FF6B6B" />
             </TouchableOpacity>
           </View>
 
           {ingredients.map((ing, index) => (
-            <View key={index} style={adminStyles.modernIngredientItem}>
+            <View
+              key={ing.id || `new-${index}`}
+              style={adminStyles.modernIngredientItem}
+            >
               <View style={adminStyles.modernIngredientNumber}>
                 <Text style={adminStyles.modernIngredientNumberText}>
                   {index + 1}
@@ -657,6 +918,7 @@ const EditRecipeScreen = () => {
                   value={ing.name}
                   onChangeText={(text) => updateIngredient(index, "name", text)}
                   placeholderTextColor="#95A5A6"
+                  editable={!deletingIngredient}
                 />
 
                 <TextInput
@@ -667,15 +929,37 @@ const EditRecipeScreen = () => {
                     updateIngredient(index, "quantity", text)
                   }
                   placeholderTextColor="#95A5A6"
+                  editable={!deletingIngredient}
                 />
               </View>
 
-              {ingredients.length > 1 && (
+              {ing.isNew ? (
+                <TouchableOpacity
+                  style={adminStyles.modernSaveButton}
+                  onPress={() => saveNewIngredient(index)}
+                  disabled={addingIngredient}
+                >
+                  {addingIngredient ? (
+                    <ActivityIndicator size="small" color="#4CAF50" />
+                  ) : (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={20}
+                      color="#4CAF50"
+                    />
+                  )}
+                </TouchableOpacity>
+              ) : (
                 <TouchableOpacity
                   style={adminStyles.modernRemoveButton}
                   onPress={() => removeIngredient(index)}
+                  disabled={deletingIngredient === ing.id}
                 >
-                  <Ionicons name="trash-outline" size={20} color="#E74C3C" />
+                  {deletingIngredient === ing.id ? (
+                    <ActivityIndicator size="small" color="#E74C3C" />
+                  ) : (
+                    <Ionicons name="trash-outline" size={20} color="#E74C3C" />
+                  )}
                 </TouchableOpacity>
               )}
             </View>
@@ -692,13 +976,17 @@ const EditRecipeScreen = () => {
             <TouchableOpacity
               style={adminStyles.modernAddButton}
               onPress={addStep}
+              disabled={addingStep}
             >
               <Ionicons name="add-circle" size={24} color="#FF6B6B" />
             </TouchableOpacity>
           </View>
 
           {steps.map((step, index) => (
-            <View key={index} style={adminStyles.modernStepCard}>
+            <View
+              key={step.id || `new-${index}`}
+              style={adminStyles.modernStepCard}
+            >
               <View style={adminStyles.modernStepHeader}>
                 <View style={adminStyles.modernStepBadge}>
                   <Ionicons name="footsteps-outline" size={16} color="#FFF" />
@@ -707,17 +995,96 @@ const EditRecipeScreen = () => {
                   </Text>
                 </View>
 
-                {steps.length > 1 && (
-                  <TouchableOpacity
-                    style={adminStyles.modernStepRemoveButton}
-                    onPress={() => removeStep(index)}
-                  >
-                    <Ionicons name="trash-outline" size={18} color="#E74C3C" />
-                    <Text style={adminStyles.modernStepRemoveText}>Xóa</Text>
-                  </TouchableOpacity>
-                )}
+                <View style={{ flexDirection: "row", gap: 8 }}>
+                  {/* Reorder buttons */}
+                  {index > 0 && !step.isNew && (
+                    <TouchableOpacity
+                      style={adminStyles.modernReorderButton}
+                      onPress={() => reorderSteps(index, index - 1)}
+                    >
+                      <Ionicons name="arrow-up" size={16} color="#4A90E2" />
+                    </TouchableOpacity>
+                  )}
+                  {index < steps.length - 1 && !step.isNew && (
+                    <TouchableOpacity
+                      style={adminStyles.modernReorderButton}
+                      onPress={() => reorderSteps(index, index + 1)}
+                    >
+                      <Ionicons name="arrow-down" size={16} color="#4A90E2" />
+                    </TouchableOpacity>
+                  )}
+
+                  {/* Save/Delete button */}
+                  {step.isNew ? (
+                    <TouchableOpacity
+                      style={adminStyles.modernStepSaveButton}
+                      onPress={() => saveNewStep(index)}
+                      disabled={addingStep}
+                    >
+                      {addingStep ? (
+                        <ActivityIndicator size="small" color="#4CAF50" />
+                      ) : (
+                        <>
+                          <Ionicons
+                            name="checkmark-circle"
+                            size={18}
+                            color="#4CAF50"
+                          />
+                          <Text style={adminStyles.modernStepSaveText}>
+                            Lưu
+                          </Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  ) : (
+                    <>
+                      <TouchableOpacity
+                        style={adminStyles.modernStepUpdateButton}
+                        onPress={() => saveStepUpdate(index)}
+                        disabled={updatingStep === step.id}
+                      >
+                        {updatingStep === step.id ? (
+                          <ActivityIndicator size="small" color="#4A90E2" />
+                        ) : (
+                          <>
+                            <Ionicons
+                              name="save-outline"
+                              size={18}
+                              color="#4A90E2"
+                            />
+                            <Text style={adminStyles.modernStepUpdateText}>
+                              Cập nhật
+                            </Text>
+                          </>
+                        )}
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={adminStyles.modernStepRemoveButton}
+                        onPress={() => removeStep(index)}
+                        disabled={deletingStep === step.id}
+                      >
+                        {deletingStep === step.id ? (
+                          <ActivityIndicator size="small" color="#E74C3C" />
+                        ) : (
+                          <>
+                            <Ionicons
+                              name="trash-outline"
+                              size={18}
+                              color="#E74C3C"
+                            />
+                            <Text style={adminStyles.modernStepRemoveText}>
+                              Xóa
+                            </Text>
+                          </>
+                        )}
+                      </TouchableOpacity>
+                    </>
+                  )}
+                </View>
               </View>
 
+              {/* Step content fields - Keep as is but add disabled state */}
               <View style={adminStyles.modernFormGroup}>
                 <Text style={adminStyles.modernLabel}>Nội dung *</Text>
                 <TextInput
@@ -729,6 +1096,7 @@ const EditRecipeScreen = () => {
                   numberOfLines={4}
                   textAlignVertical="top"
                   placeholderTextColor="#95A5A6"
+                  editable={!deletingStep}
                 />
               </View>
 
@@ -747,6 +1115,7 @@ const EditRecipeScreen = () => {
                     }
                     keyboardType="numeric"
                     placeholderTextColor="#95A5A6"
+                    editable={!deletingStep}
                   />
                 </View>
 
@@ -761,6 +1130,7 @@ const EditRecipeScreen = () => {
                     value={step.tips}
                     onChangeText={(text) => updateStep(index, "tips", text)}
                     placeholderTextColor="#95A5A6"
+                    editable={!deletingStep}
                   />
                 </View>
               </View>
