@@ -91,7 +91,9 @@ class AdminService {
         buildApiUrl(API_CONFIG.ENDPOINTS.ADMIN.DASHBOARD),
         {
           method: "GET",
-        },true,false
+        },
+        true,
+        false
       );
 
       if (!response.ok) {
@@ -335,7 +337,9 @@ class AdminService {
         {
           method: "POST",
           body: formData,
-        },true, true
+        },
+        true,
+        true
       );
 
       if (!response.ok) {
@@ -351,8 +355,14 @@ class AdminService {
     }
   }
 
-  // Update recipe cover image
-  async updateRecipeCover(recipeId: number, imageUri: string): Promise<void> {
+  // For Edit Recipe Screen:
+  // Cover image (Post & Put)
+  // Cover image (Post & Put)
+  async updateRecipeCover(
+    recipeId: number,
+    imageUri: string,
+    method: "POST" | "PUT" = "PUT"
+  ): Promise<void> {
     try {
       const formData = new FormData();
       const filename = imageUri.split("/").pop() || "cover.jpg";
@@ -368,89 +378,30 @@ class AdminService {
       const response = await fetchWithAuth(
         buildApiUrl(`${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/cover`),
         {
-          method: "PUT",
+          method: method,
           body: formData,
-        },true, true
+        },
+        true,
+        true
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update cover image");
+        throw new Error(
+          errorData.message ||
+            `Failed to ${method === "POST" ? "add" : "update"} cover image`
+        );
       }
     } catch (error) {
-      console.error("Error updating cover image:", error);
-      throw error;
-    }
-  }
-
-  // Add images to a step
-  async addStepImages(
-    recipeId: number,
-    stepId: number,
-    imageUris: string[]
-  ): Promise<void> {
-    try {
-      const formData = new FormData();
-
-      imageUris.forEach((uri) => {
-        const filename = uri.split("/").pop() || `step_${stepId}.jpg`;
-        const match = /\.(\w+)$/.exec(filename);
-        const type = match ? `image/${match[1]}` : "image/jpeg";
-
-        formData.append("files", {
-          uri: uri,
-          name: filename,
-          type: type,
-        } as any);
-      });
-
-      const response = await fetchWithAuth(
-        buildApiUrl(
-          `${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/steps/${stepId}/images`
-        ),
-        {
-          method: "POST",
-          body: formData,
-        },true, true
+      console.error(
+        `Error ${method === "POST" ? "adding" : "updating"} cover image:`,
+        error
       );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to add step images");
-      }
-    } catch (error) {
-      console.error("Error adding step images:", error);
       throw error;
     }
   }
 
-  // Reorder steps
-  async reorderSteps(
-    recipeId: number,
-    steps: Array<{ stepId: number; newStepNo: number }>
-  ): Promise<void> {
-    try {
-      const response = await fetchWithAuth(
-        buildApiUrl(
-          `${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/steps/reorder`
-        ),
-        {
-          method: "PUT",
-          body: JSON.stringify({ steps }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to reorder steps");
-      }
-    } catch (error) {
-      console.error("Error reordering steps:", error);
-      throw error;
-    }
-  }
-
-  // Update recipe basic info
+  // Basic infor, include edit ingredients (Update)
   async updateRecipe(
     recipeId: number,
     recipeData: {
@@ -470,7 +421,9 @@ class AdminService {
         {
           method: "PUT",
           body: JSON.stringify(recipeData),
-        },true, false
+        },
+        true,
+        false
       );
 
       if (!response.ok) {
@@ -483,60 +436,7 @@ class AdminService {
     }
   }
 
-  // Add a new step with images
-  async addStep(
-    recipeId: number,
-    stepData: {
-      content: string;
-      suggestedTime?: number;
-      tips?: string;
-    },
-    imageUris?: string[]
-  ): Promise<void> {
-    try {
-      const formData = new FormData();
-
-      formData.append("content", stepData.content);
-      if (stepData.suggestedTime) {
-        formData.append("suggestedTime", stepData.suggestedTime.toString());
-      }
-      if (stepData.tips) {
-        formData.append("tips", stepData.tips);
-      }
-
-      if (imageUris && imageUris.length > 0) {
-        imageUris.forEach((uri) => {
-          const filename = uri.split("/").pop() || "step_image.jpg";
-          const match = /\.(\w+)$/.exec(filename);
-          const type = match ? `image/${match[1]}` : "image/jpeg";
-
-          formData.append("addFiles", {
-            uri: uri,
-            name: filename,
-            type: type,
-          } as any);
-        });
-      }
-
-      const response = await fetchWithAuth(
-        buildApiUrl(`${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/steps`),
-        {
-          method: "POST",
-          body: formData,
-        },true, true
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to add step");
-      }
-    } catch (error) {
-      console.error("Error adding step:", error);
-      throw error;
-    }
-  }
-
-  // Add ingredients
+  // Ingredient: add one or more
   async addIngredients(
     recipeId: number,
     ingredients: Array<{ name: string; quantity: string }>
@@ -562,7 +462,33 @@ class AdminService {
     }
   }
 
-  // Update existing step
+  // Ingredients: delete one or more
+  async deleteIngredients(
+    recipeId: number,
+    ingredientIds: number[]
+  ): Promise<void> {
+    try {
+      const response = await fetchWithAuth(
+        buildApiUrl(
+          `${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/ingredients`
+        ),
+        {
+          method: "DELETE",
+          body: JSON.stringify({ ingredientIds }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete ingredients");
+      }
+    } catch (error) {
+      console.error("Error deleting ingredients:", error);
+      throw error;
+    }
+  }
+
+  // Step: update all field
   async updateStep(
     recipeId: number,
     stepId: number,
@@ -607,7 +533,9 @@ class AdminService {
         {
           method: "PUT",
           body: formData,
-        },true, true
+        },
+        true,
+        true
       );
 
       if (!response.ok) {
@@ -620,7 +548,7 @@ class AdminService {
     }
   }
 
-  // Delete steps (bulk delete)
+  // Step: delete one or more
   async deleteSteps(recipeId: number, stepIds: number[]): Promise<void> {
     try {
       const response = await fetchWithAuth(
@@ -641,66 +569,122 @@ class AdminService {
     }
   }
 
-  // Delete ingredients (bulk delete)
-  async deleteIngredients(
+  // Step: add full field
+  async addStep(
     recipeId: number,
-    ingredientIds: number[]
+    stepData: {
+      content: string;
+      suggestedTime?: number;
+      tips?: string;
+    },
+    imageUris?: string[]
+  ): Promise<void> {
+    try {
+      const formData = new FormData();
+
+      formData.append("content", stepData.content);
+      if (stepData.suggestedTime) {
+        formData.append("suggestedTime", stepData.suggestedTime.toString());
+      }
+      if (stepData.tips) {
+        formData.append("tips", stepData.tips);
+      }
+
+      if (imageUris && imageUris.length > 0) {
+        imageUris.forEach((uri) => {
+          const filename = uri.split("/").pop() || "step_image.jpg";
+          const match = /\.(\w+)$/.exec(filename);
+          const type = match ? `image/${match[1]}` : "image/jpeg";
+
+          formData.append("addFiles", {
+            uri: uri,
+            name: filename,
+            type: type,
+          } as any);
+        });
+      }
+
+      const response = await fetchWithAuth(
+        buildApiUrl(`${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/steps`),
+        {
+          method: "POST",
+          body: formData,
+        },
+        true,
+        true
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add step");
+      }
+    } catch (error) {
+      console.error("Error adding step:", error);
+      throw error;
+    }
+  }
+
+  // Step: reorder
+  async reorderSteps(
+    recipeId: number,
+    steps: Array<{ stepId: number; newStepNo: number }>
   ): Promise<void> {
     try {
       const response = await fetchWithAuth(
         buildApiUrl(
-          `${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/ingredients`
+          `${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/steps/reorder`
         ),
         {
-          method: "DELETE",
-          body: JSON.stringify({ ingredientIds }),
+          method: "PUT",
+          body: JSON.stringify({ steps }),
         }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to delete ingredients");
+        throw new Error(errorData.message || "Failed to reorder steps");
       }
     } catch (error) {
-      console.error("Error deleting ingredients:", error);
+      console.error("Error reordering steps:", error);
       throw error;
     }
   }
 
+  //For manage user
   async getUserRecipes(
-  userId: number,
-  page: number = 0,
-  size: number = 12
-): Promise<{
-  items: any[];
-  totalPages: number;
-  totalElements: number;
-  hasNext: boolean;
-}> {
-  try {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      size: size.toString(),
-    });
+    userId: number,
+    page: number = 0,
+    size: number = 12
+  ): Promise<{
+    items: any[];
+    totalPages: number;
+    totalElements: number;
+    hasNext: boolean;
+  }> {
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        size: size.toString(),
+      });
 
-    const response = await fetchWithAuth(
-      buildApiUrl(`/cookinote/recipes/users/${userId}?${params}`),
-      {
-        method: "GET",
+      const response = await fetchWithAuth(
+        buildApiUrl(`/cookinote/recipes/users/${userId}?${params}`),
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch user recipes");
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch user recipes");
+      const data = await response.json();
+      return data.data;
+    } catch (error) {
+      console.error("Error fetching user recipes:", error);
+      throw error;
     }
-
-    const data = await response.json();
-    return data.data;
-  } catch (error) {
-    console.error("Error fetching user recipes:", error);
-    throw error;
   }
-}
 }
 
 export default new AdminService();

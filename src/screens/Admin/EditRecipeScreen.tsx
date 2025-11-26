@@ -15,9 +15,9 @@ import { useAppSelector } from "../../store/hooks";
 import adminService, { UpdateRecipeData } from "../../services/adminService";
 import { adminStyles } from "./styles";
 import { Ionicons } from "@expo/vector-icons";
-import { getCategories } from "../../services/categoryService";
+import { getCategories } from "../../services/categoryService"; //Để lấy danh sách danh mục cho add/ edit recipe
 import { Category } from "../../types/recipe";
-import { useRecipe } from "../../hooks/useRecipe";
+import { useRecipe } from "../../hooks/useRecipe"; //Để lấy recipe details
 
 interface Ingredient {
   id?: number;
