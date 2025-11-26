@@ -268,7 +268,11 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
 
   const handleViewRecipe = (recipeId: number) => {
     if (navigation) {
-      navigation.navigate("RecipeDetail", { recipeId: recipeId.toString() });
+      navigation.navigate("RecipeDetail", {
+        recipeId: recipeId.toString(),
+        showEditButton: false,
+        showAddToCartButton: false,
+      });
     }
   };
 

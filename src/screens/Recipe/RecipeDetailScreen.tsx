@@ -31,6 +31,8 @@ interface RecipeDetailScreenProps {
   route?: {
     params?: {
       recipeId?: string | number;
+      showEditButton?: boolean; // Add prop to control edit button visibility
+      showAddToCartButton?: boolean; // Add prop to control add to cart button visibility
     };
   };
   navigation?: any;
@@ -41,6 +43,9 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
   navigation,
 }) => {
   const recipeId = route?.params?.recipeId;
+const showEditButton = route?.params?.showEditButton ?? true; // Default: true
+  const showAddToCartButton = route?.params?.showAddToCartButton ?? true; // Default: true
+
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const { getRecipeDetails } = useRecipe();
 
@@ -543,46 +548,55 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
         </View>
 
         {/* Button Chỉnh sửa va Button Thêm vào Shopping Cart */}
-        <View style={recipeStyles.actionButtonsTop}>
-          <TouchableOpacity
-            style={[
-              recipeStyles.editButton,
-              !isAuthenticated && recipeStyles.disabledButton,
-            ]}
-            onPress={handleEditRecipe}
-            disabled={!isAuthenticated}
-          >
-            <Text
-              style={[
-                recipeStyles.editButtonText,
-                !isAuthenticated && recipeStyles.disabledButtonText,
-              ]}
-            >
-              ✏️ Chỉnh sửa
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity // <--- Đặt liền kề ngay sau thẻ đóng của nút trước
-            style={[
-              recipeStyles.addToCartButton,
-              !isAuthenticated && recipeStyles.disabledButton,
-            ]}
-            onPress={handleAddToShoppingCart}
-            disabled={!isAuthenticated || isAddingToCart}
-          >
-            {isAddingToCart ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <Text
+        {(showEditButton || showAddToCartButton) && (
+          <View style={recipeStyles.actionButtonsTop}>
+            {showEditButton && (
+              <TouchableOpacity
                 style={[
-                  recipeStyles.addToCartButtonText,
-                  !isAuthenticated && recipeStyles.disabledButtonText,
+                  recipeStyles.editButton,
+                  !showAddToCartButton && { flex: 1 }, // Full width if cart button hidden
+                  !isAuthenticated && recipeStyles.disabledButton,
                 ]}
+                onPress={handleEditRecipe}
+                disabled={!isAuthenticated}
               >
-                📃 Thêm vào giỏ
-              </Text>
+                <Text
+                  style={[
+                    recipeStyles.editButtonText,
+                    !isAuthenticated && recipeStyles.disabledButtonText,
+                  ]}
+                >
+                  ✏️ Chỉnh sửa
+                </Text>
+              </TouchableOpacity>
             )}
-          </TouchableOpacity>
-        </View>
+
+            {showAddToCartButton && (
+              <TouchableOpacity
+                style={[
+                  recipeStyles.addToCartButton,
+                  !showEditButton && { flex: 1 }, // Full width if edit button hidden
+                  !isAuthenticated && recipeStyles.disabledButton,
+                ]}
+                onPress={handleAddToShoppingCart}
+                disabled={!isAuthenticated || isAddingToCart}
+              >
+                {isAddingToCart ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Text
+                    style={[
+                      recipeStyles.addToCartButtonText,
+                      !isAuthenticated && recipeStyles.disabledButtonText,
+                    ]}
+                  >
+                    📃 Thêm vào giỏ
+                  </Text>
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
 
         {/* Description */}
         {recipe.description && (
