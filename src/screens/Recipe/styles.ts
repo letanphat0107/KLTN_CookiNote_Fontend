@@ -212,12 +212,6 @@ export const recipeStyles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  // Rating and difficulty
-  ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-  },
   ratingText: {
     fontSize: FONT_SIZES.md,
     fontFamily: "Roboto-Regular",
@@ -1509,6 +1503,284 @@ modernModalButtonConfirmText: {
   fontSize: 16,
   fontWeight: "bold",
   color: "#FFFFFF",
+},
+
+// Rating styles
+ratingContainer: {
+  backgroundColor: "#FFFFFF",
+  padding: 20,
+  marginTop: 20,
+  borderRadius: 12,
+  marginHorizontal: 15,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3,
+},
+
+ratingHeader: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 16,
+},
+
+ratingTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+  color: "#2C3E50",
+},
+
+ratingStats: {
+  flexDirection: "row",
+  alignItems: "baseline",
+  gap: 4,
+},
+
+averageRating: {
+  fontSize: 24,
+  fontWeight: "bold",
+  color: "#FFD700",
+},
+
+ratingCount: {
+  fontSize: 14,
+  color: "#7F8C8D",
+},
+
+starContainer: {
+  flexDirection: "row",
+  justifyContent: "center",
+  gap: 8,
+  paddingVertical: 12,
+},
+
+starButton: {
+  padding: 4,
+},
+
+myRatingContainer: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginTop: 12,
+  paddingTop: 12,
+  borderTopWidth: 1,
+  borderTopColor: "#E0E0E0",
+},
+
+myRatingText: {
+  fontSize: 14,
+  color: "#2C3E50",
+  fontWeight: "600",
+},
+
+deleteRatingButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 4,
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 6,
+  backgroundColor: "#FFEBEE",
+},
+
+deleteRatingText: {
+  fontSize: 13,
+  color: "#E74C3C",
+  fontWeight: "600",
+},
+
+// Comments styles
+commentsSection: {
+  backgroundColor: "#FFFFFF",
+  padding: 20,
+  marginTop: 20,
+  marginHorizontal: 15,
+  borderRadius: 12,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3,
+},
+
+commentsSectionHeader: {
+  marginBottom: 16,
+},
+
+commentInputContainer: {
+  marginBottom: 20,
+  borderWidth: 1,
+  borderColor: "#E0E0E0",
+  borderRadius: 12,
+  padding: 12,
+  backgroundColor: "#F8F9FA",
+},
+
+commentInput: {
+  fontSize: 14,
+  color: "#2C3E50",
+  minHeight: 60,
+  maxHeight: 120,
+  textAlignVertical: "top",
+  marginBottom: 8,
+},
+
+commentInputActions: {
+  flexDirection: "row",
+  justifyContent: "flex-end",
+  gap: 8,
+},
+
+cancelButton: {
+  paddingHorizontal: 16,
+  paddingVertical: 8,
+  borderRadius: 6,
+  backgroundColor: "#E0E0E0",
+},
+
+cancelButtonText: {
+  fontSize: 14,
+  color: "#7F8C8D",
+  fontWeight: "600",
+},
+
+submitCommentButton: {
+  paddingHorizontal: 16,
+  paddingVertical: 8,
+  borderRadius: 6,
+  backgroundColor: "#FF6B35",
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 4,
+},
+
+submitCommentButtonDisabled: {
+  backgroundColor: "#BDC3C7",
+},
+
+loadingCommentsContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 20,
+  gap: 12,
+},
+
+loadingCommentsText: {
+  fontSize: 14,
+  color: "#7F8C8D",
+},
+
+commentsList: {
+  gap: 16,
+},
+
+commentItem: {
+  paddingBottom: 16,
+  borderBottomWidth: 1,
+  borderBottomColor: "#F0F0F0",
+},
+
+commentReply: {
+  marginLeft: 40,
+  paddingLeft: 12,
+  borderLeftWidth: 2,
+  borderLeftColor: "#4A90E2",
+  borderBottomWidth: 0,
+},
+
+commentHeader: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  marginBottom: 8,
+},
+
+commentUserInfo: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 12,
+  flex: 1,
+},
+
+commentAvatar: {
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  overflow: "hidden",
+},
+
+avatarImage: {
+  width: "100%",
+  height: "100%",
+},
+
+commentUserName: {
+  fontSize: 14,
+  fontWeight: "600",
+  color: "#2C3E50",
+},
+
+commentTime: {
+  fontSize: 12,
+  color: "#95A5A6",
+  marginTop: 2,
+},
+
+commentActions: {
+  flexDirection: "row",
+  gap: 8,
+},
+
+commentActionButton: {
+  padding: 4,
+},
+
+commentContent: {
+  fontSize: 14,
+  color: "#34495E",
+  lineHeight: 20,
+  marginBottom: 8,
+},
+
+replyButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 4,
+  alignSelf: "flex-start",
+  paddingVertical: 4,
+},
+
+replyButtonText: {
+  fontSize: 13,
+  color: "#4A90E2",
+  fontWeight: "600",
+},
+
+repliesContainer: {
+  marginTop: 12,
+  gap: 12,
+},
+
+noCommentsContainer: {
+  alignItems: "center",
+  padding: 40,
+},
+
+noCommentsText: {
+  fontSize: 14,
+  color: "#95A5A6",
+  marginTop: 12,
+  textAlign: "center",
+},
+// Add new style for edited label
+editedLabel: {
+  fontSize: 11,
+  color: "#95A5A6",
+  fontStyle: "italic",
 },
 });
 

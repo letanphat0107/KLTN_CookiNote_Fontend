@@ -29,6 +29,12 @@ export interface RecipeWithDetails extends Recipe {
   steps?: RecipeStep[];
   ingredients?: RecipeIngredient[];
   privacy: "PUBLIC" | "PRIVATE";
+  // New fields for rating and comments
+  isFavorited: boolean;
+  averageRating: number;
+  ratingCount: number;
+  commentCount: number;
+  myRating: number | null;
 }
 
 // Paginated response for recipes

@@ -8,6 +8,7 @@ import {
   Animated,
   ActivityIndicator,
   Alert,
+  TextInput,
 } from "react-native";
 import { recipeStyles } from "./styles";
 import { useAppSelector } from "../../store/hooks";
@@ -16,7 +17,6 @@ import { RecipeWithDetails } from "../../types/recipe";
 import {
   addToFavorites,
   removeFromFavorites,
-  checkFavoriteStatus,
 } from "../../services/favoriteService";
 import EditRecipeModal from "../../components/Recipe/EditRecipeModal";
 import {
@@ -26,6 +26,16 @@ import {
 
 import { shareRecipe, ShareRecipeResponse } from "../../services/shareService";
 import ShareQRModal from "../Recipe/ShareQRModal";
+
+import { rateRecipe, deleteRating } from "../../services/ratingService";
+import {
+  getRecipeComments,
+  addComment,
+  updateComment,
+  deleteComment,
+  Comment,
+} from "../../services/commentService";
+import { Ionicons } from "@expo/vector-icons";
 
 interface RecipeDetailScreenProps {
   route?: {
@@ -43,7 +53,7 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
   navigation,
 }) => {
   const recipeId = route?.params?.recipeId;
-const showEditButton = route?.params?.showEditButton ?? true; // Default: true
+  const showEditButton = route?.params?.showEditButton ?? true; // Default: true
   const showAddToCartButton = route?.params?.showAddToCartButton ?? true; // Default: true
 
   const { isAuthenticated } = useAppSelector((state) => state.auth);
@@ -73,6 +83,18 @@ const showEditButton = route?.params?.showEditButton ?? true; // Default: true
   const [shareData, setShareData] = useState<ShareRecipeResponse | null>(null);
   const [isSharing, setIsSharing] = useState(false);
 
+  // Rating state
+  const userId = useAppSelector((state) => state.auth.user?.userId);
+  const [currentRating, setCurrentRating] = useState<number>(0);
+  const [isRating, setIsRating] = useState(false);
+
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [replyToCommentId, setReplyToCommentId] = useState<number | null>(null);
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
   // Fetch recipe details when component mounts
   useEffect(() => {
     if (recipeId) {
@@ -83,10 +105,10 @@ const showEditButton = route?.params?.showEditButton ?? true; // Default: true
     }
   }, [recipeId]);
 
-  // Check favorite status when recipe loads and user is authenticated
   useEffect(() => {
     if (recipe && isAuthenticated) {
-      checkRecipeFavoriteStatus();
+      // Remove checkRecipeFavoriteStatus() - use isFavorited from API
+      loadComments();
     }
   }, [recipe, isAuthenticated]);
 
@@ -100,6 +122,8 @@ const showEditButton = route?.params?.showEditButton ?? true; // Default: true
 
       if (recipeData) {
         setRecipe(recipeData);
+        setIsFavorite(recipeData.isFavorited); // Use isFavorited from API
+        setCurrentRating(recipeData.myRating || 0); // Set current rating
         console.log("Recipe details loaded:", recipeData.title);
       } else {
         setError("Vui lòng đăng nhập để xem chi tiết công thức");
@@ -108,17 +132,6 @@ const showEditButton = route?.params?.showEditButton ?? true; // Default: true
       setError("Đã xảy ra lỗi khi tải công thức");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const checkRecipeFavoriteStatus = async () => {
-    if (!recipe?.id) return;
-
-    try {
-      const favoriteStatus = await checkFavoriteStatus(recipe.id);
-      setIsFavorite(favoriteStatus);
-    } catch (error) {
-      console.error("Error checking favorite status:", error);
     }
   };
 
@@ -359,6 +372,266 @@ const showEditButton = route?.params?.showEditButton ?? true; // Default: true
     }
   };
 
+  const handleRating = async (score: number) => {
+  if (!isAuthenticated) {
+    showToastMessage("⭐ Vui lòng đăng nhập để đánh giá!", 3000);
+    setTimeout(() => {
+      if (navigation) {
+        navigation.navigate("Login");
+      }
+    }, 2000);
+    return;
+  }
+
+  if (!recipe?.id) return;
+
+  setIsRating(true);
+  try {
+    const success = await rateRecipe(recipe.id, score);
+
+    if (success) {
+      setCurrentRating(score);
+      showToastMessage(`⭐ Đã đánh giá ${score} sao!`, 2000);
+      
+      // Update recipe state locally instead of reloading
+      setRecipe(prev => {
+        if (!prev) return prev;
+        
+        const oldRating = currentRating;
+        const oldCount = prev.ratingCount || 0;
+        const oldAverage = prev.averageRating || 0;
+        
+        let newCount = oldCount;
+        let newAverage = oldAverage;
+        
+        if (oldRating === 0) {
+          // New rating
+          newCount = oldCount + 1;
+          newAverage = ((oldAverage * oldCount) + score) / newCount;
+        } else {
+          // Update existing rating
+          newAverage = ((oldAverage * oldCount) - oldRating + score) / oldCount;
+        }
+        
+        return {
+          ...prev,
+          ratingCount: newCount,
+          averageRating: newAverage,
+          myRating: score
+        };
+      });
+    } else {
+      showToastMessage("❌ Không thể đánh giá. Thử lại sau!", 3000);
+    }
+  } catch (error) {
+    console.error("Error rating recipe:", error);
+    showToastMessage("❌ Đã xảy ra lỗi. Vui lòng thử lại!", 3000);
+  } finally {
+    setIsRating(false);
+  }
+};
+
+  const handleDeleteRating = async () => {
+  if (!recipe?.id || !currentRating) return;
+
+  Alert.alert("Xác nhận", "Bạn có chắc muốn xóa đánh giá của mình?", [
+    { text: "Hủy", style: "cancel" },
+    {
+      text: "Xóa",
+      style: "destructive",
+      onPress: async () => {
+        setIsRating(true);
+        try {
+          const success = await deleteRating(recipe.id);
+
+          if (success) {
+            const oldRating = currentRating;
+            setCurrentRating(0);
+            showToastMessage("🗑️ Đã xóa đánh giá!", 2000);
+            
+            // Update recipe state locally
+            setRecipe(prev => {
+              if (!prev) return prev;
+              
+              const oldCount = prev.ratingCount || 0;
+              const oldAverage = prev.averageRating || 0;
+              const newCount = Math.max(0, oldCount - 1);
+              
+              let newAverage = 0;
+              if (newCount > 0) {
+                newAverage = ((oldAverage * oldCount) - oldRating) / newCount;
+              }
+              
+              return {
+                ...prev,
+                ratingCount: newCount,
+                averageRating: newAverage,
+                myRating: 0
+              };
+            });
+          } else {
+            showToastMessage("❌ Không thể xóa đánh giá!", 3000);
+          }
+        } catch (error) {
+          console.error("Error deleting rating:", error);
+          showToastMessage("❌ Đã xảy ra lỗi!", 3000);
+        } finally {
+          setIsRating(false);
+        }
+      },
+    },
+  ]);
+};
+
+  // Add comment functions
+const loadComments = async (showLoading = true) => {
+  if (!recipe?.id) return;
+
+  if (showLoading) {
+    setIsLoadingComments(true);
+  }
+  
+  try {
+    const commentsData = await getRecipeComments(recipe.id);
+
+    // Add isOwner flag to each comment and reply
+    const commentsWithOwnership = commentsData.map((comment) => ({
+      ...comment,
+      isOwner: comment.authorId === userId,
+      replies: comment.replies?.map((reply) => ({
+        ...reply,
+        isOwner: reply.authorId === userId,
+      })),
+    }));
+
+    setComments(commentsWithOwnership);
+  } catch (error) {
+    console.error("Error loading comments:", error);
+  } finally {
+    if (showLoading) {
+      setIsLoadingComments(false);
+    }
+  }
+};
+
+  const handleSubmitComment = async () => {
+  if (!isAuthenticated) {
+    showToastMessage("💬 Vui lòng đăng nhập để bình luận!", 3000);
+    setTimeout(() => {
+      if (navigation) {
+        navigation.navigate("Login");
+      }
+    }, 2000);
+    return;
+  }
+
+  if (!recipe?.id || !commentText.trim()) return;
+
+  setIsSubmittingComment(true);
+  try {
+    if (editingCommentId) {
+      // Update existing comment
+      const success = await updateComment(
+        editingCommentId,
+        commentText.trim()
+      );
+      if (success) {
+        showToastMessage("✅ Đã cập nhật bình luận!", 2000);
+        setEditingCommentId(null);
+        setCommentText("");
+        loadComments(); // Only reload comments, not entire recipe
+      } else {
+        showToastMessage("❌ Không thể cập nhật bình luận!", 3000);
+      }
+    } else {
+      // Add new comment or reply
+      const success = await addComment(
+        recipe.id,
+        commentText.trim(),
+        replyToCommentId || undefined
+      );
+
+      if (success) {
+        showToastMessage(
+          replyToCommentId ? "💬 Đã trả lời!" : "💬 Đã bình luận!",
+          2000
+        );
+        setCommentText("");
+        setReplyToCommentId(null);
+        loadComments(); // Only reload comments
+        
+        // Update comment count locally
+        setRecipe(prev => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            commentCount: (prev.commentCount || 0) + 1
+          };
+        });
+      } else {
+        showToastMessage("❌ Không thể gửi bình luận!", 3000);
+      }
+    }
+  } catch (error) {
+    console.error("Error submitting comment:", error);
+    showToastMessage("❌ Đã xảy ra lỗi!", 3000);
+  } finally {
+    setIsSubmittingComment(false);
+  }
+};
+
+  const handleEditComment = (comment: Comment) => {
+    setEditingCommentId(comment.id);
+    setCommentText(comment.content);
+    setReplyToCommentId(null);
+  };
+
+  const handleDeleteComment = async (commentId: number) => {
+  Alert.alert("Xác nhận", "Bạn có chắc muốn xóa bình luận này?", [
+    { text: "Hủy", style: "cancel" },
+    {
+      text: "Xóa",
+      style: "destructive",
+      onPress: async () => {
+        try {
+          const success = await deleteComment(commentId);
+
+          if (success) {
+            showToastMessage("🗑️ Đã xóa bình luận!", 2000);
+            loadComments(); // Only reload comments
+            
+            // Update comment count locally
+            setRecipe(prev => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                commentCount: Math.max(0, (prev.commentCount || 0) - 1)
+              };
+            });
+          } else {
+            showToastMessage("❌ Không thể xóa bình luận!", 3000);
+          }
+        } catch (error) {
+          console.error("Error deleting comment:", error);
+          showToastMessage("❌ Đã xảy ra lỗi!", 3000);
+        }
+      },
+    },
+  ]);
+};
+
+  const handleReplyComment = (commentId: number, authorName: string) => {
+    setReplyToCommentId(commentId);
+    setCommentText(`@${authorName} `);
+    setEditingCommentId(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCommentId(null);
+    setReplyToCommentId(null);
+    setCommentText("");
+  };
+
   // Helper functions
   const formatDifficulty = (difficulty: string) => {
     switch (difficulty?.toUpperCase()) {
@@ -435,6 +708,217 @@ const showEditButton = route?.params?.showEditButton ?? true; // Default: true
           <Text style={recipeStyles.scrollHint}>
             📸 Lướt để xem {images.length} ảnh hướng dẫn
           </Text>
+        )}
+      </View>
+    );
+  };
+
+  // Render rating stars
+  const renderRatingStars = () => {
+    return (
+      <View style={recipeStyles.ratingContainer}>
+        <View style={recipeStyles.ratingHeader}>
+          <Text style={recipeStyles.ratingTitle}>⭐ Đánh giá</Text>
+          <View style={recipeStyles.ratingStats}>
+            <Text style={recipeStyles.averageRating}>
+              {recipe?.averageRating?.toFixed(1) || "0.0"}
+            </Text>
+            <Text style={recipeStyles.ratingCount}>
+              ({recipe?.ratingCount || 0} đánh giá)
+            </Text>
+          </View>
+        </View>
+
+        <View style={recipeStyles.starContainer}>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <TouchableOpacity
+              key={star}
+              onPress={() => handleRating(star)}
+              disabled={isRating || !isAuthenticated}
+              style={recipeStyles.starButton}
+            >
+              <Ionicons
+                name={star <= currentRating ? "star" : "star-outline"}
+                size={32}
+                color={star <= currentRating ? "#FFD700" : "#BDC3C7"}
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {currentRating > 0 && (
+          <View style={recipeStyles.myRatingContainer}>
+            <Text style={recipeStyles.myRatingText}>
+              Bạn đã đánh giá: {currentRating} ⭐
+            </Text>
+            <TouchableOpacity
+              onPress={handleDeleteRating}
+              style={recipeStyles.deleteRatingButton}
+              disabled={isRating}
+            >
+              <Ionicons name="trash-outline" size={16} color="#E74C3C" />
+              <Text style={recipeStyles.deleteRatingText}>Xóa</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  // Render comments
+  const renderComment = (comment: Comment, isReply = false) => {
+    return (
+      <View
+        key={comment.id}
+        style={[recipeStyles.commentItem, isReply && recipeStyles.commentReply]}
+      >
+        <View style={recipeStyles.commentHeader}>
+          <View style={recipeStyles.commentUserInfo}>
+            <View style={recipeStyles.commentAvatar}>
+              {comment.authorAvatar ? (
+                <Image
+                  source={{ uri: comment.authorAvatar }}
+                  style={recipeStyles.avatarImage}
+                />
+              ) : (
+                <Ionicons name="person-circle" size={40} color="#95A5A6" />
+              )}
+            </View>
+            <View>
+              <Text style={recipeStyles.commentUserName}>
+                {comment.authorName}
+              </Text>
+              <Text style={recipeStyles.commentTime}>
+                {new Date(comment.createdAt).toLocaleDateString("vi-VN", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+                {comment.updatedAt &&
+                  comment.updatedAt !== comment.createdAt && (
+                    <Text style={recipeStyles.editedLabel}>
+                      {" "}
+                      (Đã chỉnh sửa)
+                    </Text>
+                  )}
+              </Text>
+            </View>
+          </View>
+
+          {comment.isOwner && (
+            <View style={recipeStyles.commentActions}>
+              <TouchableOpacity
+                onPress={() => handleEditComment(comment)}
+                style={recipeStyles.commentActionButton}
+              >
+                <Ionicons name="create-outline" size={18} color="#4A90E2" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleDeleteComment(comment.id)}
+                style={recipeStyles.commentActionButton}
+              >
+                <Ionicons name="trash-outline" size={18} color="#E74C3C" />
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+
+        <Text style={recipeStyles.commentContent}>{comment.content}</Text>
+
+        {!isReply && (
+          <TouchableOpacity
+            onPress={() => handleReplyComment(comment.id, comment.authorName)}
+            style={recipeStyles.replyButton}
+          >
+            <Ionicons name="arrow-undo-outline" size={16} color="#4A90E2" />
+            <Text style={recipeStyles.replyButtonText}>Trả lời</Text>
+          </TouchableOpacity>
+        )}
+
+        {comment.replies && comment.replies.length > 0 && (
+          <View style={recipeStyles.repliesContainer}>
+            {comment.replies.map((reply) => renderComment(reply, true))}
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  const renderCommentsSection = () => {
+    return (
+      <View style={recipeStyles.commentsSection}>
+        <View style={recipeStyles.commentsSectionHeader}>
+          <Text style={recipeStyles.sectionTitle}>
+            💬 Bình luận ({recipe?.commentCount || 0})
+          </Text>
+        </View>
+
+        {/* Comment Input */}
+        <View style={recipeStyles.commentInputContainer}>
+          <TextInput
+            style={recipeStyles.commentInput}
+            placeholder={
+              editingCommentId
+                ? "Chỉnh sửa bình luận..."
+                : replyToCommentId
+                ? "Viết câu trả lời..."
+                : "Viết bình luận của bạn..."
+            }
+            value={commentText}
+            onChangeText={setCommentText}
+            multiline
+            maxLength={500}
+            placeholderTextColor="#95A5A6"
+            editable={!isSubmittingComment}
+          />
+          <View style={recipeStyles.commentInputActions}>
+            {(editingCommentId || replyToCommentId) && (
+              <TouchableOpacity
+                onPress={handleCancelEdit}
+                style={recipeStyles.cancelButton}
+              >
+                <Text style={recipeStyles.cancelButtonText}>Hủy</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={[
+                recipeStyles.submitCommentButton,
+                (!commentText.trim() || isSubmittingComment) &&
+                  recipeStyles.submitCommentButtonDisabled,
+              ]}
+              onPress={handleSubmitComment}
+              disabled={!commentText.trim() || isSubmittingComment}
+            >
+              {isSubmittingComment ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Ionicons name="send" size={20} color="#FFFFFF" />
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Comments List */}
+        {isLoadingComments ? (
+          <View style={recipeStyles.loadingCommentsContainer}>
+            <ActivityIndicator size="small" color="#FF6B35" />
+            <Text style={recipeStyles.loadingCommentsText}>
+              Đang tải bình luận...
+            </Text>
+          </View>
+        ) : comments.length > 0 ? (
+          <View style={recipeStyles.commentsList}>
+            {comments.map((comment) => renderComment(comment))}
+          </View>
+        ) : (
+          <View style={recipeStyles.noCommentsContainer}>
+            <Ionicons name="chatbubbles-outline" size={48} color="#BDC3C7" />
+            <Text style={recipeStyles.noCommentsText}>
+              Chưa có bình luận nào. Hãy là người đầu tiên!
+            </Text>
+          </View>
         )}
       </View>
     );
@@ -566,7 +1050,7 @@ const showEditButton = route?.params?.showEditButton ?? true; // Default: true
                     !isAuthenticated && recipeStyles.disabledButtonText,
                   ]}
                 >
-                  ✏️ Chỉnh sửa
+                  ✏️ Tạo bản sao
                 </Text>
               </TouchableOpacity>
             )}
@@ -666,6 +1150,11 @@ const showEditButton = route?.params?.showEditButton ?? true; // Default: true
           </View>
         </View>
 
+        {/* Rating Section */}
+        {renderRatingStars()}
+
+        {/* Comments Section */}
+        {renderCommentsSection()}
         {/* Bottom spacing for fixed buttons */}
         <View style={{ height: 100 }} />
       </ScrollView>
