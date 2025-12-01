@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   RefreshControl,
   Alert,
   Dimensions,
+  FlatList,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
@@ -17,6 +18,7 @@ import { adminStyles } from "./styles";
 import { Ionicons } from "@expo/vector-icons";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
+import { logStreamService, LogMessage } from "../../services/logStreamService";
 
 const { width } = Dimensions.get("window");
 
@@ -29,6 +31,13 @@ const AdminDashboardScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [exportingReport, setExportingReport] = useState(false);
+
+  // Log stream states
+  const [logs, setLogs] = useState<LogMessage[]>([]);
+  const [isLogStreamActive, setIsLogStreamActive] = useState(false);
+  const [logStreamError, setLogStreamError] = useState<string | null>(null);
+  const logFlatListRef = useRef<FlatList>(null);
+  const maxLogs = 100; // Keep last 100 logs
 
   const defaultStats: DashboardStats = {
     totalUsers: 0,
@@ -54,6 +63,132 @@ const AdminDashboardScreen = () => {
   useEffect(() => {
     fetchStats();
   }, []);
+
+  // Log stream lifecycle
+  useEffect(() => {
+    if (isLogStreamActive && tokens?.accessToken) {
+      startLogStream();
+    } else {
+      stopLogStream();
+    }
+
+    return () => {
+      stopLogStream();
+    };
+  }, [isLogStreamActive, tokens?.accessToken]);
+
+  const startLogStream = () => {
+    if (!tokens?.accessToken) return;
+
+    setLogStreamError(null);
+
+    logStreamService.connect(
+      tokens.accessToken,
+      (log: LogMessage) => {
+        setLogs((prevLogs) => {
+          const newLogs = [log, ...prevLogs];
+          // Keep only last maxLogs
+          return newLogs.slice(0, maxLogs);
+        });
+
+        // Auto scroll to top (newest log)
+        setTimeout(() => {
+          logFlatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+        }, 100);
+      },
+      (error) => {
+        console.error("Log stream error:", error);
+        setLogStreamError("Mất kết nối với server. Đang thử kết nối lại...");
+      }
+    );
+  };
+
+  const stopLogStream = () => {
+    logStreamService.disconnect();
+  };
+
+  const toggleLogStream = () => {
+    setIsLogStreamActive(!isLogStreamActive);
+    if (isLogStreamActive) {
+      setLogs([]); // Clear logs when stopping
+      setLogStreamError(null);
+    }
+  };
+
+  const clearLogs = () => {
+    Alert.alert("Xóa logs", "Bạn có chắc muốn xóa tất cả logs?", [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Xóa",
+        style: "destructive",
+        onPress: () => setLogs([]),
+      },
+    ]);
+  };
+
+  const getLogLevelColor = (level: string) => {
+    switch (level) {
+      case "ERROR":
+        return "#E74C3C";
+      case "WARN":
+        return "#FF9800";
+      case "INFO":
+        return "#2196F3";
+      case "DEBUG":
+        return "#9C27B0";
+      case "TRACE":
+        return "#607D8B";
+      default:
+        return "#7F8C8D";
+    }
+  };
+
+  const getLogLevelIcon = (level: string) => {
+    switch (level) {
+      case "ERROR":
+        return "close-circle";
+      case "WARN":
+        return "warning";
+      case "INFO":
+        return "information-circle";
+      case "DEBUG":
+        return "bug";
+      case "TRACE":
+        return "code-slash";
+      default:
+        return "ellipse";
+    }
+  };
+
+
+  const renderLogStreamSection = () => (
+  <View style={adminStyles.modernDashboardSection}>
+    <View style={adminStyles.modernSectionHeader}>
+      <Text style={adminStyles.modernSectionTitle}>
+        <Ionicons name="terminal" size={20} color="#FF6B6B" /> Logs Realtime
+      </Text>
+    </View>
+
+    <TouchableOpacity
+      style={adminStyles.logStreamNavigateCard}
+      onPress={() => navigation.navigate("LogStream" as never)}
+    >
+      <View style={adminStyles.logStreamNavigateIcon}>
+        <Ionicons name="terminal-outline" size={48} color="#4A90E2" />
+      </View>
+      <Text style={adminStyles.logStreamNavigateTitle}>
+        Xem Logs Realtime
+      </Text>
+      <Text style={adminStyles.logStreamNavigateSubtitle}>
+        Theo dõi hoạt động hệ thống trực tiếp
+      </Text>
+      <View style={adminStyles.logStreamNavigateArrow}>
+        <Ionicons name="arrow-forward-circle" size={32} color="#4A90E2" />
+      </View>
+    </TouchableOpacity>
+  </View>
+);
+  
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -388,7 +523,8 @@ const AdminDashboardScreen = () => {
       <View style={adminStyles.modernDashboardSection}>
         <View style={adminStyles.modernSectionHeader}>
           <Text style={adminStyles.modernSectionTitle}>
-            <Ionicons name="information-circle" size={20} color="#FF6B6B" />{"  "}
+            <Ionicons name="information-circle" size={20} color="#FF6B6B" />
+            {"  "}
             Thông tin hệ thống
           </Text>
         </View>
@@ -445,7 +581,7 @@ const AdminDashboardScreen = () => {
       <View style={adminStyles.modernDashboardSection}>
         <View style={adminStyles.modernSectionHeader}>
           <Text style={adminStyles.modernSectionTitle}>
-            <Ionicons name="time" size={20} color="#FF6B6B" />  Hoạt động gần đây
+            <Ionicons name="time" size={20} color="#FF6B6B" /> Hoạt động gần đây
           </Text>
         </View>
 
@@ -506,6 +642,9 @@ const AdminDashboardScreen = () => {
           </View>
         </View>
       </View>
+
+      {/* Log Stream Section */}
+      {renderLogStreamSection()}
 
       <View style={{ height: 30 }} />
     </ScrollView>

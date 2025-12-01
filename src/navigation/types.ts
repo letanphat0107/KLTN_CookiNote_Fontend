@@ -37,6 +37,7 @@ export type RootStackParamList = {
   ManageCategory: undefined;
   CreateRecipe: undefined;
   EditRecipe: { recipeId: string };
+  LogStream: undefined;
 };
 
 export type TabParamList = {

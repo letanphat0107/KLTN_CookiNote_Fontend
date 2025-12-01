@@ -2464,4 +2464,364 @@ modernStepUpdateText: {
   fontWeight: "600",
   color: "#4A90E2",
 },
+
+// Full screen log styles
+logStreamFullScreen: {
+  flex: 1,
+  backgroundColor: "#1E1E1E",
+  paddingTop: 40,
+},
+
+logStreamFullHeader: {
+  flexDirection: "row",
+  alignItems: "center",
+  padding: 16,
+  backgroundColor: "#FFFFFF",
+  borderBottomWidth: 1,
+  borderBottomColor: "#E0E0E0",
+  gap: 12,
+},
+
+logStreamBackButton: {
+  padding: 4,
+},
+
+logStreamFullHeaderContent: {
+  flex: 1,
+},
+
+logStreamFullTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+  color: "#2C3E50",
+  marginBottom: 4,
+},
+
+logStreamFullStatus: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 6,
+},
+
+logStreamFullStatusText: {
+  fontSize: 13,
+  color: "#7F8C8D",
+},
+
+logStreamFullActions: {
+  flexDirection: "row",
+  gap: 8,
+},
+
+clearLogsButtonFull: {
+  padding: 10,
+  borderRadius: 8,
+  backgroundColor: "#FFEBEE",
+},
+
+toggleLogButtonFull: {
+  padding: 10,
+  borderRadius: 8,
+  backgroundColor: "#4A90E2",
+},
+
+toggleLogButtonActiveFull: {
+  backgroundColor: "#E74C3C",
+},
+
+logStreamPlaceholderFull: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  padding: 40,
+},
+
+logStreamPlaceholderTextFull: {
+  fontSize: 16,
+  color: "#95A5A6",
+  marginTop: 16,
+  textAlign: "center",
+},
+
+logStreamEmptyFull: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  gap: 16,
+},
+
+logStreamEmptyTextFull: {
+  fontSize: 15,
+  color: "#95A5A6",
+},
+
+logListFull: {
+  flex: 1,
+  backgroundColor: "#1E1E1E",
+},
+
+logListContentFull: {
+  padding: 16,
+  gap: 12,
+},
+
+logStreamFooter: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: 12,
+  backgroundColor: "#2C2C2C",
+  borderTopWidth: 1,
+  borderTopColor: "#3C3C3C",
+},
+
+logStreamFooterText: {
+  fontSize: 12,
+  color: "#95A5A6",
+},
+
+logStreamFooterTextGreen: {
+  fontSize: 12,
+  color: "#4CAF50",
+  fontWeight: "bold",
+},
+
+// Navigate card for dashboard
+logStreamNavigateCard: {
+  backgroundColor: "#F8F9FA",
+  borderRadius: 12,
+  padding: 32,
+  alignItems: "center",
+  borderWidth: 2,
+  borderColor: "#E3F2FD",
+  borderStyle: "dashed",
+},
+
+logStreamNavigateIcon: {
+  marginBottom: 16,
+},
+
+logStreamNavigateTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+  color: "#2C3E50",
+  marginBottom: 8,
+},
+
+logStreamNavigateSubtitle: {
+  fontSize: 14,
+  color: "#7F8C8D",
+  marginBottom: 16,
+  textAlign: "center",
+},
+
+logStreamNavigateArrow: {
+  marginTop: 8,
+},
+
+// Log Stream Styles
+logStreamContainer: {
+  backgroundColor: "#1E1E1E",
+  borderRadius: 12,
+  overflow: "hidden",
+  minHeight: 300,
+  maxHeight: 500,
+},
+
+logStreamPlaceholder: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  paddingVertical: 80,
+},
+
+logStreamPlaceholderText: {
+  fontSize: 14,
+  color: "#95A5A6",
+  marginTop: 12,
+  textAlign: "center",
+},
+
+logStreamError: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 8,
+  backgroundColor: "#FFEBEE",
+  padding: 12,
+  borderBottomWidth: 1,
+  borderBottomColor: "#FFCDD2",
+},
+
+logStreamErrorText: {
+  fontSize: 13,
+  color: "#E74C3C",
+  flex: 1,
+},
+
+logStreamHeader: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: 12,
+  backgroundColor: "#2C2C2C",
+  borderBottomWidth: 1,
+  borderBottomColor: "#3C3C3C",
+},
+
+logStreamStatus: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 8,
+},
+
+logStreamIndicator: {
+  width: 8,
+  height: 8,
+  borderRadius: 4,
+  backgroundColor: "#4CAF50",
+},
+
+logStreamIndicatorError: {
+  backgroundColor: "#E74C3C",
+},
+
+logStreamStatusText: {
+  fontSize: 13,
+  color: "#FFFFFF",
+  fontWeight: "600",
+},
+
+logCount: {
+  fontSize: 12,
+  color: "#95A5A6",
+},
+
+logStreamEmpty: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  paddingVertical: 60,
+  gap: 12,
+},
+
+logStreamEmptyText: {
+  fontSize: 13,
+  color: "#95A5A6",
+},
+
+logList: {
+  flex: 1,
+  backgroundColor: "#1E1E1E",
+},
+
+logListContent: {
+  padding: 12,
+  gap: 8,
+},
+
+logItem: {
+  backgroundColor: "#2C2C2C",
+  borderRadius: 8,
+  padding: 12,
+  borderLeftWidth: 3,
+  borderLeftColor: "#4A90E2",
+},
+
+logHeader: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 6,
+},
+
+logLevelContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 6,
+},
+
+logLevel: {
+  fontSize: 12,
+  fontWeight: "bold",
+  letterSpacing: 0.5,
+},
+
+logTimestamp: {
+  fontSize: 11,
+  color: "#95A5A6",
+  fontFamily: "monospace",
+},
+
+logMessage: {
+  fontSize: 12,
+  color: "#ECEFF1",
+  lineHeight: 18,
+  fontFamily: "monospace",
+},
+
+toggleLogButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 6,
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 6,
+  backgroundColor: "#4A90E2",
+},
+
+toggleLogButtonActive: {
+  backgroundColor: "#E74C3C",
+},
+
+toggleLogButtonText: {
+  fontSize: 13,
+  color: "#FFFFFF",
+  fontWeight: "600",
+},
+
+clearLogsButton: {
+  paddingHorizontal: 8,
+  paddingVertical: 6,
+  borderRadius: 6,
+  backgroundColor: "#FFEBEE",
+},
+logStreamIndicatorInactive: {
+  backgroundColor: "#95A5A6",
+},
+
+logStreamFooterTextOrange: {
+  fontSize: 12,
+  color: "#FF9800",
+  fontWeight: "bold",
+},
+logExpandButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  alignSelf: "flex-start",
+  gap: 4,
+  marginTop: 8,
+  paddingVertical: 4,
+  paddingHorizontal: 8,
+  borderRadius: 4,
+  backgroundColor: "rgba(74, 144, 226, 0.1)",
+},
+
+logExpandButtonText: {
+  fontSize: 12,
+  color: "#4A90E2",
+  fontWeight: "600",
+},
+
+logMetadata: {
+  marginTop: 8,
+  paddingTop: 8,
+  borderTopWidth: 1,
+  borderTopColor: "#3C3C3C",
+},
+
+logMetadataText: {
+  fontSize: 11,
+  color: "#95A5A6",
+  fontStyle: "italic",
+},
 });

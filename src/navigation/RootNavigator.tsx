@@ -30,6 +30,7 @@ import CreateRecipeScreen from "../screens/Admin/CreateRecipeScreen";
 import EditRecipeScreen from "../screens/Admin/EditRecipeScreen";
 import DailySuggestionsScreen from "../screens/Home/DailySuggestionsScreen";
 import QRScannerScreen from "../screens/QRScanner/QRScannerScreen";
+import LogStreamScreen from "../screens/Admin/LogStreamScreen";
 
 import { RootStackParamList } from "./types";
 
@@ -158,6 +159,13 @@ const RootNavigator = () => {
                   title: "Chỉnh sửa công thức"
                 }}
               />
+              <Stack.Screen
+  name="LogStream"
+  component={LogStreamScreen}
+  options={{
+    headerShown: false,
+  }}
+/>
             </>
           )}
           {/* Main App with Authenticated Tab Navigator */}
