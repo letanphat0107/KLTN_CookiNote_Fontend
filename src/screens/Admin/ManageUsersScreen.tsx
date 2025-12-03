@@ -17,7 +17,10 @@ import adminService, { AdminUser } from "../../services/adminService";
 import { adminStyles } from "./styles";
 import { Ionicons } from "@expo/vector-icons";
 
+import { useNavigation } from "@react-navigation/native";
+
 const ManageUsersScreen = () => {
+  const navigation = useNavigation<any>();
   const { tokens } = useAppSelector((state) => state.auth);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<AdminUser[]>([]);
@@ -156,6 +159,41 @@ const ManageUsersScreen = () => {
         },
       ]
     );
+  };
+
+  const handleViewRecipeDetail = (recipeId: number) => {
+    setShowDetailModal(false);
+    navigation.navigate("RecipeDetail", { recipeId });
+  };
+
+  const handleEditRecipe = (recipeId: number) => {
+    setShowDetailModal(false);
+    navigation.navigate("EditRecipe", { recipeId });
+  };
+
+  const handleDeleteRecipe = async (recipeId: number, title: string) => {
+    if (!tokens?.accessToken) return;
+
+    Alert.alert("Xác nhận xóa", `Bạn có chắc muốn xóa "${title}"?`, [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Xóa",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await adminService.deleteRecipe(recipeId);
+            Alert.alert("Thành công", "Đã xóa món ăn");
+            
+            // Refresh user's recipes
+            if (selectedUser) {
+              await fetchUserRecipes(selectedUser.userId);
+            }
+          } catch (error: any) {
+            Alert.alert("Lỗi", error.message || "Không thể xóa món ăn");
+          }
+        },
+      },
+    ]);
   };
 
   const getRoleColor = (role: string) => {
@@ -300,14 +338,15 @@ const ManageUsersScreen = () => {
   );
 
   const renderRecipeItem = ({ item }: { item: any }) => (
-    <View style={adminStyles.modernUserRecipeCard}>
-      <Image
-        source={{
-          uri: item.imageUrl || "https://via.placeholder.com/120x90",
-        }}
-        style={adminStyles.modernUserRecipeImage}
-      />
+  <View style={adminStyles.modernUserRecipeCardUser}>
+    <Image
+      source={{
+        uri: item.imageUrl || "https://thecrites.com/sites/all/modules/cookbook/theme/images/default-recipe-big.png",
+      }}
+      style={adminStyles.modernUserRecipeImage}
+    />
 
+    <View style={adminStyles.modernUserRecipeContentWrapper}>
       <View style={adminStyles.modernUserRecipeInfo}>
         <Text style={adminStyles.modernUserRecipeTitle} numberOfLines={2}>
           {item.title}
@@ -337,8 +376,33 @@ const ManageUsersScreen = () => {
           </Text>
         </View>
       </View>
+
+      {/* Recipe Actions - Now below recipe info */}
+      <View style={adminStyles.modernRecipeActionsRow}>
+        <TouchableOpacity
+          style={[adminStyles.modernActionButtonUser, { backgroundColor: '#E3F2FD' }]}
+          onPress={() => handleViewRecipeDetail(item.id)}
+        >
+          <Ionicons name="eye-outline" size={18} color="#4A90E2" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[adminStyles.modernActionButtonUser, { backgroundColor: '#E8F5E9' }]}
+          onPress={() => handleEditRecipe(item.id)}
+        >
+          <Ionicons name="create-outline" size={18} color="#4CAF50" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[adminStyles.modernActionButtonUser, { backgroundColor: '#FFEBEE' }]}
+          onPress={() => handleDeleteRecipe(item.id, item.title)}
+        >
+          <Ionicons name="trash-outline" size={18} color="#E74C3C" />
+        </TouchableOpacity>
+      </View>
     </View>
-  );
+  </View>
+);
 
   const renderDetailModal = () => (
     <Modal visible={showDetailModal} transparent animationType="slide">

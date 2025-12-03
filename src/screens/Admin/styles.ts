@@ -2116,11 +2116,6 @@ modernUserRecipeImage: {
   height: 90,
 },
 
-modernUserRecipeInfo: {
-  flex: 1,
-  padding: 12,
-  justifyContent: "space-between",
-},
 
 modernUserRecipeTitle: {
   fontSize: 15,
@@ -2823,5 +2818,66 @@ logMetadataText: {
   fontSize: 11,
   color: "#95A5A6",
   fontStyle: "italic",
+},
+
+modernRecipeActionsUser: {
+  position: 'absolute',
+  right: 8,
+  top: 24,
+  flexDirection: 'row',
+  gap: 8,
+  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  borderRadius: 20,
+  padding: 4,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3,
+},
+
+
+// Update existing styles
+modernUserRecipeCardUser: {
+  backgroundColor: '#FFFFFF',
+  borderRadius: 12,
+  marginBottom: 12,
+  padding: 12,
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 12,
+  borderWidth: 1,
+  borderColor: '#E0E0E0',
+},
+
+modernUserRecipeContentWrapper: {
+  flex: 1,
+  justifyContent: 'space-between',
+},
+
+modernUserRecipeInfo: {
+  flex: 1,
+  marginBottom: 8,
+},
+
+modernRecipeActionsRow: {
+  flexDirection: 'row',
+  gap: 8,
+  paddingTop: 8,
+  borderTopWidth: 1,
+  borderTopColor: '#F0F0F0',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+},
+
+modernActionButtonUser: {
+  width: 36,
+  height: 36,
+  borderRadius: 18,
+  justifyContent: 'center',
+  alignItems: 'center',
+  borderWidth: 1,
+  borderColor: '#E0E0E0',
+  marginLeft: 10,
 },
 });
