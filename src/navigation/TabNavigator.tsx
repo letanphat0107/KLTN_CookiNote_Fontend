@@ -10,6 +10,7 @@ import HomeScreen from "../screens/Home/HomeScreen";
 import FavoriteScreen from "../screens/Favorite/FavoriteScreen";
 import UnauthenticatedFavorite from "../screens/Home/UnauthenticatedFavorite";
 import CulinaryStoryNavigator from "./CulinaryStoryNavigator";
+import PersonalizedSuggestionScreen from "../screens/Suggestion/PersonalizedSuggestionScreen";
 import { TabParamList } from "./types";
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -75,6 +76,22 @@ const TabNavigator = () => {
           tabBarIcon: ({ color, focused, size }) => (
             <Ionicons
               name={focused ? "book" : "book-outline"}
+              size={focused ? 26 : 24}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      {/* Personalized Suggestion Tab */}
+      <Tab.Screen
+        name="PersonalizedSuggestion"
+        component={PersonalizedSuggestionScreen}
+        options={{
+          tabBarLabel: "Gợi Ý",
+          tabBarIcon: ({ color, focused, size }) => (
+            <Ionicons
+              name={focused ? "nutrition" : "nutrition-outline"}
               size={focused ? 26 : 24}
               color={color}
             />

@@ -44,6 +44,7 @@ export type TabParamList = {
   Home: undefined;
   CulinaryStory: undefined;
   CulinaryStoryDetail: { storyId: string };
+  PersonalizedSuggestion: undefined;
   Favorite: undefined;
   UnauthFavorite: undefined;
 };
