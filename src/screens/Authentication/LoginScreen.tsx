@@ -46,8 +46,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         password: password,
       };
 
-      console.log("Login data:", loginData);
-
       const response = await fetch(
         API_CONFIG.BASE_URL + API_CONFIG.ENDPOINTS.AUTH.LOGIN,
         {
