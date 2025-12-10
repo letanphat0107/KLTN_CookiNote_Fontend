@@ -387,6 +387,86 @@ searchContainer: {
     fontSize: 16,
     fontWeight: "bold",
   },
+  editButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    backgroundColor: "#FFF5F0",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#FF6B35",
+  },
+
+  editButtonText: {
+    color: "#FF6B35",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+
+  deleteButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    backgroundColor: "#FFE5E5",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#E74C3C",
+  },
+
+  deleteButtonText: {
+    color: "#E74C3C",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+
+  // Restore/Permanent Delete buttons for Deleted Recipes
+  restoreButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    backgroundColor: "#E8F8F5",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#27AE60",
+  },
+
+  restoreButtonText: {
+    color: "#27AE60",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+
+  permanentDeleteButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    backgroundColor: "#FADBD8",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#C0392B",
+  },
+
+  permanentDeleteButtonText: {
+    color: "#C0392B",
+    fontSize: 13,
+    fontWeight: "600",
+  },
 });
 
 export default favoriteStyles;

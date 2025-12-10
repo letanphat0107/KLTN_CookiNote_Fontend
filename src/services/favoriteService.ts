@@ -473,4 +473,50 @@ export const getDeletedRecipes = async (
   }
 };
 
+// src/services/favoriteService.ts - Add these functions
+
+export const restoreRecipe = async (recipeId: number): Promise<boolean> => {
+  try {
+    const response = await fetchWithAuth(
+      `${API_CONFIG.BASE_URL}/cookinote/recipes/${recipeId}/restore`,
+      {
+        method: "PUT",
+      }
+    );
+
+    if (response.ok) {
+      return true;
+    }
+
+    const error = await response.json();
+    throw new Error(error.message || "Không thể khôi phục công thức");
+  } catch (error) {
+    console.error("Error restoring recipe:", error);
+    throw error;
+  }
+};
+
+export const permanentDeleteRecipe = async (
+  recipeId: number
+): Promise<boolean> => {
+  try {
+    const response = await fetchWithAuth(
+      `${API_CONFIG.BASE_URL}/cookinote/recipes/${recipeId}/permanent`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (response.ok) {
+      return true;
+    }
+
+    const error = await response.json();
+    throw new Error(error.message || "Không thể xóa vĩnh viễn công thức");
+  } catch (error) {
+    console.error("Error permanently deleting recipe:", error);
+    throw error;
+  }
+};
+
 export type { CookedHistoryItem, PaginatedCookedHistoryResponse };

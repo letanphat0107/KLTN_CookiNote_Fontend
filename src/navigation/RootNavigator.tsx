@@ -154,23 +154,42 @@ const RootNavigator = () => {
               <Stack.Screen
                 name="EditRecipe"
                 component={EditRecipeScreen}
-                options={{ 
+                options={{
                   headerShown: true,
-                  title: "Chỉnh sửa công thức"
+                  title: "Chỉnh sửa công thức",
                 }}
               />
               <Stack.Screen
-  name="LogStream"
-  component={LogStreamScreen}
-  options={{
-    headerShown: false,
-  }}
-/>
+                name="LogStream"
+                component={LogStreamScreen}
+                options={{
+                  headerShown: false,
+                }}
+              />
             </>
           )}
           {/* Main App with Authenticated Tab Navigator */}
           <Stack.Screen name="MainTabs" component={TabNavigator} />
-          <Stack.Screen name="DailySuggestions" component={DailySuggestionsScreen} />
+          <Stack.Screen
+                name="CreateRecipe"
+                component={CreateRecipeScreen}
+                options={{
+                  headerShown: true,
+                  title: "Tạo công thức mới",
+                }}
+              />
+              <Stack.Screen
+                name="EditRecipe"
+                component={EditRecipeScreen}
+                options={{
+                  headerShown: true,
+                  title: "Chỉnh sửa công thức",
+                }}
+              />
+          <Stack.Screen
+            name="DailySuggestions"
+            component={DailySuggestionsScreen}
+          />
 
           {/* Additional authenticated screens */}
           <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
@@ -179,16 +198,13 @@ const RootNavigator = () => {
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="NewPassword" component={NewPasswordScreen} />
           <Stack.Screen name="SharedAccount" component={SharedAccountScreen} />
-          
+
           <Stack.Screen
             name="OTPVerification"
             component={OTPVerificationScreen}
           />
 
-<Stack.Screen 
-  name="QRScanner" 
-  component={QRScannerScreen}
-/>
+          <Stack.Screen name="QRScanner" component={QRScannerScreen} />
 
           {/* Authentication screens (for logout/re-login) */}
           <Stack.Screen name="Login" component={LoginScreen} />
@@ -204,10 +220,10 @@ const RootNavigator = () => {
           {/* Authentication */}
           <Stack.Screen name="MainTabs" component={TabNavigator} />
           <Stack.Screen
-                name="AdminDashboard"
-                component={AdminTabNavigator}
-                options={{ headerShown: false }}
-              />
+            name="AdminDashboard"
+            component={AdminTabNavigator}
+            options={{ headerShown: false }}
+          />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen

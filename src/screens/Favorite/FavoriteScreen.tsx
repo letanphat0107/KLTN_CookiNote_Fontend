@@ -10,6 +10,7 @@ import {
   RefreshControl,
   Alert,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { favoriteStyles } from "./styles";
 import { useAppSelector } from "../../store/hooks";
 import { Recipe } from "../../types/recipe";
@@ -21,9 +22,12 @@ import {
   removeFromFavorites,
   getCookedHistory,
   CookedHistoryItem,
+  restoreRecipe,
+  permanentDeleteRecipe,
 } from "../../services/favoriteService";
 import { useFocusEffect } from "@react-navigation/native";
 import { getSharedRecipe } from "../../services/shareService";
+import adminService from "../../services/adminService";
 
 interface FavoriteScreenProps {
   navigation?: any;
@@ -40,7 +44,7 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
   // Data states
   const [favoriteRecipes, setFavoriteRecipes] = useState<Recipe[]>([]);
   const [myRecipes, setMyRecipes] = useState<Recipe[]>([]);
-  const [cookedHistory, setCookedHistory] = useState<CookedHistoryItem[]>([]); // FIXED
+  const [cookedHistory, setCookedHistory] = useState<CookedHistoryItem[]>([]);
   const [deletedRecipes, setDeletedRecipes] = useState<Recipe[]>([]);
 
   // Loading states
@@ -160,28 +164,25 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
     }
   };
 
-  // FIXED: loadCookedHistory
   const loadCookedHistory = async (isRefresh = false) => {
     try {
       const result = await getCookedHistory(0, 20);
 
-      // Set the full cooked history items array
       const items = result.items || [];
       setCookedHistory(items);
       setHasMoreCooked(result.hasNext || false);
 
-      // Update favorite statuses for cooked recipes
       const newFavoriteStatuses = { ...favoriteStatuses };
       if (items.length > 0) {
         items.forEach((item) => {
-          if (item?.recipeId && !(item.recipeId in newFavoriteStatuses)) {
+          if (!(item.recipeId in newFavoriteStatuses)) {
             newFavoriteStatuses[item.recipeId] = false;
           }
         });
         setFavoriteStatuses(newFavoriteStatuses);
       }
     } catch (error) {
-      console.error("Error loading ry:", error);
+      console.error("Error loading cooked history:", error);
       setCookedHistory([]);
       setHasMoreCooked(false);
     }
@@ -233,8 +234,6 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
               prev.filter((recipe) => recipe.id !== recipeId)
             );
           }
-
-          Alert.alert("Thành công", "Đã xóa khỏi danh sách yêu thích");
         }
       } else {
         // Add to favorites
@@ -245,13 +244,6 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
             ...prev,
             [recipeId]: true,
           }));
-
-          Alert.alert("Thành công", "Đã thêm vào danh sách yêu thích");
-
-          // Reload favorites if we're on favorites tab to show the new item
-          if (activeTab === "favorites") {
-            await loadFavoriteRecipes();
-          }
         }
       }
 
@@ -266,18 +258,112 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
     }
   };
 
-  const handleViewRecipe = (recipeId: number) => {
+  const handleViewRecipe = (
+    recipeId: number,
+    showEdit = false,
+    showCart = false
+  ) => {
     if (navigation) {
       navigation.navigate("RecipeDetail", {
         recipeId: recipeId.toString(),
-        showEditButton: false,
-        showAddToCartButton: false,
+        showEditButton: showEdit,
+        showAddToCartButton: showCart,
       });
     }
   };
 
   const handleCardPress = (recipeId: number) => {
-    handleViewRecipe(recipeId);
+    // Determine button visibility based on active tab
+    const showEdit = activeTab !== "myRecipes";
+    const showCart = activeTab !== "myRecipes";
+    handleViewRecipe(recipeId, showEdit, showCart);
+  };
+
+  const handleEditRecipe = (recipeId: number) => {
+    navigation?.navigate("EditRecipe", { recipeId });
+  };
+
+  const handleDeleteRecipe = async (recipeId: number) => {
+    Alert.alert(
+      "Xác nhận xóa",
+      "Bạn có chắc muốn xóa công thức này? Công thức sẽ được chuyển vào thùng rác.",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: async () => {
+            setLoadingActions((prev) => ({ ...prev, [recipeId]: true }));
+            try {
+              await adminService.deleteRecipe(recipeId);
+              Alert.alert("Thành công", "Đã xóa công thức");
+              loadData(true);
+            } catch (error) {
+              console.error("Error deleting recipe:", error);
+              Alert.alert("Lỗi", "Không thể xóa công thức. Vui lòng thử lại.");
+            } finally {
+              setLoadingActions((prev) => ({ ...prev, [recipeId]: false }));
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleRestoreRecipe = async (recipeId: number) => {
+    Alert.alert("Xác nhận khôi phục", "Bạn có muốn khôi phục công thức này?", [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Khôi phục",
+        onPress: async () => {
+          setLoadingActions((prev) => ({ ...prev, [recipeId]: true }));
+          try {
+            await restoreRecipe(recipeId);
+            Alert.alert("Thành công", "Đã khôi phục công thức");
+            loadData(true);
+          } catch (error: any) {
+            console.error("Error restoring recipe:", error);
+            Alert.alert(
+              "Lỗi",
+              error.message ||
+                "Không thể khôi phục công thức. Vui lòng thử lại."
+            );
+          } finally {
+            setLoadingActions((prev) => ({ ...prev, [recipeId]: false }));
+          }
+        },
+      },
+    ]);
+  };
+
+  const handlePermanentDelete = async (recipeId: number) => {
+    Alert.alert(
+      "Xác nhận xóa vĩnh viễn",
+      "⚠️ Hành động này không thể hoàn tác! Công thức sẽ bị xóa vĩnh viễn khỏi hệ thống.",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa vĩnh viễn",
+          style: "destructive",
+          onPress: async () => {
+            setLoadingActions((prev) => ({ ...prev, [recipeId]: true }));
+            try {
+              await permanentDeleteRecipe(recipeId);
+              Alert.alert("Thành công", "Đã xóa vĩnh viễn công thức");
+              loadData(true);
+            } catch (error: any) {
+              console.error("Error permanently deleting recipe:", error);
+              Alert.alert(
+                "Lỗi",
+                error.message || "Không thể xóa công thức. Vui lòng thử lại."
+              );
+            } finally {
+              setLoadingActions((prev) => ({ ...prev, [recipeId]: false }));
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleShareCodeSubmit = async () => {
@@ -293,10 +379,7 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
       const recipe = await getSharedRecipe(shareCode.trim());
 
       if (recipe) {
-        // Clear input
         setShareCode("");
-
-        // Navigate to RecipeDetail with the shared recipe
         navigation?.navigate("RecipeDetail", {
           recipeId: recipe.id,
           fromShare: true,
@@ -315,7 +398,6 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
     }
   };
 
-  // FIXED: getFilteredRecipes
   const getFilteredRecipes = (): (Recipe | CookedHistoryItem)[] => {
     let items: (Recipe | CookedHistoryItem)[] = [];
 
@@ -339,13 +421,11 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
     }
 
     return items.filter((item) => {
-      // For CookedHistoryItem
       if ("recipeTitle" in item) {
         return item.recipeTitle
           .toLowerCase()
           .includes(searchQuery.toLowerCase());
       }
-      // For Recipe
       if ("title" in item) {
         return item.title.toLowerCase().includes(searchQuery.toLowerCase());
       }
@@ -409,10 +489,10 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
           <TouchableOpacity
             style={favoriteStyles.exploreButton}
             onPress={() => {
-              if (activeTab === "favorites" || activeTab === "cooked") {
-                navigation?.navigate("Home");
-              } else if (activeTab === "myRecipes") {
+              if (activeTab === "myRecipes") {
                 navigation?.navigate("CreateRecipe");
+              } else {
+                navigation?.navigate("Home");
               }
             }}
           >
@@ -425,7 +505,6 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
     );
   };
 
-  // FIXED: renderRecipeCard to handle new CookedHistoryItem structure
   const renderRecipeCard = (item: Recipe | CookedHistoryItem) => {
     let recipeId: number;
     let recipeTitle: string;
@@ -436,7 +515,6 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
     let description: string | undefined;
     let historyItem: CookedHistoryItem | undefined;
 
-    // Check if it's CookedHistoryItem
     if ("recipeId" in item && "recipeTitle" in item) {
       historyItem = item as CookedHistoryItem;
       recipeId = historyItem.recipeId;
@@ -445,9 +523,8 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
       difficulty = historyItem.difficulty;
       totalTime = (historyItem.prepareTime || 0) + (historyItem.cookTime || 0);
       viewCount = historyItem.view;
-      description = undefined; // API doesn't return description for cooked history
+      description = undefined;
     } else {
-      // It's a Recipe
       const recipe = item as Recipe;
       recipeId = recipe.id;
       recipeTitle = recipe.title;
@@ -468,7 +545,6 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
         onPress={() => handleCardPress(recipeId)}
         activeOpacity={0.7}
       >
-        {/* Recipe Image */}
         <Image
           source={{
             uri:
@@ -478,7 +554,6 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
           style={favoriteStyles.recipeImage}
         />
 
-        {/* Cooked Badge */}
         {historyItem?.cookedAt && (
           <View style={favoriteStyles.cookedBadge}>
             <Text style={favoriteStyles.cookedBadgeText}>
@@ -488,10 +563,8 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
           </View>
         )}
 
-        {/* Recipe Info */}
         <Text style={favoriteStyles.recipeName}>{recipeTitle}</Text>
 
-        {/* Rating if cooked */}
         {historyItem?.rating && (
           <View style={favoriteStyles.ratingContainer}>
             <Text style={favoriteStyles.ratingText}>
@@ -500,14 +573,12 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
           </View>
         )}
 
-        {/* Note if cooked */}
         {historyItem?.note && (
           <Text style={favoriteStyles.cookedNote} numberOfLines={2}>
             💭 {historyItem.note}
           </Text>
         )}
 
-        {/* Recipe Details */}
         <View style={favoriteStyles.recipeInfo}>
           <View style={favoriteStyles.infoItem}>
             <Text style={favoriteStyles.infoText}>⏱️ {totalTime} phút</Text>
@@ -526,43 +597,126 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
           </Text>
         )}
 
-        {/* Actions */}
+        {/* Actions based on tab */}
         <View style={favoriteStyles.cardActions}>
-          <TouchableOpacity
-            style={favoriteStyles.viewButton}
-            onPress={(e) => {
-              e.stopPropagation();
-              handleViewRecipe(recipeId);
-            }}
-          >
-            <Text style={favoriteStyles.viewButtonText}>Xem công thức</Text>
-          </TouchableOpacity>
+          {activeTab === "myRecipes" ? (
+            <>
+              {/* Edit and Delete for My Recipes */}
+              <TouchableOpacity
+                style={favoriteStyles.editButton}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleEditRecipe(recipeId);
+                }}
+                disabled={isActionLoading}
+              >
+                <Ionicons name="create-outline" size={18} color="#FF6B35" />
+                <Text style={favoriteStyles.editButtonText}>Sửa</Text>
+              </TouchableOpacity>
 
-          {activeTab !== "deleted" && (
-            <TouchableOpacity
-              style={[
-                favoriteStyles.favoriteActionButton,
-                isFavorited && favoriteStyles.removeButton,
-              ]}
-              onPress={(e) => {
-                e.stopPropagation();
-                handleToggleFavorite(recipeId);
-              }}
-              disabled={isActionLoading}
-            >
-              {isActionLoading ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <Text
-                  style={[
-                    favoriteStyles.favoriteActionButtonText,
-                    isFavorited && favoriteStyles.removeButtonText,
-                  ]}
-                >
-                  {isFavorited ? "Bỏ yêu thích" : "Yêu thích"}
-                </Text>
-              )}
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={favoriteStyles.deleteButton}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleDeleteRecipe(recipeId);
+                }}
+                disabled={isActionLoading}
+              >
+                {isActionLoading ? (
+                  <ActivityIndicator size="small" color="#E74C3C" />
+                ) : (
+                  <>
+                    <Ionicons name="trash-outline" size={18} color="#E74C3C" />
+                    <Text style={favoriteStyles.deleteButtonText}>Xóa</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </>
+          ) : activeTab === "deleted" ? (
+            <>
+              {/* Restore and Permanent Delete for Deleted Recipes */}
+              <TouchableOpacity
+                style={favoriteStyles.restoreButton}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleRestoreRecipe(recipeId);
+                }}
+                disabled={isActionLoading}
+              >
+                {isActionLoading ? (
+                  <ActivityIndicator size="small" color="#27AE60" />
+                ) : (
+                  <>
+                    <Ionicons name="reload-outline" size={18} color="#27AE60" />
+                    <Text style={favoriteStyles.restoreButtonText}>
+                      Khôi phục
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={favoriteStyles.permanentDeleteButton}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handlePermanentDelete(recipeId);
+                }}
+                disabled={isActionLoading}
+              >
+                {isActionLoading ? (
+                  <ActivityIndicator size="small" color="#C0392B" />
+                ) : (
+                  <>
+                    <Ionicons
+                      name="trash-bin-outline"
+                      size={18}
+                      color="#C0392B"
+                    />
+                    <Text style={favoriteStyles.permanentDeleteButtonText}>
+                      Xóa vĩnh viễn
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              {/* View and Favorite for other tabs */}
+              <TouchableOpacity
+                style={favoriteStyles.viewButton}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleViewRecipe(recipeId, true, true);
+                }}
+              >
+                <Text style={favoriteStyles.viewButtonText}>Xem công thức</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  favoriteStyles.favoriteActionButton,
+                  isFavorited && favoriteStyles.removeButton,
+                ]}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleToggleFavorite(recipeId);
+                }}
+                disabled={isActionLoading}
+              >
+                {isActionLoading ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Text
+                    style={[
+                      favoriteStyles.favoriteActionButtonText,
+                      isFavorited && favoriteStyles.removeButtonText,
+                    ]}
+                  >
+                    {isFavorited ? "Bỏ yêu thích" : "Yêu thích"}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </>
           )}
         </View>
       </TouchableOpacity>
@@ -573,10 +727,10 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
     return (
       <View style={favoriteStyles.container}>
         <View style={favoriteStyles.emptyContainer}>
-          <Text style={favoriteStyles.emptyIcon}>🔐</Text>
+          <Text style={favoriteStyles.emptyIcon}>🔒</Text>
           <Text style={favoriteStyles.emptyTitle}>Vui lòng đăng nhập</Text>
           <Text style={favoriteStyles.emptyDescription}>
-            Đăng nhập để xem danh sách yêu thích và công thức của bạn
+            Đăng nhập để xem công thức của bạn
           </Text>
           <TouchableOpacity
             style={favoriteStyles.exploreButton}
@@ -595,7 +749,6 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
     <View style={favoriteStyles.container}>
       <Text style={favoriteStyles.title}>Công Thức Của Tôi</Text>
 
-      {/* Search Input */}
       <View style={favoriteStyles.searchContainer}>
         <TextInput
           style={favoriteStyles.searchInput}
@@ -606,21 +759,15 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
         />
       </View>
 
-      {/* Share Code Input with Button */}
       <View style={favoriteStyles.shareCodeContainer}>
         <View style={favoriteStyles.shareCodeRow}>
           <TextInput
             style={favoriteStyles.shareCodeInput}
-            placeholder="Nhập mã chia sẻ"
+            placeholder="Nhập mã chia sẻ..."
             value={shareCode}
             onChangeText={setShareCode}
             placeholderTextColor="#999"
-            autoCapitalize="none"
-            autoCorrect={false}
-            maxLength={8}
-            returnKeyType="done"
-            onSubmitEditing={handleShareCodeSubmit}
-            editable={!isLoadingShare}
+            autoCapitalize="characters"
           />
           <TouchableOpacity
             style={[
@@ -640,7 +787,6 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Tab Navigation */}
       <View style={favoriteStyles.tabContainer}>
         {tabs.map((tab) => (
           <TouchableOpacity
@@ -664,7 +810,6 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
         ))}
       </View>
 
-      {/* Content */}
       {isLoading ? (
         <View style={favoriteStyles.loadingContainer}>
           <ActivityIndicator size="large" color="#FF6B35" />
@@ -685,12 +830,12 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
             />
           }
         >
-          {/* FIXED: Map uniformly for all tabs */}
           {filteredRecipes.map((item, index) => (
-            <View key={`recipe-${index}`}>{renderRecipeCard(item)}</View>
+            <React.Fragment key={index}>
+              {renderRecipeCard(item)}
+            </React.Fragment>
           ))}
 
-          {/* Load more indicator */}
           {((activeTab === "favorites" && hasMoreFavorites) ||
             (activeTab === "myRecipes" && hasMoreMyRecipes) ||
             (activeTab === "cooked" && hasMoreCooked) ||
