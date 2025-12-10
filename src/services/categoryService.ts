@@ -21,7 +21,7 @@ export interface MoveRecipesRequest {
   recipeIds: number[];
 }
 
-// Get all categories (public access)
+// Get all categories - PUBLIC, keep fetch
 export const getCategories = async (): Promise<Category[]> => {
   try {
     console.log("Fetching categories...");
@@ -48,7 +48,7 @@ export const getCategories = async (): Promise<Category[]> => {
   }
 };
 
-// Search categories by name
+// Search categories - PUBLIC, keep fetch
 export const searchCategories = async (
   categoryName: string
 ): Promise<Category[]> => {
@@ -83,7 +83,7 @@ export const searchCategories = async (
   }
 };
 
-// Create category with image (ADMIN only)
+// Create category - REQUIRES AUTH (already using fetchWithAuth)
 export const createCategory = async (
   name: string,
   description: string,
@@ -149,7 +149,7 @@ export const createCategory = async (
   }
 };
 
-// Update category (ADMIN only)
+// Update category - REQUIRES AUTH (already using fetchWithAuth)
 export const updateCategory = async (
   categoryId: number,
   name?: string,
@@ -221,7 +221,7 @@ export const updateCategory = async (
   }
 };
 
-// Move recipes between categories (ADMIN only)
+// Move recipes - REQUIRES AUTH (already using fetchWithAuth)
 export const moveRecipesBetweenCategories = async (
   moveData: MoveRecipesRequest
 ): Promise<{ success: boolean; message?: string }> => {
@@ -261,7 +261,7 @@ export const moveRecipesBetweenCategories = async (
   }
 };
 
-// Delete category (ADMIN only) - Not implemented yet
+// Delete category - REQUIRES AUTH
 export const deleteCategory = async (
   categoryId: number
 ): Promise<{ success: boolean; message?: string }> => {
@@ -272,7 +272,7 @@ export const deleteCategory = async (
   };
 };
 
-// Get recipes by category
+// Get recipes by category - PUBLIC, keep fetch
 export const getRecipesByCategory = async (
   categoryId: number,
   page: number = 0,

@@ -10,7 +10,7 @@ import {
 } from "../types/recipe";
 import { RecipeSearchParams } from "../types/api";
 
-// Get popular recipes (sorted by view count)
+// Get popular recipes (sorted by view count) - PUBLIC, keep fetch
 export const getPopularRecipes = async (limit = 8): Promise<Recipe[]> => {
   try {
     console.log("Fetching popular recipes...");
@@ -37,7 +37,7 @@ export const getPopularRecipes = async (limit = 8): Promise<Recipe[]> => {
   }
 };
 
-// Get latest recipes (easy-to-cook section - sorted by creation date)
+// Get latest recipes (easy-to-cook section) - PUBLIC, keep fetch
 export const getEasyToCookRecipes = async (limit = 7): Promise<Recipe[]> => {
   try {
     console.log("Fetching latest recipes...");
@@ -64,7 +64,7 @@ export const getEasyToCookRecipes = async (limit = 7): Promise<Recipe[]> => {
   }
 };
 
-// Search recipes with pagination
+// Search recipes with pagination - PUBLIC, keep fetch
 export const searchRecipes = async (
   searchParams: RecipeSearchParams & {
     page?: number;
@@ -123,7 +123,7 @@ export const searchRecipes = async (
   }
 };
 
-// Get recipe details with authentication (using fetchWithAuth)
+// Get recipe details - REQUIRES AUTH (already using fetchWithAuth)
 export const getRecipeDetails = async (
   recipeId: number
 ): Promise<RecipeWithDetails | null> => {
@@ -139,7 +139,6 @@ export const getRecipeDetails = async (
     }
 
     const result: RecipeDetailResponse = await response.json();
-    console.log("Recipe details response:", result);
 
     if (result.code === 200) {
       return result.data;
@@ -153,7 +152,7 @@ export const getRecipeDetails = async (
   }
 };
 
-// Get recipes by category with pagination
+// Get recipes by category - PUBLIC, keep fetch
 export const getRecipesByCategory = async (
   categoryId: number,
   page = 0,
@@ -203,7 +202,7 @@ export const getRecipesByCategory = async (
   }
 };
 
-// Get recipes by difficulty
+// Get recipes by difficulty - PUBLIC, keep fetch
 export const getRecipesByDifficulty = async (
   difficulty: "EASY" | "MEDIUM" | "HARD",
   limit = 20
@@ -240,7 +239,7 @@ export const getRecipesByDifficulty = async (
   }
 };
 
-// Get recipes by category using specific endpoint
+// Get recipes by category using specific endpoint - PUBLIC, keep fetch
 export const getRecipesByCategoryEndpoint = async (
   categoryId: number,
   page = 0,
@@ -294,7 +293,7 @@ export const getRecipesByCategoryEndpoint = async (
   }
 };
 
-// Search recipes with query
+// Search recipes with query - PUBLIC, keep fetch
 export const searchRecipesByQuery = async (
   query: string,
   page = 0,
