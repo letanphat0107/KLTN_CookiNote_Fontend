@@ -143,22 +143,7 @@ const RootNavigator = () => {
                   title: "Quản lý danh mục",
                 }}
               />
-              <Stack.Screen
-                name="CreateRecipe"
-                component={CreateRecipeScreen}
-                options={{
-                  headerShown: true,
-                  title: "Tạo công thức mới",
-                }}
-              />
-              <Stack.Screen
-                name="EditRecipe"
-                component={EditRecipeScreen}
-                options={{
-                  headerShown: true,
-                  title: "Chỉnh sửa công thức",
-                }}
-              />
+
               <Stack.Screen
                 name="LogStream"
                 component={LogStreamScreen}
@@ -171,21 +156,21 @@ const RootNavigator = () => {
           {/* Main App with Authenticated Tab Navigator */}
           <Stack.Screen name="MainTabs" component={TabNavigator} />
           <Stack.Screen
-                name="CreateRecipe"
-                component={CreateRecipeScreen}
-                options={{
-                  headerShown: true,
-                  title: "Tạo công thức mới",
-                }}
-              />
-              <Stack.Screen
-                name="EditRecipe"
-                component={EditRecipeScreen}
-                options={{
-                  headerShown: true,
-                  title: "Chỉnh sửa công thức",
-                }}
-              />
+            name="CreateRecipe"
+            component={CreateRecipeScreen}
+            options={{
+              headerShown: true,
+              title: "Tạo công thức mới",
+            }}
+          />
+          <Stack.Screen
+            name="EditRecipe"
+            component={EditRecipeScreen}
+            options={{
+              headerShown: true,
+              title: "Chỉnh sửa công thức",
+            }}
+          />
           <Stack.Screen
             name="DailySuggestions"
             component={DailySuggestionsScreen}
