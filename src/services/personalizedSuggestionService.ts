@@ -12,6 +12,7 @@ export interface PersonalizedRecipeParams {
   healthCondition?: string;
   dishCharacteristics?: string;
   mealType: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
+  targetCalories?: number;
 }
 
 export interface PersonalizedRecipeIngredient {
@@ -22,6 +23,8 @@ export interface PersonalizedRecipeIngredient {
 export interface PersonalizedRecipeStep {
   stepNo: number;
   content: string;
+  tips?: string;
+  suggestedTime?: number;
 }
 
 export interface PersonalizedRecipe {
@@ -46,13 +49,41 @@ export interface PersonalizedRecipeResponse {
   path: string;
 }
 
+export interface SavePersonalizedRecipeResponse {
+  code: number;
+  message: string;
+  data?: {
+    id: number;
+  };
+  timestamp: string;
+  path: string;
+}
+
+export interface PersonalizedHistoryItem {
+  request: PersonalizedRecipeParams;
+  searchedAt: string;
+}
+
+export interface PersonalizedHistoryResponse {
+  code: number;
+  message: string;
+  data: {
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    hasNext: boolean;
+    items: PersonalizedHistoryItem[];
+  };
+  timestamp: string;
+  path: string;
+}
+
 // Get personalized recipe suggestions
 export const getPersonalizedRecipes = async (
   params: PersonalizedRecipeParams
 ): Promise<PersonalizedRecipe[]> => {
   try {
-    console.log("Getting personalized recipes with params:", params);
-
     const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}/cookinote/recipes/suggest-personalized`,
       {
@@ -62,7 +93,6 @@ export const getPersonalizedRecipes = async (
     );
 
     const result: PersonalizedRecipeResponse = await response.json();
-    console.log("Personalized recipes response:", result);
 
     if (response.ok && result.code === 200) {
       return result.data || [];
@@ -73,6 +103,85 @@ export const getPersonalizedRecipes = async (
   } catch (error) {
     console.error("Error getting personalized recipes:", error);
     return [];
+  }
+};
+
+// Get personalized history
+export const getPersonalizedHistory = async (
+  page: number = 0,
+  size: number = 1
+): Promise<PersonalizedRecipeParams | null> => {
+  try {
+    const response = await fetchWithAuth(
+      `${API_CONFIG.BASE_URL}/cookinote/recipes/personalized-history?page=${page}&size=${size}`,
+      {
+        method: "GET",
+      }
+    );
+
+    const result: PersonalizedHistoryResponse = await response.json();
+
+    if (response.ok && result.code === 200 && result.data.items.length > 0) {
+      // Return the most recent request
+      return result.data.items[0].request;
+    } else {
+      console.log("No personalized history found");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting personalized history:", error);
+    return null;
+  }
+};
+
+// Save personalized recipe
+export const savePersonalizedRecipe = async (
+  recipe: PersonalizedRecipe
+): Promise<{ success: boolean; recipeId?: number; message?: string }> => {
+  try {
+    console.log("Saving personalized recipe:", recipe);
+
+    const response = await fetchWithAuth(
+      `${API_CONFIG.BASE_URL}/cookinote/recipes/save-personalized`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          originalRecipeId: recipe.originalRecipeId,
+          title: recipe.title,
+          description: recipe.description,
+          imageUrl: recipe.imageUrl,
+          prepareTime: recipe.prepareTime,
+          cookTime: recipe.cookTime,
+          difficulty: recipe.difficulty,
+          calories: recipe.calories,
+          servings: recipe.servings,
+          ingredients: recipe.ingredients,
+          steps: recipe.steps,
+        }),
+      }
+    );
+
+    const result: SavePersonalizedRecipeResponse = await response.json();
+
+    if (response.ok && result.code === 200) {
+      return {
+        success: true,
+        recipeId: result.data?.id,
+        message: "Đã lưu công thức thành công!",
+      };
+    } else {
+      console.error("Failed to save personalized recipe:", result.message);
+      return {
+        success: false,
+        message: result.message || "Không thể lưu công thức",
+      };
+    }
+  } catch (error) {
+    console.error("Error saving personalized recipe:", error);
+    return {
+      success: false,
+      message: "Đã xảy ra lỗi khi lưu công thức",
+    };
   }
 };
 

@@ -1,5 +1,5 @@
 // src/screens/Suggestion/PersonalizedSuggestionScreen.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -21,8 +21,9 @@ import {
   getBMICategory,
   calculateBMR,
   calculateTDEE,
+  savePersonalizedRecipe,
+  getPersonalizedHistory,
 } from "../../services/personalizedSuggestionService";
-import { saveAIRecipe } from "../../services/aiChatService";
 import { personalizedStyles } from "./styles";
 
 const { width } = Dimensions.get("window");
@@ -35,16 +36,19 @@ const PersonalizedSuggestionScreen: React.FC<
   PersonalizedSuggestionScreenProps
 > = ({ navigation }) => {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const resultsRef = useRef<View>(null);
 
-  // Form state
+  // Form state - will be populated from history or defaults
   const [height, setHeight] = useState("170");
-  const [weight, setWeight] = useState("65");
-  const [age, setAge] = useState("25");
+  const [weight, setWeight] = useState("60");
+  const [age, setAge] = useState("23");
   const [gender, setGender] = useState<"MALE" | "FEMALE" | "OTHER">("MALE");
   const [activityLevel, setActivityLevel] = useState<
     "SEDENTARY" | "LIGHT" | "MODERATE" | "ACTIVE" | "VERY_ACTIVE"
   >("MODERATE");
   const [servings, setServings] = useState("1");
+  const [targetCalories, setTargetCalories] = useState("");
   const [healthCondition, setHealthCondition] = useState("");
   const [dishCharacteristics, setDishCharacteristics] = useState("");
   const [mealType, setMealType] = useState<
@@ -56,15 +60,54 @@ const PersonalizedSuggestionScreen: React.FC<
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [savingRecipeId, setSavingRecipeId] = useState<number | null>(null);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
   // Health metrics
   const [bmi, setBmi] = useState(0);
   const [bmr, setBmr] = useState(0);
   const [tdee, setTdee] = useState(0);
 
+  // Load history on mount
   useEffect(() => {
-    calculateHealthMetrics();
-  }, [height, weight, age, gender, activityLevel]);
+    if (isAuthenticated) {
+      loadHistory();
+    } else {
+      setIsLoadingHistory(false);
+    }
+  }, [isAuthenticated]);
+
+  // Recalculate metrics when form values change
+  useEffect(() => {
+    if (!isLoadingHistory) {
+      calculateHealthMetrics();
+    }
+  }, [height, weight, age, gender, activityLevel, isLoadingHistory]);
+
+  const loadHistory = async () => {
+    setIsLoadingHistory(true);
+    try {
+      const history = await getPersonalizedHistory();
+      if (history) {
+        // Populate form with historical data
+        setHeight(history.height.toString());
+        setWeight(history.weight.toString());
+        setAge(history.age.toString());
+        setGender(history.gender);
+        setActivityLevel(history.activityLevel);
+        setServings(history.servings.toString());
+        setTargetCalories(
+          history.targetCalories ? history.targetCalories.toString() : ""
+        );
+        setHealthCondition(history.healthCondition || "");
+        setDishCharacteristics(history.dishCharacteristics || "");
+        setMealType(history.mealType);
+      }
+    } catch (error) {
+      console.error("Error loading history:", error);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
 
   const calculateHealthMetrics = () => {
     const h = parseFloat(height) || 170;
@@ -102,12 +145,24 @@ const PersonalizedSuggestionScreen: React.FC<
       healthCondition: healthCondition.trim() || undefined,
       dishCharacteristics: dishCharacteristics.trim() || undefined,
       mealType,
+      targetCalories: targetCalories ? parseInt(targetCalories) : undefined,
     };
 
     try {
       const results = await getPersonalizedRecipes(params);
       setRecipes(results.slice(0, 3)); // Only take top 3
       setShowResults(true);
+
+      // Scroll to results after a short delay to ensure rendering
+      setTimeout(() => {
+        resultsRef.current?.measureLayout(
+          scrollViewRef.current as any,
+          (x, y) => {
+            scrollViewRef.current?.scrollTo({ y: y - 20, animated: true });
+          },
+          () => {}
+        );
+      }, 300);
 
       // Auto save recipes
       if (results.length > 0 && user?.role === "ADMIN") {
@@ -121,35 +176,18 @@ const PersonalizedSuggestionScreen: React.FC<
     }
   };
 
-  // Update the saveRecipesAutomatically function (around line 124)
   const saveRecipesAutomatically = async (
     recipesToSave: PersonalizedRecipe[]
   ) => {
     for (const recipe of recipesToSave) {
       try {
-        const aiRecipe = {
-          title: recipe.title,
-          description: recipe.description,
-          prepareTime: recipe.prepareTime,
-          cookTime: recipe.cookTime,
-          difficulty: recipe.difficulty,
-          ingredients: recipe.ingredients,
-          steps: recipe.steps.map((step) => ({
-            stepNo: step.stepNo,
-            content: step.content,
-            suggestedTime: null,
-            tips: null,
-          })),
-        };
-
-        await saveAIRecipe(aiRecipe, user?.role === "ADMIN");
+        await savePersonalizedRecipe(recipe);
       } catch (error) {
         console.error("Error auto-saving recipe:", recipe.title, error);
       }
     }
   };
 
-  // Update the handleSaveRecipe function (around line 149)
   const handleSaveRecipe = async (recipe: PersonalizedRecipe) => {
     if (!isAuthenticated) {
       Alert.alert("Yêu cầu đăng nhập", "Vui lòng đăng nhập để lưu công thức");
@@ -159,22 +197,7 @@ const PersonalizedSuggestionScreen: React.FC<
     setSavingRecipeId(recipe.originalRecipeId);
 
     try {
-      const aiRecipe = {
-        title: recipe.title,
-        description: recipe.description,
-        prepareTime: recipe.prepareTime,
-        cookTime: recipe.cookTime,
-        difficulty: recipe.difficulty,
-        ingredients: recipe.ingredients,
-        steps: recipe.steps.map((step) => ({
-          stepNo: step.stepNo,
-          content: step.content,
-          suggestedTime: null,
-          tips: null,
-        })),
-      };
-
-      const result = await saveAIRecipe(aiRecipe, user?.role === "ADMIN");
+      const result = await savePersonalizedRecipe(recipe);
 
       if (result.success) {
         Alert.alert("Thành công", "Đã lưu công thức vào thư viện của bạn!");
@@ -288,6 +311,36 @@ const PersonalizedSuggestionScreen: React.FC<
     </View>
   );
 
+  // Show loading while fetching history
+  if (isLoadingHistory) {
+    return (
+      <View style={personalizedStyles.container}>
+        <View style={personalizedStyles.header}>
+          <Ionicons name="nutrition" size={32} color="#FF6B35" />
+          <Text style={personalizedStyles.headerTitle}>Gợi Ý Cá Nhân</Text>
+          <Text style={personalizedStyles.headerSubtitle}>
+            Tìm công thức phù hợp với bạn
+          </Text>
+        </View>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator size="large" color="#FF6B35" />
+          <Text
+            style={{
+              marginTop: 16,
+              fontSize: 16,
+              color: "#666666",
+              fontFamily: "Roboto-Regular",
+            }}
+          >
+            Đang tải thông tin...
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={personalizedStyles.container}>
       {/* Header */}
@@ -300,6 +353,7 @@ const PersonalizedSuggestionScreen: React.FC<
       </View>
 
       <ScrollView
+        ref={scrollViewRef}
         style={personalizedStyles.scrollView}
         contentContainerStyle={personalizedStyles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -461,14 +515,31 @@ const PersonalizedSuggestionScreen: React.FC<
             ))}
           </View>
 
-          <Text style={personalizedStyles.inputLabel}>Số khẩu phần</Text>
-          <TextInput
-            style={personalizedStyles.input}
-            value={servings}
-            onChangeText={setServings}
-            keyboardType="numeric"
-            placeholder="1"
-          />
+          <View style={personalizedStyles.inputRow}>
+            <View style={personalizedStyles.inputGroup}>
+              <Text style={personalizedStyles.inputLabel}>Số khẩu phần</Text>
+              <TextInput
+                style={personalizedStyles.input}
+                value={servings}
+                onChangeText={setServings}
+                keyboardType="numeric"
+                placeholder="1"
+              />
+            </View>
+
+            <View style={personalizedStyles.inputGroup}>
+              <Text style={personalizedStyles.inputLabel}>
+                Calo mục tiêu (tùy chọn)
+              </Text>
+              <TextInput
+                style={personalizedStyles.input}
+                value={targetCalories}
+                onChangeText={setTargetCalories}
+                keyboardType="numeric"
+                placeholder={Math.round(tdee / 3).toString()}
+              />
+            </View>
+          </View>
 
           <Text style={personalizedStyles.inputLabel}>
             Tình trạng sức khỏe (tùy chọn)
@@ -518,7 +589,11 @@ const PersonalizedSuggestionScreen: React.FC<
 
         {/* Results Section */}
         {showResults && recipes.length > 0 && (
-          <View style={personalizedStyles.resultsSection}>
+          <View
+            ref={resultsRef}
+            style={personalizedStyles.resultsSection}
+            onLayout={() => {}}
+          >
             <Text style={personalizedStyles.resultsTitle}>
               🎯 {recipes.length} Công thức dành cho bạn
             </Text>
@@ -531,7 +606,11 @@ const PersonalizedSuggestionScreen: React.FC<
         )}
 
         {showResults && recipes.length === 0 && (
-          <View style={personalizedStyles.emptyResults}>
+          <View
+            ref={resultsRef}
+            style={personalizedStyles.emptyResults}
+            onLayout={() => {}}
+          >
             <Ionicons name="sad-outline" size={64} color="#CCCCCC" />
             <Text style={personalizedStyles.emptyText}>
               Không tìm thấy công thức phù hợp
