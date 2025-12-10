@@ -12,9 +12,11 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 import { editRecipeStyles } from "./styles";
 import { RecipeWithDetails } from "../../types/recipe";
+import { forkRecipeWithSuggestion } from "../../services/recipeActionService";
 
 interface EditRecipeModalProps {
   visible: boolean;
@@ -61,6 +63,9 @@ const EditRecipeModal: React.FC<EditRecipeModalProps> = ({
     steps: [],
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [showAIInput, setShowAIInput] = useState(false);
+  const [modificationRequest, setModificationRequest] = useState("");
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
 
   // Initialize form data when recipe changes
   useEffect(() => {
@@ -86,8 +91,43 @@ const EditRecipeModal: React.FC<EditRecipeModalProps> = ({
             tips: step.tips,
           })) || [],
       });
+      // Reset AI input when recipe changes
+      setShowAIInput(false);
+      setModificationRequest("");
     }
   }, [recipe]);
+
+  const handleAISuggestion = async () => {
+    if (!modificationRequest.trim()) {
+      Alert.alert("Thông báo", "Vui lòng nhập yêu cầu điều chỉnh");
+      return;
+    }
+
+    setIsLoadingAI(true);
+    try {
+      const suggestedRecipe = await forkRecipeWithSuggestion(
+        recipe.id,
+        modificationRequest.trim()
+      );
+
+      if (suggestedRecipe) {
+        setFormData(suggestedRecipe);
+        setShowAIInput(false);
+        setModificationRequest("");
+        Alert.alert(
+          "Thành công",
+          "Đã điều chỉnh công thức theo yêu cầu của bạn!"
+        );
+      } else {
+        Alert.alert("Lỗi", "Không thể điều chỉnh công thức. Vui lòng thử lại.");
+      }
+    } catch (error) {
+      console.error("Error getting AI suggestion:", error);
+      Alert.alert("Lỗi", "Đã xảy ra lỗi khi điều chỉnh công thức");
+    } finally {
+      setIsLoadingAI(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!formData.title.trim()) {
@@ -215,6 +255,66 @@ const EditRecipeModal: React.FC<EditRecipeModalProps> = ({
         </View>
 
         <ScrollView style={editRecipeStyles.content}>
+          {/* AI Suggestion Section */}
+          <View style={editRecipeStyles.section}>
+            <View style={editRecipeStyles.aiButtonContainer}>
+              <TouchableOpacity
+                style={editRecipeStyles.aiSuggestButton}
+                onPress={() => setShowAIInput(!showAIInput)}
+                disabled={isLoadingAI}
+              >
+                <Ionicons name="sparkles" size={20} color="#FFFFFF" />
+                <Text style={editRecipeStyles.aiSuggestButtonText}>
+                  Điều chỉnh AI
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {showAIInput && (
+              <View style={editRecipeStyles.aiInputContainer}>
+                <Text style={editRecipeStyles.aiInputLabel}>
+                  Nhập yêu cầu điều chỉnh:
+                </Text>
+                <TextInput
+                  style={[editRecipeStyles.input, editRecipeStyles.aiTextArea]}
+                  value={modificationRequest}
+                  onChangeText={setModificationRequest}
+                  placeholder="VD: Khẩu phần cho 2 người, Giảm 50% đường, Thay thế bằng nguyên liệu chay..."
+                  placeholderTextColor="#999"
+                  multiline
+                  numberOfLines={3}
+                />
+                <View style={editRecipeStyles.aiButtonRow}>
+                  <TouchableOpacity
+                    style={editRecipeStyles.aiCancelButton}
+                    onPress={() => {
+                      setShowAIInput(false);
+                      setModificationRequest("");
+                    }}
+                  >
+                    <Text style={editRecipeStyles.aiCancelButtonText}>Hủy</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={editRecipeStyles.aiApplyButton}
+                    onPress={handleAISuggestion}
+                    disabled={isLoadingAI}
+                  >
+                    {isLoadingAI ? (
+                      <ActivityIndicator size="small" color="#FFFFFF" />
+                    ) : (
+                      <>
+                        <Ionicons name="checkmark" size={18} color="#FFFFFF" />
+                        <Text style={editRecipeStyles.aiApplyButtonText}>
+                          Áp dụng
+                        </Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+          </View>
+
           {/* Basic Info */}
           <View style={editRecipeStyles.section}>
             <Text style={editRecipeStyles.sectionTitle}>Thông tin cơ bản</Text>
@@ -277,35 +377,6 @@ const EditRecipeModal: React.FC<EditRecipeModalProps> = ({
                 />
               </View>
             </View>
-
-            {/* <Text style={editRecipeStyles.label}>Độ khó</Text>
-            <View style={editRecipeStyles.pickerContainer}>
-              <Picker
-                selectedValue={formData.difficulty}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, difficulty: value }))
-                }
-                style={editRecipeStyles.picker}
-              >
-                <Picker.Item label="Dễ" value="EASY" />
-                <Picker.Item label="Trung bình" value="MEDIUM" />
-                <Picker.Item label="Khó" value="HARD" />
-              </Picker>
-            </View>
-
-            <Text style={editRecipeStyles.label}>Quyền riêng tư</Text>
-            <View style={editRecipeStyles.pickerContainer}>
-              <Picker
-                selectedValue={formData.privacy}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, privacy: value }))
-                }
-                style={editRecipeStyles.picker}
-              >
-                <Picker.Item label="Riêng tư" value="PRIVATE" />
-                <Picker.Item label="Công khai" value="PUBLIC" />
-              </Picker>
-            </View> */}
           </View>
 
           {/* Ingredients */}

@@ -163,5 +163,86 @@ optionText: {
 optionTextSelected: {
   color: "#FFF",
 },
+// Add these styles to src/components/Recipe/styles.ts at the end
 
+  // AI Suggestion styles
+  aiButtonContainer: {
+    marginBottom: 10,
+  },
+  aiSuggestButton: {
+    backgroundColor: "#8B5CF6",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    elevation: 2,
+    shadowColor: "#8B5CF6",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  aiSuggestButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "600",
+    fontFamily: "Roboto-Medium",
+  },
+  aiInputContainer: {
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: "#F9F5FF",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E9D5FF",
+  },
+  aiInputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#6B21A8",
+    marginBottom: 8,
+    fontFamily: "Roboto-Medium",
+  },
+  aiTextArea: {
+    minHeight: 80,
+    textAlignVertical: "top",
+  },
+  aiButtonRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 12,
+  },
+  aiCancelButton: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    backgroundColor: "#E5E7EB",
+    alignItems: "center",
+  },
+  aiCancelButtonText: {
+    color: "#374151",
+    fontSize: 14,
+    fontWeight: "600",
+    fontFamily: "Roboto-Medium",
+  },
+  aiApplyButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    backgroundColor: "#8B5CF6",
+  },
+  aiApplyButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "600",
+    fontFamily: "Roboto-Medium",
+  },
 });

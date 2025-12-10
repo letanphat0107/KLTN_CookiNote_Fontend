@@ -22,6 +22,31 @@ interface ForkRecipeData {
   }>;
 }
 
+interface ForkSuggestResponse {
+  code: number;
+  message: string;
+  data: {
+    categoryId: number;
+    title: string;
+    description: string;
+    prepareTime: number;
+    cookTime: number;
+    difficulty: "EASY" | "MEDIUM" | "HARD";
+    ingredients: Array<{
+      name: string;
+      quantity: string;
+    }>;
+    steps: Array<{
+      stepNo: number;
+      content: string;
+      suggestedTime?: number;
+      tips?: string;
+    }>;
+  };
+  timestamp: string;
+  path: string;
+}
+
 // Add recipe ingredients to shopping list
 export const addRecipeToShoppingList = async (
   recipeId: number
@@ -81,3 +106,46 @@ export const forkRecipe = async (
     return false;
   }
 };
+
+// Fork recipe with AI suggestions
+export const forkRecipeWithSuggestion = async (
+  recipeId: number,
+  modificationRequest: string
+): Promise<ForkRecipeData | null> => {
+  try {
+    console.log("Fork recipe with suggestion:", recipeId, modificationRequest);
+
+    const response = await fetchWithAuth(
+      `${API_CONFIG.BASE_URL}/cookinote/recipes/${recipeId}/fork-suggest`,
+      {
+        method: "POST",
+        body: JSON.stringify({ modificationRequest }),
+      }
+    );
+
+    const result: ForkSuggestResponse = await response.json();
+    console.log("Fork recipe with suggestion response:", result);
+
+    if (response.ok && result.code === 200) {
+      return {
+        categoryId: result.data.categoryId,
+        title: result.data.title,
+        description: result.data.description,
+        prepareTime: result.data.prepareTime,
+        cookTime: result.data.cookTime,
+        difficulty: result.data.difficulty,
+        privacy: "PRIVATE", // Default to private
+        ingredients: result.data.ingredients,
+        steps: result.data.steps,
+      };
+    } else {
+      console.error("Failed to fork recipe with suggestion:", result.message);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error forking recipe with suggestion:", error);
+    return null;
+  }
+};
+
+export type { ForkRecipeData };
