@@ -43,6 +43,8 @@ interface RecipeDetailScreenProps {
       recipeId?: string | number;
       showEditButton?: boolean; // Add prop to control edit button visibility
       showAddToCartButton?: boolean; // Add prop to control add to cart button visibility
+      showRating?: boolean; // Add prop to control rating section visibility
+      showComments?: boolean; // Add prop to control comments section visibility
     };
   };
   navigation?: any;
@@ -55,6 +57,8 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
   const recipeId = route?.params?.recipeId;
   const showEditButton = route?.params?.showEditButton ?? true; // Default: true
   const showAddToCartButton = route?.params?.showAddToCartButton ?? true; // Default: true
+    const showRating = route?.params?.showRating ?? true; // Default: true
+  const showComments = route?.params?.showComments ?? true; // Default: true
 
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const { getRecipeDetails } = useRecipe();
@@ -1029,6 +1033,26 @@ const loadComments = async (showLoading = true) => {
               {formatDifficulty(recipe.difficulty)}
             </Text>
           </View>
+
+          {/* Servings */}
+  {recipe.servings != null && recipe.servings > 0 && (
+    <View style={recipeStyles.infoRow}>
+      <Text style={recipeStyles.infoLabel}>Khẩu phần:</Text>
+      <Text style={recipeStyles.infoValue}>
+        {recipe.servings} người
+      </Text>
+    </View>
+  )}
+  
+  {/* Calories */}
+  {recipe.calories != null && recipe.calories > 0 && (
+    <View style={recipeStyles.infoRow}>
+      <Text style={recipeStyles.infoLabel}>Năng lượng:</Text>
+      <Text style={recipeStyles.infoValue}>
+        {recipe.calories} kcal
+      </Text>
+    </View>
+  )}
         </View>
 
         {/* Button Chỉnh sửa va Button Thêm vào Shopping Cart */}
@@ -1150,11 +1174,11 @@ const loadComments = async (showLoading = true) => {
           </View>
         </View>
 
-        {/* Rating Section */}
-        {renderRatingStars()}
+        {/* Rating Section - Conditional */}
+        {showRating && renderRatingStars()}
 
-        {/* Comments Section */}
-        {renderCommentsSection()}
+        {/* Comments Section - Conditional */}
+        {showComments && renderCommentsSection()}
         {/* Bottom spacing for fixed buttons */}
         <View style={{ height: 100 }} />
       </ScrollView>

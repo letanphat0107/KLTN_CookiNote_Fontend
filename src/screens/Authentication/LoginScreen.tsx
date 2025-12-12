@@ -189,7 +189,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         </View>
 
         {/* Test Login Buttons for Development */}
-        {/* {__DEV__ && (
+        {__DEV__ && (
           <View style={authStyles.testSection}>
             <Text style={authStyles.testTitle}>🧪 Test Account</Text>
             <TouchableOpacity
@@ -214,7 +214,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               <Text style={authStyles.testButtonText}>Fill Admin Account</Text>
             </TouchableOpacity>
           </View>
-        )} */}
+        )}
       </View>
     </ScrollView>
   );

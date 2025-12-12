@@ -284,6 +284,8 @@ const PersonalizedSuggestionScreen: React.FC<
           onPress={() =>
             navigation?.navigate("RecipeDetail", {
               recipeId: recipe.originalRecipeId.toString(),
+              showRating: false,
+  showComments: false 
             })
           }
         >

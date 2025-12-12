@@ -35,6 +35,9 @@ export interface RecipeWithDetails extends Recipe {
   ratingCount: number;
   commentCount: number;
   myRating: number | null;
+
+  calories?: number;
+  servings?: number;
 }
 
 // Paginated response for recipes
