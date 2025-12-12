@@ -10,7 +10,9 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
+  Linking,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { floatingStyles } from "./styles";
 import { useAppSelector } from "../../store/hooks";
 import {
@@ -108,7 +110,6 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
         setNewQuantity("");
         setShowAddForm(false);
         await loadShoppingList();
-        // Alert.alert("Thành công", "Đã thêm vào danh sách mua sắm");
       } else {
         Alert.alert("Lỗi", "Không thể thêm vào danh sách mua sắm");
       }
@@ -120,15 +121,12 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
     }
   };
 
-  // Updated handleToggleItem with API call
   const handleToggleItem = async (itemId: number, currentChecked: boolean) => {
-    if (processingItems.has(itemId)) return; // Prevent multiple calls
+    if (processingItems.has(itemId)) return;
 
-    // Add to processing set
     setProcessingItems((prev) => new Set(prev).add(itemId));
 
     try {
-      // Optimistically update UI
       setShoppingListGroups((prev) =>
         prev.map((group) => ({
           ...group,
@@ -138,14 +136,12 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
         }))
       );
 
-      // Call API to update on server
       const success = await toggleShoppingListItemCheck(
         itemId,
         !currentChecked
       );
 
       if (!success) {
-        // Revert on failure
         setShoppingListGroups((prev) =>
           prev.map((group) => ({
             ...group,
@@ -158,7 +154,6 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
       }
     } catch (error) {
       console.error("Error toggling item:", error);
-      // Revert on error
       setShoppingListGroups((prev) =>
         prev.map((group) => ({
           ...group,
@@ -169,7 +164,6 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
       );
       Alert.alert("Lỗi", "Đã xảy ra lỗi khi cập nhật");
     } finally {
-      // Remove from processing set
       setProcessingItems((prev) => {
         const newSet = new Set(prev);
         newSet.delete(itemId);
@@ -178,10 +172,8 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
     }
   };
 
-  // Updated handleRemoveItem to handle both single item and recipe group
   const handleRemoveItem = async (itemId: number, recipeId?: number | null) => {
     if (recipeId) {
-      // If item belongs to a recipe, show option to remove entire recipe group
       Alert.alert(
         "Xóa nguyên liệu",
         "Bạn có chắc chắc không muốn mua món này!",
@@ -194,7 +186,6 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
         ]
       );
     } else {
-      // Single item removal
       Alert.alert("Xóa nguyên liệu", "Bạn có chắc muốn xóa nguyên liệu này?", [
         { text: "Hủy", style: "cancel" },
         {
@@ -208,14 +199,10 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
 
   const removeSingleItem = async (itemId: number) => {
     try {
-      const success = await removeShoppingListItem([itemId]); // truyền mảng có 1 phần tử
+      const success = await removeShoppingListItem([itemId]);
 
       if (success) {
         await loadShoppingList();
-        // Toast-style alert instead of blocking alert
-        // setTimeout(() => {
-        //   Alert.alert("", "Đã xóa nguyên liệu");
-        // });
       } else {
         Alert.alert("Lỗi", "Không thể xóa nguyên liệu");
       }
@@ -277,6 +264,61 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
     );
   };
 
+  // NEW: Shopee Integration Function
+  const handleBuyOnShopee = async (ingredientName: string) => {
+    try {
+      // Format ingredient name for URL (replace spaces with +)
+      const keyword = encodeURIComponent(
+        ingredientName.trim().replace(/\s+/g, "+")
+      );
+      const shopeeUrl = `https://shopee.vn/search?keyword=${keyword}`;
+
+      // Check if URL can be opened
+      const supported = await Linking.canOpenURL(shopeeUrl);
+
+      if (supported) {
+        await Linking.openURL(shopeeUrl);
+      } else {
+        Alert.alert("Lỗi", "Không thể mở Shopee. Vui lòng kiểm tra lại.");
+      }
+    } catch (error) {
+      console.error("Error opening Shopee:", error);
+      Alert.alert("Lỗi", "Đã xảy ra lỗi khi mở Shopee");
+    }
+  };
+
+  // NEW: Buy all items in a group on Shopee
+  const handleBuyGroupOnShopee = async (group: ShoppingListGroup) => {
+    try {
+      // Combine all unchecked items from the group
+      const uncheckedItems = group.items
+        .filter((item) => !item.checked)
+        .map((item) => item.ingredient)
+        .join(" ");
+
+      if (!uncheckedItems.trim()) {
+        Alert.alert("Thông báo", "Tất cả nguyên liệu đã được mua");
+        return;
+      }
+
+      const keyword = encodeURIComponent(
+        uncheckedItems.trim().replace(/\s+/g, "+")
+      );
+      const shopeeUrl = `https://shopee.vn/search?keyword=${keyword}`;
+
+      const supported = await Linking.canOpenURL(shopeeUrl);
+
+      if (supported) {
+        await Linking.openURL(shopeeUrl);
+      } else {
+        Alert.alert("Lỗi", "Không thể mở Shopee. Vui lòng kiểm tra lại.");
+      }
+    } catch (error) {
+      console.error("Error opening Shopee:", error);
+      Alert.alert("Lỗi", "Đã xảy ra lỗi khi mở Shopee");
+    }
+  };
+
   const handleButtonPress = () => {
     if (!isAuthenticated) {
       Alert.alert(
@@ -290,7 +332,6 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
       return;
     }
 
-    // Animation effect
     Animated.sequence([
       Animated.timing(scaleAnim, {
         toValue: 0.9,
@@ -310,6 +351,7 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
   const renderGroupHeader = (group: ShoppingListGroup) => {
     const checkedCount = group.items.filter((item) => item.checked).length;
     const totalCount = group.items.length;
+    const hasUncheckedItems = checkedCount < totalCount;
 
     return (
       <View style={floatingStyles.groupHeader}>
@@ -325,6 +367,15 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
           <Text style={floatingStyles.groupItemCount}>
             {checkedCount}/{totalCount} nguyên liệu
           </Text>
+          {/* NEW: Buy all button for group */}
+          {hasUncheckedItems && (
+            <TouchableOpacity
+              style={floatingStyles.shopeeGroupButton}
+              onPress={() => handleBuyGroupOnShopee(group)}
+            >
+              <Ionicons name="cart-outline" size={16} color="#EE4D2D" />
+            </TouchableOpacity>
+          )}
           {group.recipeId && (
             <TouchableOpacity
               style={floatingStyles.removeGroupButton}
@@ -390,6 +441,16 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
             <Text style={floatingStyles.recipeTag}>📝 Từ công thức</Text>
           )}
         </View>
+
+        {/* NEW: Shopee Buy Button */}
+        {!item.checked && (
+          <TouchableOpacity
+            style={floatingStyles.shopeeButton}
+            onPress={() => handleBuyOnShopee(item.ingredient)}
+          >
+            <Ionicons name="cart" size={18} color="#EE4D2D" />
+          </TouchableOpacity>
+        )}
 
         {/* Remove Button */}
         <TouchableOpacity
@@ -462,10 +523,7 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
                     key={`group-${groupIndex}`}
                     style={floatingStyles.shoppingGroup}
                   >
-                    {/* Group Header */}
                     {renderGroupHeader(group)}
-
-                    {/* Group Items */}
                     <View style={floatingStyles.groupItems}>
                       {group.items.map((item) =>
                         renderShoppingItem(item, group)

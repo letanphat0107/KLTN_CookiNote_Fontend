@@ -914,5 +914,29 @@ bulletIcon: {
   lineHeight: 22,    // căn thẳng với text
   paddingTop: 3,     // chỉnh để • nằm giữa dòng
 },
+// Add these new styles to your floatingStyles object:
 
+shopeeButton: {
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+  backgroundColor: '#FFF5F0',
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginRight: 8,
+  borderWidth: 1,
+  borderColor: '#EE4D2D',
+},
+
+shopeeGroupButton: {
+  width: 28,
+  height: 28,
+  borderRadius: 14,
+  backgroundColor: '#FFF5F0',
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginRight: 8,
+  borderWidth: 1,
+  borderColor: '#EE4D2D',
+},
 });
