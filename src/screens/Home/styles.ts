@@ -831,8 +831,5 @@ export const homeStyles = StyleSheet.create({
   elevation: 4,
   marginTop: 30,
 },
-qrScanButtonText: {
-  fontSize: 24,
-  color: "#FFFFFF",
-},
+
 });

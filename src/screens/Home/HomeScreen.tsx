@@ -13,6 +13,7 @@ import {
   RefreshControl,
   FlatList,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useAppSelector } from "../../store/hooks";
 import { useCategory } from "../../hooks/useCategory";
 import { useRecipe } from "../../hooks/useRecipe";
@@ -404,7 +405,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           style={homeStyles.qrScanButton}
           onPress={() => navigation?.navigate("QRScanner")}
         >
-          <Text style={homeStyles.qrScanButtonText}>[ l ]</Text>
+          <Ionicons name="qr-code-outline" size={24} color="#ffffff" />
         </TouchableOpacity>
 
         {/* Back button when viewing category or search results */}
@@ -430,13 +431,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 <View
                   style={[
                     homeStyles.userAvatar,
-                    { backgroundColor: "#BDBDBD", alignItems: "center", justifyContent: "center" },
+                    {
+                      backgroundColor: "#BDBDBD",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    },
                   ]}
                 >
-                  <Text style={{ backgroundColor: "#FF6B35",color: "#fff", fontSize: 16, fontWeight: "700" }}>
-                    {( user?.username || "U")
-                      .charAt(0)
-                      .toUpperCase()}
+                  <Text
+                    style={{
+                      backgroundColor: "#FF6B35",
+                      color: "#fff",
+                      fontSize: 16,
+                      fontWeight: "700",
+                    }}
+                  >
+                    {(user?.username || "U").charAt(0).toUpperCase()}
                   </Text>
                 </View>
               )}
