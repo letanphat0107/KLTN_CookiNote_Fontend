@@ -180,12 +180,17 @@ export const floatingStyles = StyleSheet.create({
   userMessageText: {
     backgroundColor: "#2196F3",
     color: "#FFFFFF",
+    fontSize: 16,
+    lineHeight: 22,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 18,
   },
 
-  aiMessageText: {
-    backgroundColor: "#F0F0F0",
-    color: "#333333",
-  },
+  // aiMessageText: {
+  //   backgroundColor: "#F0F0F0",
+  //   color: "#333333",
+  // },
 
   messageTime: {
     fontSize: 12,
@@ -878,4 +883,36 @@ dishNameHint: {
   fontStyle: "italic",
   marginTop: 8,
 },
+
+formattedMessageContainer: {
+  gap: 8,
+  paddingVertical: 4,
+},
+
+aiMessageText: {
+  fontSize: 15,
+  lineHeight: 22,
+  color: "#2d3436",
+},
+
+boldText: {
+  fontWeight: "700",
+  color: "#1e272e",
+},
+
+bulletPoint: {
+  flexDirection: "row",
+  alignItems: "flex-start",
+  paddingLeft: 4,
+  marginBottom: 4,
+},
+
+bulletIcon: {
+  fontSize: 12,
+  color: "#FF6B35",
+  marginRight: 8,
+  lineHeight: 22,    // căn thẳng với text
+  paddingTop: 3,     // chỉnh để • nằm giữa dòng
+},
+
 });

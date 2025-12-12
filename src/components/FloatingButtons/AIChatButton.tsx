@@ -626,6 +626,92 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
     </View>
   );
 
+  const formatAIMessage = (message: string) => {
+    // Split message into lines
+    const lines = message.split("\n");
+    const formattedElements: React.ReactNode[] = [];
+
+    let key = 0;
+
+    lines.forEach((line, index) => {
+      const trimmedLine = line.trim();
+
+      // Skip empty lines but add spacing
+      if (!trimmedLine) {
+        formattedElements.push(
+          <View key={`space-${key++}`} style={{ height: 8 }} />
+        );
+        return;
+      }
+
+      // Bold text between ** **
+      if (trimmedLine.includes("**")) {
+        const parts = trimmedLine.split("**");
+        const formattedParts = parts.map((part, i) => {
+          if (i % 2 === 1) {
+            // Odd index = bold text
+            return (
+              <Text key={`bold-${key++}`} style={floatingStyles.boldText}>
+                {part}
+              </Text>
+            );
+          }
+          return <Text key={`normal-${key++}`}>{part}</Text>;
+        });
+
+        formattedElements.push(
+          <Text key={`line-${index}`} style={floatingStyles.aiMessageText}>
+            {formattedParts}
+          </Text>
+        );
+        return;
+      }
+
+      // Bullet points (lines starting with *)
+      if (trimmedLine.startsWith("*")) {
+        const bulletText = trimmedLine.substring(1).trim();
+        const colonIndex = bulletText.indexOf(":");
+
+        if (colonIndex > 0) {
+          // Has colon - make text before colon bold
+          const beforeColon = bulletText.substring(0, colonIndex);
+          const afterColon = bulletText.substring(colonIndex);
+
+          formattedElements.push(
+            <View key={`bullet-${index}`} style={floatingStyles.bulletPoint}>
+              <Text style={floatingStyles.bulletIcon}>•</Text>
+              <Text style={floatingStyles.aiMessageText}>
+                <Text style={floatingStyles.boldText}>{beforeColon}</Text>
+                {afterColon}
+              </Text>
+            </View>
+          );
+        } else {
+          formattedElements.push(
+            <View key={`bullet-${index}`} style={floatingStyles.bulletPoint}>
+              <Text style={floatingStyles.bulletIcon}>•</Text>
+              <Text style={floatingStyles.aiMessageText}>{bulletText}</Text>
+            </View>
+          );
+        }
+        return;
+      }
+
+      // Regular paragraph
+      formattedElements.push(
+        <Text key={`line-${index}`} style={floatingStyles.aiMessageText}>
+          {trimmedLine}
+        </Text>
+      );
+    });
+
+    return (
+      <View style={floatingStyles.formattedMessageContainer}>
+        {formattedElements}
+      </View>
+    );
+  };
+
   const renderChatMessage = (message: ChatMessage) => (
     <View
       key={message.id}
@@ -643,16 +729,14 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
         </View>
       ) : (
         <>
-          <Text
-            style={[
-              floatingStyles.messageText,
-              message.isUser
-                ? floatingStyles.userMessageText
-                : floatingStyles.aiMessageText,
-            ]}
-          >
-            {message.message}
-          </Text>
+          {/* Format AI messages differently from user messages */}
+          {message.isUser ? (
+            <Text style={floatingStyles.userMessageText}>
+              {message.message}
+            </Text>
+          ) : (
+            formatAIMessage(message.message)
+          )}
 
           {/* Generated Recipe */}
           {message.generatedRecipe &&
@@ -909,78 +993,78 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
       {renderIngredientSelector()}
 
       {/* AI Recipe Creator Modal */}
-    {renderAIRecipeCreatorModal()}
+      {renderAIRecipeCreatorModal()}
     </Modal>
   );
 
   const renderAIRecipeCreatorModal = () => (
-  <Modal
-    visible={showAIRecipeCreator}
-    transparent={true}
-    animationType="fade"
-  >
-    <View style={floatingStyles.ingredientModalOverlay}>
-      <View style={floatingStyles.ingredientModal}>
-        <View style={floatingStyles.ingredientHeader}>
-          <Text style={floatingStyles.ingredientTitle}>
-            ✨ Tạo công thức bằng AI
-          </Text>
-          <TouchableOpacity onPress={() => setShowAIRecipeCreator(false)}>
-            <Text style={floatingStyles.closeButton}>✕</Text>
-          </TouchableOpacity>
-        </View>
+    <Modal
+      visible={showAIRecipeCreator}
+      transparent={true}
+      animationType="fade"
+    >
+      <View style={floatingStyles.ingredientModalOverlay}>
+        <View style={floatingStyles.ingredientModal}>
+          <View style={floatingStyles.ingredientHeader}>
+            <Text style={floatingStyles.ingredientTitle}>
+              ✨ Tạo công thức bằng AI
+            </Text>
+            <TouchableOpacity onPress={() => setShowAIRecipeCreator(false)}>
+              <Text style={floatingStyles.closeButton}>✕</Text>
+            </TouchableOpacity>
+          </View>
 
-        <View style={{ padding: 20 }}>
-          <Text style={floatingStyles.ingredientSubtitle}>
-            Nhập tên món ăn bạn muốn tạo công thức
-          </Text>
+          <View style={{ padding: 20 }}>
+            <Text style={floatingStyles.ingredientSubtitle}>
+              Nhập tên món ăn bạn muốn tạo công thức
+            </Text>
 
-          <TextInput
-            style={floatingStyles.dishNameInput}
-            placeholder="Ví dụ: Phở bò, Bánh xèo, Cơm tấm..."
-            value={dishNameInput}
-            onChangeText={setDishNameInput}
-            placeholderTextColor="#999"
-            autoFocus={true}
-            maxLength={100}
-          />
+            <TextInput
+              style={floatingStyles.dishNameInput}
+              placeholder="Ví dụ: Phở bò, Bánh xèo, Cơm tấm..."
+              value={dishNameInput}
+              onChangeText={setDishNameInput}
+              placeholderTextColor="#999"
+              autoFocus={true}
+              maxLength={100}
+            />
 
-          <Text style={floatingStyles.dishNameHint}>
-            💡 Mẹo: Tên món càng chi tiết càng tốt (ví dụ: "Phở bò Nam Định")
-          </Text>
-        </View>
+            <Text style={floatingStyles.dishNameHint}>
+              💡 Mẹo: Tên món càng chi tiết càng tốt (ví dụ: "Phở bò Nam Định")
+            </Text>
+          </View>
 
-        <View style={floatingStyles.ingredientActions}>
-          <TouchableOpacity
-            style={floatingStyles.cancelButton}
-            onPress={() => {
-              setShowAIRecipeCreator(false);
-              setDishNameInput("");
-            }}
-          >
-            <Text style={floatingStyles.cancelButtonText}>Hủy</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              floatingStyles.getSuggestionsButton,
-              !dishNameInput.trim() && floatingStyles.disabledButton,
-            ]}
-            onPress={handleCreateAIRecipe}
-            disabled={!dishNameInput.trim() || isGeneratingRecipe}
-          >
-            {isGeneratingRecipe ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <Text style={floatingStyles.getSuggestionsButtonText}>
-                Tạo công thức ✨
-              </Text>
-            )}
-          </TouchableOpacity>
+          <View style={floatingStyles.ingredientActions}>
+            <TouchableOpacity
+              style={floatingStyles.cancelButton}
+              onPress={() => {
+                setShowAIRecipeCreator(false);
+                setDishNameInput("");
+              }}
+            >
+              <Text style={floatingStyles.cancelButtonText}>Hủy</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                floatingStyles.getSuggestionsButton,
+                !dishNameInput.trim() && floatingStyles.disabledButton,
+              ]}
+              onPress={handleCreateAIRecipe}
+              disabled={!dishNameInput.trim() || isGeneratingRecipe}
+            >
+              {isGeneratingRecipe ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text style={floatingStyles.getSuggestionsButtonText}>
+                  Tạo công thức ✨
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
-  </Modal>
-);
+    </Modal>
+  );
 
   return (
     <>

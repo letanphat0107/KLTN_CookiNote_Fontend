@@ -285,7 +285,7 @@ const PersonalizedSuggestionScreen: React.FC<
             navigation?.navigate("RecipeDetail", {
               recipeId: recipe.originalRecipeId.toString(),
               showRating: false,
-  showComments: false 
+              showComments: false,
             })
           }
         >
