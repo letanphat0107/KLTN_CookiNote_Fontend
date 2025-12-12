@@ -757,6 +757,12 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
           onChangeText={setSearchQuery}
           placeholderTextColor="#999"
         />
+        <TouchableOpacity
+          style={favoriteStyles.modernCreateButton}
+          onPress={() => navigation.navigate("CreateRecipe")}
+        >
+          <Ionicons name="add" size={24} color="#FFF" />
+        </TouchableOpacity>
       </View>
 
       <View style={favoriteStyles.shareCodeContainer}>

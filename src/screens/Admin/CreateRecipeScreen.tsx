@@ -33,10 +33,13 @@ interface Step {
 
 const CreateRecipeScreen = () => {
   const navigation = useNavigation();
-  const { tokens } = useAppSelector((state) => state.auth);
+  const { tokens, user } = useAppSelector((state) => state.auth);
 
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+
+  // Check if user is admin
+  const isAdmin = user?.role === "ADMIN";
 
   // Basic info
   const [categoryId, setCategoryId] = useState("1");
@@ -47,7 +50,10 @@ const CreateRecipeScreen = () => {
   const [difficulty, setDifficulty] = useState<"EASY" | "MEDIUM" | "HARD">(
     "MEDIUM"
   );
-  const [privacy, setPrivacy] = useState<"PUBLIC" | "PRIVATE">("PUBLIC");
+  // Set default privacy to PRIVATE for regular users, PUBLIC for admins
+  const [privacy, setPrivacy] = useState<"PUBLIC" | "PRIVATE">(
+    isAdmin ? "PUBLIC" : "PRIVATE"
+  );
 
   // Cover image
   const [coverImageUri, setCoverImageUri] = useState<string | null>(null);
@@ -472,56 +478,59 @@ const CreateRecipeScreen = () => {
             </View>
           </View>
 
-          <View style={adminStyles.modernFormGroup}>
-            <Text style={adminStyles.modernLabel}>Quyền riêng tư</Text>
-            <View style={adminStyles.modernPrivacyPicker}>
-              <TouchableOpacity
-                style={[
-                  adminStyles.modernPrivacyChip,
-                  privacy === "PUBLIC" && adminStyles.modernPrivacyChipActive,
-                ]}
-                onPress={() => setPrivacy("PUBLIC")}
-              >
-                <Ionicons
-                  name="earth-outline"
-                  size={18}
-                  color={privacy === "PUBLIC" ? "#FFF" : "#7F8C8D"}
-                />
-                <Text
+          {isAdmin && (
+            <View style={adminStyles.modernFormGroup}>
+              <Text style={adminStyles.modernLabel}>Quyền riêng tư</Text>
+              <View style={adminStyles.modernPrivacyPicker}>
+                <TouchableOpacity
                   style={[
-                    adminStyles.modernPrivacyChipText,
-                    privacy === "PUBLIC" &&
-                      adminStyles.modernPrivacyChipTextActive,
+                    adminStyles.modernPrivacyChip,
+                    privacy === "PUBLIC" && adminStyles.modernPrivacyChipActive,
                   ]}
+                  onPress={() => setPrivacy("PUBLIC")}
                 >
-                  Công khai
-                </Text>
-              </TouchableOpacity>
+                  <Ionicons
+                    name="earth-outline"
+                    size={18}
+                    color={privacy === "PUBLIC" ? "#FFF" : "#7F8C8D"}
+                  />
+                  <Text
+                    style={[
+                      adminStyles.modernPrivacyChipText,
+                      privacy === "PUBLIC" &&
+                        adminStyles.modernPrivacyChipTextActive,
+                    ]}
+                  >
+                    Công khai
+                  </Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  adminStyles.modernPrivacyChip,
-                  privacy === "PRIVATE" && adminStyles.modernPrivacyChipActive,
-                ]}
-                onPress={() => setPrivacy("PRIVATE")}
-              >
-                <Ionicons
-                  name="lock-closed-outline"
-                  size={18}
-                  color={privacy === "PRIVATE" ? "#FFF" : "#7F8C8D"}
-                />
-                <Text
+                <TouchableOpacity
                   style={[
-                    adminStyles.modernPrivacyChipText,
+                    adminStyles.modernPrivacyChip,
                     privacy === "PRIVATE" &&
-                      adminStyles.modernPrivacyChipTextActive,
+                      adminStyles.modernPrivacyChipActive,
                   ]}
+                  onPress={() => setPrivacy("PRIVATE")}
                 >
-                  Riêng tư
-                </Text>
-              </TouchableOpacity>
+                  <Ionicons
+                    name="lock-closed-outline"
+                    size={18}
+                    color={privacy === "PRIVATE" ? "#FFF" : "#7F8C8D"}
+                  />
+                  <Text
+                    style={[
+                      adminStyles.modernPrivacyChipText,
+                      privacy === "PRIVATE" &&
+                        adminStyles.modernPrivacyChipTextActive,
+                    ]}
+                  >
+                    Riêng tư
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          )}
         </View>
 
         {/* Ingredients Section */}

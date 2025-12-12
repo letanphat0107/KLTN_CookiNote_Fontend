@@ -324,6 +324,8 @@ cookedNote: {
 searchContainer: {
     paddingHorizontal: 16,
     marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
   },
 
   searchInput: {
@@ -335,6 +337,8 @@ searchContainer: {
     color: "#333",
     borderWidth: 1,
     borderColor: "#E0E0E0",
+    flex: 1,
+    marginRight: 8,
   },
 
   shareCodeContainer: {
@@ -467,6 +471,20 @@ searchContainer: {
     fontSize: 13,
     fontWeight: "600",
   },
+  modernCreateButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#FF6B6B",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#FF6B6B",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+
 });
 
 export default favoriteStyles;
