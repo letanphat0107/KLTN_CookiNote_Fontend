@@ -585,6 +585,31 @@ class AdminService {
     }
   }
 
+  // Add this method to the AdminService class in adminService.ts
+
+async updateRecipeNutrition(
+  recipeId: number,
+  nutritionData: { calories?: number; servings?: number }
+): Promise<void> {
+  try {
+    const response = await fetchWithAuth(
+      buildApiUrl(`${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/nutrition`),
+      {
+        method: "PATCH",
+        body: JSON.stringify(nutritionData),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to update nutrition info");
+    }
+  } catch (error) {
+    console.error("Error updating nutrition:", error);
+    throw error;
+  }
+}
+
   // Step: add full field
   async addStep(
     recipeId: number,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,13 +7,16 @@ import {
   Image,
   Share,
   Animated,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { culinaryStoryStyles } from "./styles";
+import { getPostDetail, Post } from "../../services/postService";
 
 interface CulinaryStoryDetailScreenProps {
   route?: {
     params?: {
-      storyId?: string;
+      postId?: string;
     };
   };
   navigation?: any;
@@ -23,74 +26,35 @@ const CulinaryStoryDetailScreen: React.FC<CulinaryStoryDetailScreenProps> = ({
   route,
   navigation,
 }) => {
-  const storyId = route?.params?.storyId;
+  const postId = route?.params?.postId;
+  const [post, setPost] = useState<Post | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(124);
+  const [likeCount, setLikeCount] = useState(0);
 
   // Toast message state
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
   const toastOpacity = useState(new Animated.Value(0))[0];
 
-  // Mock detailed story data
-  const storyDetail = {
-    id: parseInt(storyId || "1"),
-    title: "Khám phá văn hóa ẩm thực Việt Nam",
-    fullContent: `
-Ẩm thực Việt Nam là một phần không thể tách rời khỏi văn hóa và lịch sử dân tộc. Từ những món ăn đơn giản trong gia đình đến những đặc sản vùng miền, mỗi món ăn đều mang trong mình một câu chuyện riêng.
+  useEffect(() => {
+    if (postId) {
+      loadPostDetail();
+    }
+  }, [postId]);
 
-**Nguồn gốc và phát triển**
-
-Ẩm thực Việt Nam được hình thành qua hàng nghìn năm lịch sử, chịu ảnh hưởng từ nhiều nền văn hóa khác nhau nhưng vẫn giữ được nét đặc trưng riêng. Từ thời cổ đại, người Việt đã biết cách chế biến các món ăn từ gạo, rau củ và thịt cá.
-
-**Đặc điểm nổi bật**
-
-- **Cân bằng dinh dưỡng**: Mỗi bữa ăn Việt Nam thường có đầy đủ chất đạm, tinh bột, vitamin từ rau xanh
-- **Hương vị hài hòa**: Sự kết hợp tinh tế giữa ngọt, chua, cay, mặn
-- **Nguyên liệu tươi ngon**: Ưu tiên sử dụng nguyên liệu tươi, theo mùa
-- **Cách chế biến đa dạng**: Luộc, nướng, xào, canh, gỏi...
-
-**Món ăn đặc trưng**
-
-Phở, bánh mì, bún bò Huế, bánh xèo, gỏi cuốn... mỗi món đều có cách chế biến và thưởng thức riêng biệt, phản ánh văn hóa ẩm thực phong phú của từng vùng miền.
-
-**Giá trị văn hóa**
-
-Ẩm thực không chỉ là việc ăn uống mà còn là cách thể hiện tình cảm, sự tôn trọng và kết nối con người. Bữa cơm gia đình, những buổi tiệc tết, hay đơn giản là mời khách uống trà đều mang ý nghĩa văn hóa sâu sắc.
-    `,
-    category: "culture",
-    author: {
-      name: "Chef Minh",
-      avatar:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
-      bio: "Đầu bếp chuyên nghiệp với 15 năm kinh nghiệm trong lĩnh vực ẩm thực Việt Nam",
-      followers: "2.1K",
-    },
-    publishDate: "2 ngày trước",
-    readTime: "5 phút đọc",
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
-    tags: ["Văn hóa", "Ẩm thực Việt", "Truyền thống", "Lịch sử"],
-    viewCount: 1234,
-    shareCount: 89,
+  const loadPostDetail = async () => {
+    try {
+      setIsLoading(true);
+      const postData = await getPostDetail(parseInt(postId || "0"));
+      setPost(postData);
+    } catch (error) {
+      console.error("Error loading post detail:", error);
+      Alert.alert("Lỗi", "Không thể tải thông tin bài viết");
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  const relatedStories = [
-    {
-      id: 2,
-      title: "Bí quyết nấu ăn từ các đầu bếp chuyên nghiệp",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
-      readTime: "3 phút đọc",
-    },
-    {
-      id: 3,
-      title: "Hành trình khám phá món ăn địa phương",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
-      readTime: "4 phút đọc",
-    },
-  ];
 
   // Toast functions
   const showToastMessage = (message: string, duration: number = 2000) => {
@@ -127,25 +91,55 @@ Phở, bánh mì, bún bò Huế, bánh xèo, gỏi cuốn... mỗi món đều 
   };
 
   const handleShare = async () => {
+    if (!post) return;
+
     try {
       await Share.share({
-        message: `Đọc bài viết hay: "${storyDetail.title}" trên CookiNote`,
-        url: `https://cookinote.app/story/${storyId}`,
+        message: `Đọc bài viết hay: "${post.title}" trên CookiNote`,
+        url: `https://cookinote.app/posts/${postId}`,
       });
     } catch (error) {
       showToastMessage("Không thể chia sẻ bài viết");
     }
   };
 
-  const handleFollowAuthor = () => {
-    showToastMessage(`Đã theo dõi ${storyDetail.author.name}!`);
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "Hôm nay";
+    if (diffDays === 1) return "Hôm qua";
+    if (diffDays < 7) return `${diffDays} ngày trước`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} tuần trước`;
+    return date.toLocaleDateString("vi-VN");
   };
 
-  const handleRelatedStoryPress = (id: number) => {
-    if (navigation) {
-      navigation.push("CulinaryStoryDetail", { storyId: id.toString() });
-    }
-  };
+  if (isLoading) {
+    return (
+      <View style={culinaryStoryStyles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FF6B6B" />
+        <Text style={culinaryStoryStyles.loadingText}>Đang tải...</Text>
+      </View>
+    );
+  }
+
+  if (!post) {
+    return (
+      <View style={culinaryStoryStyles.loadingContainer}>
+        <Text style={culinaryStoryStyles.emptyTitle}>
+          Không tìm thấy bài viết
+        </Text>
+        <TouchableOpacity
+          style={culinaryStoryStyles.readMoreButton}
+          onPress={handleBack}
+        >
+          <Text style={culinaryStoryStyles.readMoreText}>Quay lại</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={culinaryStoryStyles.detailContainer}>
@@ -186,87 +180,49 @@ Phở, bánh mì, bún bò Huế, bánh xèo, gỏi cuốn... mỗi món đều 
         style={culinaryStoryStyles.detailContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Story Image */}
+        {/* Post Image */}
         <Image
-          source={{ uri: storyDetail.image }}
+          source={{
+            uri:
+              post.imageUrl ||
+              "https://thecrites.com/sites/all/modules/cookbook/theme/images/default-recipe-big.png",
+          }}
           style={culinaryStoryStyles.detailImage}
         />
 
-        {/* Story Info */}
+        {/* Post Info */}
         <View style={culinaryStoryStyles.detailInfo}>
-          {/* Category & Read Time */}
-          <View style={culinaryStoryStyles.detailMeta}>
-            <View style={culinaryStoryStyles.categoryBadge}>
-              <Text style={culinaryStoryStyles.categoryBadgeText}>Văn hóa</Text>
-            </View>
-            <Text style={culinaryStoryStyles.readTime}>
-              📖 {storyDetail.readTime}
-            </Text>
-          </View>
-
           {/* Title */}
-          <Text style={culinaryStoryStyles.detailTitle}>
-            {storyDetail.title}
-          </Text>
-
-          {/* Stats */}
-          <View style={culinaryStoryStyles.statsContainer}>
-            <Text style={culinaryStoryStyles.statItem}>
-              👁️ {storyDetail.viewCount}
-            </Text>
-            <Text style={culinaryStoryStyles.statItem}>❤️ {likeCount}</Text>
-            <Text style={culinaryStoryStyles.statItem}>
-              📤 {storyDetail.shareCount}
-            </Text>
-          </View>
+          <Text style={culinaryStoryStyles.detailTitle}>{post.title}</Text>
 
           {/* Author Info */}
           <View style={culinaryStoryStyles.authorSection}>
             <Image
-              source={{ uri: storyDetail.author.avatar }}
+              source={{
+                uri: post.authorAvatarUrl || "https://via.placeholder.com/50",
+              }}
               style={culinaryStoryStyles.authorAvatar}
             />
             <View style={culinaryStoryStyles.authorInfo}>
               <Text style={culinaryStoryStyles.authorName}>
-                {storyDetail.author.name}
+                {post.authorName}
               </Text>
-              <Text style={culinaryStoryStyles.authorBio}>
-                {storyDetail.author.bio}
-              </Text>
-              <Text style={culinaryStoryStyles.authorFollowers}>
-                {storyDetail.author.followers} người theo dõi
-              </Text>
+              {post.role === "ADMIN" && (
+                <Text style={culinaryStoryStyles.adminBadgeText}>
+                  ✓ Quản trị viên
+                </Text>
+              )}
             </View>
-            <TouchableOpacity
-              style={culinaryStoryStyles.followButton}
-              onPress={handleFollowAuthor}
-            >
-              <Text style={culinaryStoryStyles.followButtonText}>Theo dõi</Text>
-            </TouchableOpacity>
           </View>
 
           {/* Publish Date */}
           <Text style={culinaryStoryStyles.publishDate}>
-            Xuất bản {storyDetail.publishDate}
+            Xuất bản {formatDate(post.createdAt)}
           </Text>
 
           {/* Content */}
           <View style={culinaryStoryStyles.contentSection}>
-            <Text style={culinaryStoryStyles.fullContent}>
-              {storyDetail.fullContent}
-            </Text>
-          </View>
-
-          {/* Tags */}
-          <View style={culinaryStoryStyles.tagsSection}>
-            <Text style={culinaryStoryStyles.tagsTitle}>Thẻ:</Text>
-            <View style={culinaryStoryStyles.tagsContainer}>
-              {storyDetail.tags.map((tag, index) => (
-                <View key={index} style={culinaryStoryStyles.tag}>
-                  <Text style={culinaryStoryStyles.tagText}>#{tag}</Text>
-                </View>
-              ))}
-            </View>
+            <Text style={culinaryStoryStyles.fullContent}>{post.content}</Text>
           </View>
 
           {/* Action Buttons */}
@@ -296,34 +252,6 @@ Phở, bánh mì, bún bò Huế, bánh xèo, gỏi cuốn... mỗi món đều 
                 📤 Chia sẻ
               </Text>
             </TouchableOpacity>
-          </View>
-
-          {/* Related Stories */}
-          <View style={culinaryStoryStyles.relatedSection}>
-            <Text style={culinaryStoryStyles.relatedTitle}>
-              📚 Bài viết liên quan
-            </Text>
-            {relatedStories.map((story) => (
-              <TouchableOpacity
-                key={story.id}
-                style={culinaryStoryStyles.relatedStoryCard}
-                onPress={() => handleRelatedStoryPress(story.id)}
-              >
-                <Image
-                  source={{ uri: story.image }}
-                  style={culinaryStoryStyles.relatedStoryImage}
-                />
-                <View style={culinaryStoryStyles.relatedStoryInfo}>
-                  <Text style={culinaryStoryStyles.relatedStoryTitle}>
-                    {story.title}
-                  </Text>
-                  <Text style={culinaryStoryStyles.relatedStoryReadTime}>
-                    {story.readTime}
-                  </Text>
-                </View>
-                <Text style={culinaryStoryStyles.relatedStoryArrow}>→</Text>
-              </TouchableOpacity>
-            ))}
           </View>
         </View>
       </ScrollView>

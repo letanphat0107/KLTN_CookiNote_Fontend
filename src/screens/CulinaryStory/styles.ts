@@ -464,6 +464,48 @@ export const culinaryStoryStyles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
   },
+
+  // Add these styles to culinaryStoryStyles in styles.ts
+
+authorAvatarImage: {
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  backgroundColor: "#E0E0E0",
+},
+
+adminBadge: {
+  position: "absolute",
+  top: 12,
+  right: 12,
+  backgroundColor: "#FF6B35",
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 12,
+  zIndex: 1,
+},
+
+adminBadgeText: {
+  color: "#FFF",
+  fontSize: 12,
+  fontWeight: "600",
+},
+
+loadMoreButton: {
+  backgroundColor: "#FF6B35",
+  paddingVertical: 12,
+  paddingHorizontal: 24,
+  borderRadius: 8,
+  alignItems: "center",
+  marginHorizontal: 16,
+  marginTop: 16,
+},
+
+loadMoreText: {
+  color: "#FFF",
+  fontSize: 16,
+  fontWeight: "600",
+},
 });
 
 export default culinaryStoryStyles;

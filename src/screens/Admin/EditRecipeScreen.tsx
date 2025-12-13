@@ -63,6 +63,9 @@ const EditRecipeScreen = () => {
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
   const [newCoverImageUri, setNewCoverImageUri] = useState<string | null>(null);
 
+  const [calories, setCalories] = useState("");
+  const [servings, setServings] = useState("");
+
   // Ingredients
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
 
@@ -106,6 +109,9 @@ const EditRecipeScreen = () => {
         setDifficulty(recipe.difficulty as any);
         setPrivacy((recipe.privacy as any) || "PUBLIC");
         setCoverImageUrl(recipe.imageUrl || null);
+
+        setCalories(recipe.calories?.toString() || "");
+        setServings(recipe.servings?.toString() || "");
 
         if (recipe.ingredients && recipe.ingredients.length > 0) {
           setIngredients(
@@ -593,6 +599,18 @@ const EditRecipeScreen = () => {
 
             await adminService.updateRecipe(recipeId, recipeData);
 
+            const nutritionData: { calories?: number; servings?: number } = {};
+            if (calories.trim()) {
+              nutritionData.calories = parseInt(calories);
+            }
+            if (servings.trim()) {
+              nutritionData.servings = parseInt(servings);
+            }
+
+            if (Object.keys(nutritionData).length > 0) {
+              await adminService.updateRecipeNutrition(recipeId, nutritionData);
+            }
+
             Alert.alert("Thành công", "Đã cập nhật công thức", [
               {
                 text: "OK",
@@ -787,6 +805,38 @@ const EditRecipeScreen = () => {
                 placeholder="0"
                 value={cookTime}
                 onChangeText={setCookTime}
+                keyboardType="numeric"
+                placeholderTextColor="#95A5A6"
+              />
+            </View>
+          </View>
+
+          <View style={adminStyles.modernRowGroup}>
+            <View style={[adminStyles.modernFormGroup, { flex: 1 }]}>
+              <Text style={adminStyles.modernLabel}>
+                <Ionicons name="fitness-outline" size={16} color="#7F8C8D" />{" "}
+                Calories (kcal)
+              </Text>
+              <TextInput
+                style={adminStyles.modernInput}
+                placeholder="0"
+                value={calories}
+                onChangeText={setCalories}
+                keyboardType="numeric"
+                placeholderTextColor="#95A5A6"
+              />
+            </View>
+
+            <View style={[adminStyles.modernFormGroup, { flex: 1 }]}>
+              <Text style={adminStyles.modernLabel}>
+                <Ionicons name="people-outline" size={16} color="#7F8C8D" />{" "}
+                Khẩu phần
+              </Text>
+              <TextInput
+                style={adminStyles.modernInput}
+                placeholder="0"
+                value={servings}
+                onChangeText={setServings}
                 keyboardType="numeric"
                 placeholderTextColor="#95A5A6"
               />

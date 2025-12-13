@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,8 +6,11 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { culinaryStoryStyles } from "./styles";
+import { getPosts, Post } from "../../services/postService";
 
 interface CulinaryStoryScreenProps {
   navigation?: any;
@@ -16,128 +19,120 @@ interface CulinaryStoryScreenProps {
 const CulinaryStoryScreen: React.FC<CulinaryStoryScreenProps> = ({
   navigation,
 }) => {
-  const [activeCategory, setActiveCategory] = useState("all");
-  const [isLoading, setIsLoading] = useState(false);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
 
-  // Sample culinary stories data
-  const stories = [
-    {
-      id: 1,
-      title: "Khám phá văn hóa ẩm thực Việt Nam",
-      content:
-        "Nơi chia sẻ những câu chuyện thú vị về ẩm thực, từ những món ăn truyền thống đến các xu hướng hiện đại. Khám phá bí mật đằng sau những hương vị đặc biệt của ẩm thực Việt Nam...",
-      category: "culture",
-      author: "Chef Minh",
-      publishDate: "2 ngày trước",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
-      featured: true,
-    },
-    {
-      id: 2,
-      title: "Bí quyết nấu ăn từ các đầu bếp chuyên nghiệp",
-      content:
-        "Học hỏi những kỹ thuật nấu ăn độc đáo và bí quyết từ các chuyên gia ẩm thực. Từ cách chọn nguyên liệu đến những tip nhỏ giúp món ăn thêm hấp dẫn...",
-      category: "tips",
-      author: "Chef An",
-      publishDate: "5 ngày trước",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
-      featured: false,
-    },
-    {
-      id: 3,
-      title: "Hành trình khám phá món ăn địa phương",
-      content:
-        "Cùng nhau khám phá những món ăn đặc sản từ khắp mọi miền đất nước. Mỗi vùng miền có những hương vị riêng biệt, tạo nên sự đa dạng phong phú của ẩm thực Việt...",
-      category: "travel",
-      author: "Food Explorer",
-      publishDate: "1 tuần trước",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
-      featured: false,
-    },
-    {
-      id: 4,
-      title: "Lịch sử phát triển của món phở Việt Nam",
-      content:
-        "Từ một món ăn đường phố đơn giản đến biểu tượng ẩm thực quốc gia. Hành trình phát triển và lan rộng của món phở ra khắp thế giới...",
-      category: "history",
-      author: "Historian Chef",
-      publishDate: "2 tuần trước",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
-      featured: false,
-    },
-  ];
-
-  const categories = [
-    { key: "all", label: "Tất cả" },
-    { key: "culture", label: "Văn hóa" },
-    { key: "tips", label: "Bí quyết" },
-    { key: "travel", label: "Du lịch" },
-    { key: "history", label: "Lịch sử" },
-  ];
-
-  const filteredStories = stories.filter(
-    (story) => activeCategory === "all" || story.category === activeCategory
+  // Load posts when screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      loadPosts();
+    }, [])
   );
 
-  const featuredStories = stories.filter((story) => story.featured);
+  const loadPosts = async (pageNum: number = 0, isRefresh: boolean = false) => {
+    try {
+      if (isRefresh) {
+        setIsRefreshing(true);
+      } else if (pageNum === 0) {
+        setIsLoading(true);
+      }
 
-  // Cập nhật handleReadMore function
-  const handleReadMore = (storyId: number) => {
-    console.log("Read more story:", storyId);
-    // Navigate to detail screen within the same stack
+      const response = await getPosts(pageNum, 10);
+
+      if (pageNum === 0) {
+        setPosts(response.items);
+      } else {
+        setPosts([...posts, ...response.items]);
+      }
+
+      setPage(pageNum);
+      setHasMore(response.hasNext);
+    } catch (error) {
+      console.error("Error loading posts:", error);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    loadPosts(0, true);
+  };
+
+  const handleReadMore = (postId: number) => {
     if (navigation) {
       navigation.navigate("CulinaryStoryDetail", {
-        storyId: storyId.toString(),
+        postId: postId.toString(),
       });
     }
   };
 
-  const renderStoryCard = (story: any, featured = false) => (
-    <View
-      key={story.id}
-      style={[
-        culinaryStoryStyles.storyCard,
-        featured && culinaryStoryStyles.featuredCard,
-      ]}
-    >
-      {/* Story Image */}
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "Hôm nay";
+    if (diffDays === 1) return "Hôm qua";
+    if (diffDays < 7) return `${diffDays} ngày trước`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} tuần trước`;
+    return date.toLocaleDateString("vi-VN");
+  };
+
+  const renderPostCard = (post: Post) => (
+    <View key={post.id} style={culinaryStoryStyles.storyCard}>
+      {/* Post Image */}
       <Image
-        source={{ uri: story.image }}
+        source={{
+          uri:
+            post.imageUrl ||
+            "https://thecrites.com/sites/all/modules/cookbook/theme/images/default-recipe-big.png",
+        }}
         style={culinaryStoryStyles.storyImage}
       />
 
-      {/* Category Badge */}
-      <Text style={culinaryStoryStyles.storyCategory}>
-        {categories.find((cat) => cat.key === story.category)?.label ||
-          story.category}
+      {/* Author Badge */}
+      {post.role === "ADMIN" && (
+        <View style={culinaryStoryStyles.adminBadge}>
+          <Text style={culinaryStoryStyles.adminBadgeText}>✓ Admin</Text>
+        </View>
+      )}
+
+      {/* Post Title */}
+      <Text style={culinaryStoryStyles.storyTitle}>{post.title}</Text>
+
+      {/* Post Content Preview */}
+      <Text style={culinaryStoryStyles.storyContent} numberOfLines={3}>
+        {post.content}
       </Text>
-
-      {/* Story Title */}
-      <Text style={culinaryStoryStyles.storyTitle}>{story.title}</Text>
-
-      {/* Story Content Preview */}
-      <Text style={culinaryStoryStyles.storyContent}>{story.content}</Text>
 
       {/* Read More Button */}
       <TouchableOpacity
         style={culinaryStoryStyles.readMoreButton}
-        onPress={() => handleReadMore(story.id)}
+        onPress={() => handleReadMore(post.id)}
       >
         <Text style={culinaryStoryStyles.readMoreText}>Đọc tiếp</Text>
       </TouchableOpacity>
 
-      {/* Story Metadata */}
+      {/* Post Metadata */}
       <View style={culinaryStoryStyles.storyMeta}>
         <View style={culinaryStoryStyles.authorInfo}>
-          <View style={culinaryStoryStyles.authorAvatar} />
+          <Image
+            source={{
+              uri: post.authorAvatarUrl || "https://via.placeholder.com/40",
+            }}
+            style={culinaryStoryStyles.authorAvatarImage}
+          />
           <View>
-            <Text style={culinaryStoryStyles.authorName}>{story.author}</Text>
+            <Text style={culinaryStoryStyles.authorName}>
+              {post.authorName}
+            </Text>
             <Text style={culinaryStoryStyles.publishDate}>
-              {story.publishDate}
+              {formatDate(post.createdAt)}
             </Text>
           </View>
         </View>
@@ -176,57 +171,33 @@ const CulinaryStoryScreen: React.FC<CulinaryStoryScreenProps> = ({
         </Text>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Categories Filter */}
-        <View style={culinaryStoryStyles.categoriesContainer}>
-          <Text style={culinaryStoryStyles.categoriesTitle}>Danh mục</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={culinaryStoryStyles.categoriesList}
-          >
-            {categories.map((category) => (
-              <TouchableOpacity
-                key={category.key}
-                style={[
-                  culinaryStoryStyles.categoryButton,
-                  activeCategory === category.key &&
-                    culinaryStoryStyles.categoryButtonActive,
-                ]}
-                onPress={() => setActiveCategory(category.key)}
-              >
-                <Text
-                  style={[
-                    culinaryStoryStyles.categoryButtonText,
-                    activeCategory === category.key &&
-                      culinaryStoryStyles.categoryButtonTextActive,
-                  ]}
-                >
-                  {category.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            colors={["#FF6B35"]}
+            tintColor="#FF6B35"
+          />
+        }
+      >
+        {/* All Posts */}
+        <View style={culinaryStoryStyles.content}>
+          {posts.length === 0 ? renderEmptyState() : posts.map(renderPostCard)}
         </View>
 
-        {/* Featured Stories */}
-        {featuredStories.length > 0 && activeCategory === "all" && (
-          <View style={culinaryStoryStyles.featuredSection}>
-            <Text style={culinaryStoryStyles.featuredTitle}>
-              🌟 Câu chuyện nổi bật
-            </Text>
-            {featuredStories.map((story) => renderStoryCard(story, true))}
-          </View>
+        {/* Load More */}
+        {hasMore && (
+          <TouchableOpacity
+            style={culinaryStoryStyles.loadMoreButton}
+            onPress={() => loadPosts(page + 1)}
+          >
+            <Text style={culinaryStoryStyles.loadMoreText}>Tải thêm</Text>
+          </TouchableOpacity>
         )}
 
-        {/* All Stories */}
-        <View style={culinaryStoryStyles.content}>
-          {filteredStories.length === 0
-            ? renderEmptyState()
-            : filteredStories
-                .filter((story) => !story.featured || activeCategory !== "all")
-                .map((story) => renderStoryCard(story))}
-        </View>
+        <View style={{ height: 20 }} />
       </ScrollView>
     </View>
   );
