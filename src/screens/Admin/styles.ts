@@ -928,12 +928,6 @@ export const adminStyles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
 
-  // Modern Modal
-  modernModalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    justifyContent: "flex-end",
-  },
 
   modernModalContainer: {
     backgroundColor: "#FFFFFF",
@@ -943,21 +937,6 @@ export const adminStyles = StyleSheet.create({
     overflow: "hidden",
   },
 
-  modernModalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
-  },
-
-  modernModalTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#2C3E50",
-  },
 
   modernModalSubtitle: {
     fontSize: 14,
@@ -965,9 +944,7 @@ export const adminStyles = StyleSheet.create({
     marginTop: 4,
   },
 
-  modernModalContent: {
-    padding: 20,
-  },
+
 
   // Image Section
   imageSection: {
@@ -1015,14 +992,6 @@ export const adminStyles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  modernModalFooter: {
-    flexDirection: "row",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    gap: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#F0F0F0",
-  },
 
   modernCancelButton: {
     flex: 1,
@@ -2880,4 +2849,132 @@ modernActionButtonUser: {
   borderColor: '#E0E0E0',
   marginLeft: 10,
 },
+
+// Add these styles to the adminStyles object
+
+  // AI Buttons
+  modernAIButtonsContainer: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 8,
+  },
+  modernAIButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#3498DB",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    gap: 8,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  modernAIButtonText: {
+    color: "#FFF",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  // Modal Styles
+  modernModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modernModalContent: {
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    width: "100%",
+    maxWidth: 500,
+    overflow: "hidden",
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+  },
+  modernModalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ECF0F1",
+    gap: 12,
+  },
+  modernModalTitle: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#2C3E50",
+  },
+  modernModalCloseButton: {
+    padding: 4,
+  },
+  modernModalBody: {
+    padding: 20,
+  },
+  modernModalLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#2C3E50",
+    marginBottom: 8,
+  },
+  modernModalInput: {
+    backgroundColor: "#F8F9FA",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 14,
+    color: "#2C3E50",
+  },
+  modernModalHint: {
+    fontSize: 12,
+    color: "#7F8C8D",
+    marginTop: 8,
+    fontStyle: "italic",
+  },
+  modernModalFooter: {
+    flexDirection: "row",
+    padding: 20,
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#ECF0F1",
+  },
+  modernModalCancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#ECF0F1",
+    borderRadius: 12,
+  },
+  modernModalCancelText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#7F8C8D",
+  },
+  modernModalConfirmButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#3498DB",
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
+  },
+  modernModalConfirmText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FFF",
+  },
 });

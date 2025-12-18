@@ -83,6 +83,36 @@ export interface UpdateRecipeData {
   }>;
 }
 
+export interface AIImportedRecipe {
+  title: string;
+  description: string;
+  prepareTime: number;
+  cookTime: number;
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  ingredients: Array<{
+    name: string;
+    quantity: string;
+  }>;
+  steps: Array<{
+    stepNo: number;
+    content: string;
+    suggestedTime: number;
+    tips?: string;
+  }>;
+}
+
+export interface AIImportResponse {
+  code: number;
+  message: string;
+  data: AIImportedRecipe;
+}
+
+export interface AIEnrichResponse {
+  code: number;
+  message: string;
+  data: AIImportedRecipe;
+}
+
 class AdminService {
   // Get dashboard statistics
   async getDashboardStats(): Promise<DashboardStats> {
@@ -587,28 +617,30 @@ class AdminService {
 
   // Add this method to the AdminService class in adminService.ts
 
-async updateRecipeNutrition(
-  recipeId: number,
-  nutritionData: { calories?: number; servings?: number }
-): Promise<void> {
-  try {
-    const response = await fetchWithAuth(
-      buildApiUrl(`${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/nutrition`),
-      {
-        method: "PATCH",
-        body: JSON.stringify(nutritionData),
-      }
-    );
+  async updateRecipeNutrition(
+    recipeId: number,
+    nutritionData: { calories?: number; servings?: number }
+  ): Promise<void> {
+    try {
+      const response = await fetchWithAuth(
+        buildApiUrl(
+          `${API_CONFIG.ENDPOINTS.RECIPE.UPDATE}/${recipeId}/nutrition`
+        ),
+        {
+          method: "PATCH",
+          body: JSON.stringify(nutritionData),
+        }
+      );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to update nutrition info");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update nutrition info");
+      }
+    } catch (error) {
+      console.error("Error updating nutrition:", error);
+      throw error;
     }
-  } catch (error) {
-    console.error("Error updating nutrition:", error);
-    throw error;
   }
-}
 
   // Step: add full field
   async addStep(
@@ -747,6 +779,66 @@ async updateRecipeNutrition(
       return data.data;
     } catch (error) {
       console.error("Error fetching user recipes:", error);
+      throw error;
+    }
+  }
+
+  // AI Import from URL
+  async importRecipeFromUrl(url: string): Promise<AIImportedRecipe> {
+    try {
+      const response = await fetchWithAuth(
+        buildApiUrl("/cookinote/ai/import-from-url"),
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ url }),
+        },
+        true,
+        false
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || "Failed to import recipe from URL"
+        );
+      }
+
+      const data: AIImportResponse = await response.json();
+      return data.data;
+    } catch (error) {
+      console.error("Error importing recipe from URL:", error);
+      throw error;
+    }
+  }
+
+  // AI Enrich Recipe
+  async enrichRecipe(recipeData: AIImportedRecipe): Promise<AIImportedRecipe> {
+    try {
+      const response = await fetchWithAuth(
+        buildApiUrl("/cookinote/ai/enrich-recipe"),
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(recipeData),
+        },
+        true,
+        false
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to enrich recipe data");
+      }
+
+      const data: AIEnrichResponse = await response.json();
+      return data.data;
+    } catch (error) {
+      console.error("Error enriching recipe:", error);
       throw error;
     }
   }

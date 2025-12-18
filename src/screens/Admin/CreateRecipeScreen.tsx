@@ -8,11 +8,15 @@ import {
   Alert,
   Image,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { useAppSelector } from "../../store/hooks";
-import adminService, { CreateRecipeData } from "../../services/adminService";
+import adminService, {
+  CreateRecipeData,
+  AIImportedRecipe,
+} from "../../services/adminService";
 import { adminStyles } from "./styles";
 import { Ionicons } from "@expo/vector-icons";
 import { getCategories } from "../../services/categoryService";
@@ -37,6 +41,10 @@ const CreateRecipeScreen = () => {
 
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [importModalVisible, setImportModalVisible] = useState(false);
+  const [importUrl, setImportUrl] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [enriching, setEnriching] = useState(false);
 
   // Check if user is admin
   const isAdmin = user?.role === "ADMIN";
@@ -186,6 +194,176 @@ const CreateRecipeScreen = () => {
     setSteps(newSteps);
   };
 
+  const handleImportFromUrl = async () => {
+    if (!importUrl.trim()) {
+      Alert.alert("Lỗi", "Vui lòng nhập URL");
+      return;
+    }
+
+    setImporting(true);
+    try {
+      const importedData = await adminService.importRecipeFromUrl(importUrl);
+
+      // Fill form with imported data
+      setTitle(importedData.title || "");
+      setDescription(importedData.description || "");
+      setPrepareTime(importedData.prepareTime?.toString() || "");
+      setCookTime(importedData.cookTime?.toString() || "");
+      setDifficulty(importedData.difficulty || "MEDIUM");
+
+      if (importedData.ingredients && importedData.ingredients.length > 0) {
+        setIngredients(importedData.ingredients);
+      }
+
+      if (importedData.steps && importedData.steps.length > 0) {
+        setSteps(
+          importedData.steps.map((step) => ({
+            ...step,
+            imageUris: [],
+          }))
+        );
+      }
+
+      setImportModalVisible(false);
+      setImportUrl("");
+      Alert.alert(
+        "Thành công",
+        "Đã nhập công thức từ URL. Vui lòng kiểm tra và chỉnh sửa nếu cần."
+      );
+    } catch (error: any) {
+      console.error("Error importing recipe:", error);
+      Alert.alert("Lỗi", error.message || "Không thể nhập công thức từ URL");
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const checkMissingData = (): boolean => {
+    // Check if any required field is empty or has default/null values
+    if (!title.trim()) return true;
+    if (!description.trim()) return true;
+    if (!prepareTime || parseInt(prepareTime) <= 0) return true;
+    if (!cookTime || parseInt(cookTime) <= 0) return true;
+    if (
+      ingredients.length === 0 ||
+      ingredients.some((ing) => !ing.name.trim() || !ing.quantity.trim())
+    )
+      return true;
+    if (steps.length === 0 || steps.some((step) => !step.content.trim()))
+      return true;
+
+    return false;
+  };
+
+  const handleAutoFill = async () => {
+    if (!checkMissingData()) {
+      Alert.alert("Thông báo", "Tất cả thông tin đã được điền đầy đủ");
+      return;
+    }
+
+    Alert.alert(
+      "Xác nhận",
+      "AI sẽ tự động điền các thông tin còn thiếu. Bạn có muốn tiếp tục?",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Tiếp tục",
+          onPress: async () => {
+            setEnriching(true);
+            try {
+              // Prepare current data for enrichment
+              const currentData: AIImportedRecipe = {
+                title: title || "",
+                description: description || "",
+                prepareTime: parseInt(prepareTime) || 0,
+                cookTime: parseInt(cookTime) || 0,
+                difficulty: difficulty,
+                ingredients: ingredients.filter(
+                  (ing) => ing.name.trim() || ing.quantity.trim()
+                ),
+                steps: steps.map((step) => ({
+                  stepNo: step.stepNo,
+                  content: step.content,
+                  suggestedTime: step.suggestedTime,
+                  tips: step.tips,
+                })),
+              };
+
+              const enrichedData = await adminService.enrichRecipe(currentData);
+
+              // Update form with enriched data (only fill missing fields)
+              if (!title.trim() && enrichedData.title) {
+                setTitle(enrichedData.title);
+              }
+              if (!description.trim() && enrichedData.description) {
+                setDescription(enrichedData.description);
+              }
+              if (
+                (!prepareTime || parseInt(prepareTime) <= 0) &&
+                enrichedData.prepareTime
+              ) {
+                setPrepareTime(enrichedData.prepareTime.toString());
+              }
+              if (
+                (!cookTime || parseInt(cookTime) <= 0) &&
+                enrichedData.cookTime
+              ) {
+                setCookTime(enrichedData.cookTime.toString());
+              }
+
+              // Fill missing ingredients
+              if (
+                enrichedData.ingredients &&
+                enrichedData.ingredients.length > 0
+              ) {
+                const hasEmptyIngredients = ingredients.some(
+                  (ing) => !ing.name.trim() || !ing.quantity.trim()
+                );
+                if (
+                  hasEmptyIngredients ||
+                  (ingredients.length === 1 && !ingredients[0].name)
+                ) {
+                  setIngredients(enrichedData.ingredients);
+                }
+              }
+
+              // Fill missing steps
+              if (enrichedData.steps && enrichedData.steps.length > 0) {
+                const hasEmptySteps = steps.some(
+                  (step) => !step.content.trim()
+                );
+                if (
+                  hasEmptySteps ||
+                  (steps.length === 1 && !steps[0].content)
+                ) {
+                  setSteps(
+                    enrichedData.steps.map((step) => ({
+                      ...step,
+                      imageUris: [],
+                    }))
+                  );
+                }
+              }
+
+              Alert.alert(
+                "Thành công",
+                "Đã tự động điền thông tin còn thiếu. Vui lòng kiểm tra lại."
+              );
+            } catch (error: any) {
+              console.error("Error enriching recipe:", error);
+              Alert.alert(
+                "Lỗi",
+                error.message || "Không thể tự động điền thông tin"
+              );
+            } finally {
+              setEnriching(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const validateForm = (): boolean => {
     if (!title.trim()) {
       Alert.alert("Lỗi", "Vui lòng nhập tên món ăn");
@@ -307,6 +485,40 @@ const CreateRecipeScreen = () => {
         style={adminStyles.modernFormContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* AI Action Buttons */}
+        <View style={adminStyles.modernSection}>
+          <View style={adminStyles.modernAIButtonsContainer}>
+            <TouchableOpacity
+              style={adminStyles.modernAIButton}
+              onPress={() => setImportModalVisible(true)}
+              disabled={importing}
+            >
+              <Ionicons name="cloud-download-outline" size={20} color="#FFF" />
+              <Text style={adminStyles.modernAIButtonText}>Nhập từ URL</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                adminStyles.modernAIButton,
+                { backgroundColor: "#9B59B6" },
+              ]}
+              onPress={handleAutoFill}
+              disabled={enriching}
+            >
+              {enriching ? (
+                <ActivityIndicator size="small" color="#FFF" />
+              ) : (
+                <>
+                  <Ionicons name="sparkles-outline" size={20} color="#FFF" />
+                  <Text style={adminStyles.modernAIButtonText}>
+                    Tự động điền
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Cover Image Section */}
         <View style={adminStyles.modernSection}>
           <Text style={adminStyles.modernSectionTitle}>
@@ -749,6 +961,81 @@ const CreateRecipeScreen = () => {
           )}
         </TouchableOpacity>
       </View>
+
+      {/* Import URL Modal */}
+      <Modal
+        visible={importModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setImportModalVisible(false)}
+      >
+        <View style={adminStyles.modernModalOverlay}>
+          <View style={adminStyles.modernModalContent}>
+            <View style={adminStyles.modernModalHeader}>
+              <Ionicons
+                name="cloud-download-outline"
+                size={24}
+                color="#FF6B6B"
+              />
+              <Text style={adminStyles.modernModalTitle}>
+                Nhập công thức từ URL
+              </Text>
+              <TouchableOpacity
+                style={adminStyles.modernModalCloseButton}
+                onPress={() => setImportModalVisible(false)}
+              >
+                <Ionicons name="close" size={24} color="#7F8C8D" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={adminStyles.modernModalBody}>
+              <Text style={adminStyles.modernModalLabel}>URL công thức:</Text>
+              <TextInput
+                style={adminStyles.modernModalInput}
+                placeholder="https://vnexpress.net/..."
+                value={importUrl}
+                onChangeText={setImportUrl}
+                placeholderTextColor="#95A5A6"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <Text style={adminStyles.modernModalHint}>
+                AI sẽ tự động phân tích và trích xuất công thức từ URL
+              </Text>
+            </View>
+
+            <View style={adminStyles.modernModalFooter}>
+              <TouchableOpacity
+                style={adminStyles.modernModalCancelButton}
+                onPress={() => {
+                  setImportModalVisible(false);
+                  setImportUrl("");
+                }}
+              >
+                <Text style={adminStyles.modernModalCancelText}>Hủy</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  adminStyles.modernModalConfirmButton,
+                  importing && adminStyles.modernButtonDisabled,
+                ]}
+                onPress={handleImportFromUrl}
+                disabled={importing}
+              >
+                {importing ? (
+                  <ActivityIndicator size="small" color="#FFF" />
+                ) : (
+                  <>
+                    <Ionicons name="download-outline" size={20} color="#FFF" />
+                    <Text style={adminStyles.modernModalConfirmText}>Nhập</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };

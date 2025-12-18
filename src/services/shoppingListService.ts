@@ -39,7 +39,6 @@ export const getShoppingList = async (): Promise<ShoppingListResponse> => {
     );
 
     const result = await response.json();
-    console.log("API response:", result);
 
     if (response.ok && result.code === 200) {
       const groups = result.data || [];

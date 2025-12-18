@@ -80,7 +80,6 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
     setIsLoading(true);
     try {
       const response = await getShoppingList();
-      console.log("Shopping list response:", response);
 
       setShoppingListGroups(response.groups);
       setTotalItems(response.totalItems);
