@@ -9,9 +9,6 @@ import {
   updateCategory,
   moveRecipesBetweenCategories,
   deleteCategory,
-  CategoryCreateRequest,
-  CategoryUpdateRequest,
-  MoveCategoryRequest,
 } from "../services/categoryService";
 import { Alert } from "react-native";
 
@@ -67,139 +64,14 @@ export const useCategory = () => {
 
   // Admin functions - only available for admin users
 
-  // Create category (Admin only)
-  const createCategoryLocal = useCallback(
-    async (categoryData: CategoryCreateRequest): Promise<boolean> => {
-      if (!isAdmin) {
-        Alert.alert("Lỗi", "Chỉ quản trị viên mới có thể tạo danh mục");
-        return false;
-      }
-
-      setIsLoading(true);
-      try {
-        const success = await createCategory(categoryData);
-        if (success) {
-          Alert.alert("Thành công", "Đã tạo danh mục mới");
-          await fetchCategories(false); // Refresh list
-        } else {
-          Alert.alert("Lỗi", "Không thể tạo danh mục");
-        }
-        return success;
-      } catch (error) {
-        console.error("Error creating category:", error);
-        Alert.alert("Lỗi", "Đã có lỗi xảy ra khi tạo danh mục");
-        return false;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [isAdmin, fetchCategories]
-  );
 
   // Update category (Admin only)
-  const updateCategoryLocal = useCallback(
-    async (categoryData: CategoryUpdateRequest): Promise<boolean> => {
-      if (!isAdmin) {
-        Alert.alert("Lỗi", "Chỉ quản trị viên mới có thể cập nhật danh mục");
-        return false;
-      }
 
-      setIsLoading(true);
-      try {
-        const success = await updateCategory(categoryData);
-        if (success) {
-          Alert.alert("Thành công", "Đã cập nhật danh mục");
-          await fetchCategories(false); // Refresh list
-        } else {
-          Alert.alert("Lỗi", "Không thể cập nhật danh mục");
-        }
-        return success;
-      } catch (error) {
-        console.error("Error updating category:", error);
-        Alert.alert("Lỗi", "Đã có lỗi xảy ra khi cập nhật danh mục");
-        return false;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [isAdmin, fetchCategories]
-  );
 
-  // Move recipes between categories (Admin only)
-  const moveRecipes = useCallback(
-    async (moveData: MoveCategoryRequest): Promise<boolean> => {
-      if (!isAdmin) {
-        Alert.alert("Lỗi", "Chỉ quản trị viên mới có thể di chuyển công thức");
-        return false;
-      }
 
-      setIsLoading(true);
-      try {
-        const success = await moveRecipesBetweenCategories(moveData);
-        if (success) {
-          Alert.alert("Thành công", "Đã di chuyển công thức giữa các danh mục");
-        } else {
-          Alert.alert("Lỗi", "Không thể di chuyển công thức");
-        }
-        return success;
-      } catch (error) {
-        console.error("Error moving recipes:", error);
-        Alert.alert("Lỗi", "Đã có lỗi xảy ra khi di chuyển công thức");
-        return false;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [isAdmin]
-  );
 
   // Delete category (Admin only)
-  const deleteCategoryLocal = useCallback(
-    async (categoryId: number): Promise<boolean> => {
-      if (!isAdmin) {
-        Alert.alert("Lỗi", "Chỉ quản trị viên mới có thể xóa danh mục");
-        return false;
-      }
 
-      return new Promise((resolve) => {
-        Alert.alert(
-          "Xác nhận xóa",
-          "Bạn có chắc chắn muốn xóa danh mục này? Hành động này không thể hoàn tác.",
-          [
-            {
-              text: "Hủy",
-              style: "cancel",
-              onPress: () => resolve(false),
-            },
-            {
-              text: "Xóa",
-              style: "destructive",
-              onPress: async () => {
-                setIsLoading(true);
-                try {
-                  const success = await deleteCategory(categoryId);
-                  if (success) {
-                    Alert.alert("Thành công", "Đã xóa danh mục");
-                    await fetchCategories(false); // Refresh list
-                  } else {
-                    Alert.alert("Lỗi", "Không thể xóa danh mục");
-                  }
-                  resolve(success);
-                } catch (error) {
-                  console.error("Error deleting category:", error);
-                  Alert.alert("Lỗi", "Đã có lỗi xảy ra khi xóa danh mục");
-                  resolve(false);
-                } finally {
-                  setIsLoading(false);
-                }
-              },
-            },
-          ]
-        );
-      });
-    },
-    [isAdmin, fetchCategories]
-  );
 
   // Get category by ID
   const getCategoryById = useCallback(
@@ -229,9 +101,6 @@ export const useCategory = () => {
     getCategoryById,
 
     // Admin actions
-    createCategory: createCategoryLocal,
-    updateCategory: updateCategoryLocal,
-    deleteCategory: deleteCategoryLocal,
-    moveRecipes,
+
   };
 };

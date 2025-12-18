@@ -13,7 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { favoriteStyles } from "./styles";
 import { useAppSelector } from "../../store/hooks";
-import { Recipe } from "../../types/recipe";
+import { Recipe, Category } from "../../types/recipe";
 import {
   getFavoriteRecipes,
   getMyRecipes,
@@ -28,6 +28,7 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import { getSharedRecipe } from "../../services/shareService";
 import adminService from "../../services/adminService";
+import { getCategories } from "../../services/categoryService";
 
 interface FavoriteScreenProps {
   navigation?: any;
@@ -40,6 +41,13 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<TabType>("cooked");
+
+  // NEW: Category states
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
+    null
+  );
+  const [isCategoriesLoading, setIsCategoriesLoading] = useState(false);
 
   // Data states
   const [favoriteRecipes, setFavoriteRecipes] = useState<Recipe[]>([]);
@@ -76,21 +84,45 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
     { key: "deleted" as TabType, label: "Đã xóa", icon: "🗑️" },
   ];
 
-  // Auto-reload when screen is focused
+  // Load categories on mount
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  // Load categories
+  const loadCategories = async () => {
+    try {
+      setIsCategoriesLoading(true);
+      const data = await getCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error("Error loading categories:", error);
+    } finally {
+      setIsCategoriesLoading(false);
+    }
+  };
+
+  // Auto-reload when screen is focused or category changes
   useFocusEffect(
     useCallback(() => {
       if (isAuthenticated) {
         console.log("Screen focused, reloading data...");
         loadData(true);
       }
-    }, [isAuthenticated, activeTab])
+    }, [isAuthenticated, activeTab, selectedCategoryId])
   );
 
-  // Load data when tab changes
+  // Load data when tab or category changes
   useEffect(() => {
     if (isAuthenticated) {
       loadData();
     }
+  }, [activeTab, selectedCategoryId]);
+
+  //Reset category when tab changes
+  useEffect(() => {
+    // Reset to "Tất cả" when switching tabs
+    setSelectedCategoryId(null);
   }, [activeTab]);
 
   const loadData = async (isRefresh = false) => {
@@ -128,8 +160,10 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
 
   const loadFavoriteRecipes = async (isRefresh = false) => {
     try {
-      console.log("Loading favorite recipes...");
-      const result = await getFavoriteRecipes(0, 20);
+      console.log("Loading favorite recipes...", {
+        categoryId: selectedCategoryId,
+      });
+      const result = await getFavoriteRecipes(0, 20, selectedCategoryId);
       setFavoriteRecipes(result.items || []);
       setHasMoreFavorites(result.hasNext);
 
@@ -146,8 +180,8 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
 
   const loadMyRecipes = async (isRefresh = false) => {
     try {
-      console.log("Loading my recipes...");
-      const result = await getMyRecipes(0, 20);
+      console.log("Loading my recipes...", { categoryId: selectedCategoryId });
+      const result = await getMyRecipes(0, 20, selectedCategoryId);
       setMyRecipes(result.items || []);
       setHasMoreMyRecipes(result.hasNext);
 
@@ -166,7 +200,10 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
 
   const loadCookedHistory = async (isRefresh = false) => {
     try {
-      const result = await getCookedHistory(0, 20);
+      console.log("Loading cooked history...", {
+        categoryId: selectedCategoryId,
+      });
+      const result = await getCookedHistory(0, 20, selectedCategoryId);
 
       const items = result.items || [];
       setCookedHistory(items);
@@ -192,14 +229,107 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
     if (!user?.userId) return;
 
     try {
-      console.log("Loading deleted recipes...");
-      const result = await getDeletedRecipes(user.userId, 0, 20);
+      console.log("Loading deleted recipes...", {
+        categoryId: selectedCategoryId,
+      });
+      const result = await getDeletedRecipes(
+        user.userId,
+        0,
+        20,
+        selectedCategoryId
+      );
       setDeletedRecipes(result.items || []);
       setHasMoreDeleted(result.hasNext);
     } catch (error) {
       console.error("Error loading deleted recipes:", error);
       setDeletedRecipes([]);
     }
+  };
+
+  const handleCategorySelect = (categoryId: number | null) => {
+    setSelectedCategoryId(categoryId);
+  };
+
+  const renderCategoryIcon = (category: Category) => {
+    if (category.imageUrl && /[\u{1f000}-\u{1f999}]/u.test(category.imageUrl)) {
+      return (
+        <Text style={favoriteStyles.categoryIcon}>{category.imageUrl}</Text>
+      );
+    }
+
+    if (
+      category.imageUrl &&
+      (category.imageUrl.startsWith("http://") ||
+        category.imageUrl.startsWith("https://"))
+    ) {
+      return (
+        <Image
+          source={{ uri: category.imageUrl }}
+          style={favoriteStyles.categoryIconImage}
+          resizeMode="cover"
+        />
+      );
+    }
+
+    return <Text style={favoriteStyles.categoryIcon}>🍽️</Text>;
+  };
+
+  const renderCategoryFilter = () => {
+    if (categories.length === 0) return null;
+
+    return (
+      <View style={favoriteStyles.categoryFilterContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={favoriteStyles.categoryScrollView}
+        >
+          {/* All Categories Button */}
+          <TouchableOpacity
+            style={[
+              favoriteStyles.categoryFilterChip,
+              selectedCategoryId === null &&
+                favoriteStyles.categoryFilterChipActive,
+            ]}
+            onPress={() => handleCategorySelect(null)}
+          >
+            <Text
+              style={[
+                favoriteStyles.categoryFilterChipText,
+                selectedCategoryId === null &&
+                  favoriteStyles.categoryFilterChipTextActive,
+              ]}
+            >
+              Tất cả
+            </Text>
+          </TouchableOpacity>
+
+          {/* Category Buttons */}
+          {categories.map((category) => (
+            <TouchableOpacity
+              key={category.id}
+              style={[
+                favoriteStyles.categoryFilterChip,
+                selectedCategoryId === category.id &&
+                  favoriteStyles.categoryFilterChipActive,
+              ]}
+              onPress={() => handleCategorySelect(category.id)}
+            >
+              {renderCategoryIcon(category)}
+              <Text
+                style={[
+                  favoriteStyles.categoryFilterChipText,
+                  selectedCategoryId === category.id &&
+                    favoriteStyles.categoryFilterChipTextActive,
+                ]}
+              >
+                {category.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    );
   };
 
   const handleRefresh = useCallback(() => {
@@ -747,7 +877,7 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
 
   return (
     <View style={favoriteStyles.container}>
-      <Text style={favoriteStyles.title}>Công Thức Của Tôi</Text>
+      <Text style={favoriteStyles.title}>Quản lý công thức</Text>
 
       <View style={favoriteStyles.searchContainer}>
         <TextInput
@@ -815,6 +945,9 @@ const FavoriteScreen: React.FC<FavoriteScreenProps> = ({ navigation }) => {
           </TouchableOpacity>
         ))}
       </View>
+
+      {/* NEW: Category Filter */}
+      {renderCategoryFilter()}
 
       {isLoading ? (
         <View style={favoriteStyles.loadingContainer}>

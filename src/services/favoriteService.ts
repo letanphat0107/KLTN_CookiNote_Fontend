@@ -58,16 +58,21 @@ interface PaginatedCookedHistoryResponse {
 // Get cooked history
 export const getCookedHistory = async (
   page = 0,
-  size = 20
+  size = 20,
+  categoryId?: number | null
 ): Promise<PaginatedCookedHistoryResponse> => {
   try {
-    console.log("Fetching cooked history...");
+    console.log("Fetching cooked history...", { categoryId });
 
     const params = new URLSearchParams({
       page: page.toString(),
       size: size.toString(),
       sort: "cookedAt,desc",
     });
+
+    if (categoryId) {
+      params.append("categoryId", categoryId.toString());
+    }
 
     const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}/cookinote/cooked-history/me?${params}`,
@@ -80,10 +85,7 @@ export const getCookedHistory = async (
 
     const result = await response.json();
 
-
     if (response.ok && result.code === 200) {
-      // If result.data is array, use it directly
-      // Otherwise use result.data.items
       const items = Array.isArray(result.data)
         ? result.data
         : result.data?.items || [];
@@ -301,16 +303,21 @@ export const clearFavoritesCache = () => {
 // Get user's favorite recipes
 export const getFavoriteRecipes = async (
   page = 0,
-  size = 20
+  size = 20,
+  categoryId?: number | null
 ): Promise<PaginatedFavoriteResponse> => {
   try {
-    console.log("Fetching favorite recipes...");
+    console.log("Fetching favorite recipes...", { categoryId });
 
     const params = new URLSearchParams({
       page: page.toString(),
       size: size.toString(),
       sort: "createdAt,desc",
     });
+
+    if (categoryId) {
+      params.append("categoryId", categoryId.toString());
+    }
 
     const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.RECIPE.FAVORITE}?${params}`,
@@ -361,10 +368,11 @@ export const getFavoriteRecipes = async (
 // Get user's own recipes
 export const getMyRecipes = async (
   page = 0,
-  size = 20
+  size = 20,
+  categoryId?: number | null
 ): Promise<PaginatedFavoriteResponse> => {
   try {
-    console.log("Fetching my recipes...");
+    console.log("Fetching my recipes...", { categoryId });
 
     const params = new URLSearchParams({
       page: page.toString(),
@@ -372,6 +380,10 @@ export const getMyRecipes = async (
       sort: "createdAt,desc",
       owner: "me",
     });
+
+    if (categoryId) {
+      params.append("categoryId", categoryId.toString());
+    }
 
     const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.RECIPE.MYRECIPE}?${params}`,
@@ -419,10 +431,11 @@ export const getMyRecipes = async (
 export const getDeletedRecipes = async (
   userId: number,
   page = 0,
-  size = 20
+  size = 20,
+  categoryId?: number | null
 ): Promise<PaginatedFavoriteResponse> => {
   try {
-    console.log("Fetching deleted recipes...");
+    console.log("Fetching deleted recipes...", { categoryId });
 
     const params = new URLSearchParams({
       userId: userId.toString(),
@@ -430,6 +443,10 @@ export const getDeletedRecipes = async (
       size: size.toString(),
       sort: "deletedAt,desc",
     });
+
+    if (categoryId) {
+      params.append("categoryId", categoryId.toString());
+    }
 
     const response = await fetchWithAuth(
       `${API_CONFIG.BASE_URL}/cookinote/recipes/deleted?${params}`,

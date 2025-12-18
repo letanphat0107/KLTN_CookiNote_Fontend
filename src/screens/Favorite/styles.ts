@@ -132,7 +132,6 @@ export const favoriteStyles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: "#F8F9FA",
     marginHorizontal: 20,
-    marginBottom: 15,
     borderRadius: 25,
     padding: 4,
     elevation: 2,
@@ -484,7 +483,59 @@ searchContainer: {
     shadowRadius: 4,
     elevation: 4,
   },
+// Add these styles to favoriteStyles
 
+categoryFilterContainer: {
+  paddingHorizontal: 16,
+  paddingVertical: 12,
+  backgroundColor: "#FFF",
+  borderBottomWidth: 1,
+  borderBottomColor: "#F0F0F0",
+},
+
+categoryScrollView: {
+  flexGrow: 0,
+},
+
+categoryFilterChip: {
+  flexDirection: "row",
+  alignItems: "center",
+  paddingHorizontal: 16,
+  paddingVertical: 8,
+  marginRight: 8,
+  borderRadius: 20,
+  backgroundColor: "#F5F5F5",
+  borderWidth: 1,
+  borderColor: "#E0E0E0",
+},
+
+categoryFilterChipActive: {
+  backgroundColor: "#FF6B35",
+  borderColor: "#FF6B35",
+},
+
+categoryFilterChipText: {
+  fontSize: 14,
+  color: "#666",
+  fontWeight: "500",
+},
+
+categoryFilterChipTextActive: {
+  color: "#FFF",
+  fontWeight: "600",
+},
+
+categoryIcon: {
+  fontSize: 18,
+  marginRight: 6,
+},
+
+categoryIconImage: {
+  width: 20,
+  height: 20,
+  borderRadius: 10,
+  marginRight: 6,
+},
 });
 
 export default favoriteStyles;
