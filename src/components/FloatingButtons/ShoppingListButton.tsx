@@ -46,6 +46,13 @@ interface ShoppingListGroup {
   items: ShoppingListItem[];
 }
 
+interface ConsolidatedIngredient {
+  name: string;
+  quantities: string[];
+  totalCount: number;
+  isAllChecked: boolean;
+}
+
 const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
   isOpen,
   onToggle,
@@ -61,6 +68,7 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
   const [processingItems, setProcessingItems] = useState<Set<number>>(
     new Set()
   );
+  const [showConsolidated, setShowConsolidated] = useState(false);
 
   // Form state
   const [newIngredient, setNewIngredient] = useState("");
@@ -89,6 +97,37 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Consolidate ingredients by name
+  const getConsolidatedIngredients = (): ConsolidatedIngredient[] => {
+    const ingredientMap = new Map<string, ConsolidatedIngredient>();
+
+    shoppingListGroups.forEach((group) => {
+      group.items.forEach((item) => {
+        const normalizedName = item.ingredient.trim().toLowerCase();
+
+        if (ingredientMap.has(normalizedName)) {
+          const existing = ingredientMap.get(normalizedName)!;
+          existing.quantities.push(item.quantity);
+          existing.totalCount += 1;
+          if (!item.checked) {
+            existing.isAllChecked = false;
+          }
+        } else {
+          ingredientMap.set(normalizedName, {
+            name: item.ingredient,
+            quantities: [item.quantity],
+            totalCount: 1,
+            isAllChecked: item.checked,
+          });
+        }
+      });
+    });
+
+    return Array.from(ingredientMap.values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
   };
 
   const handleAddItem = async () => {
@@ -347,6 +386,57 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
     onToggle();
   };
 
+  const renderConsolidatedList = () => {
+    const consolidatedIngredients = getConsolidatedIngredients();
+    const uncheckedIngredients = consolidatedIngredients.filter(
+      (ing) => !ing.isAllChecked
+    );
+
+    if (uncheckedIngredients.length === 0) {
+      return (
+        <View style={floatingStyles.consolidatedEmpty}>
+          <Text style={floatingStyles.consolidatedEmptyText}>
+            Tất cả nguyên liệu đã được mua ✓
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <View style={floatingStyles.consolidatedContainer}>
+        <ScrollView
+          style={floatingStyles.consolidatedList}
+          showsVerticalScrollIndicator={false}
+        >
+          {uncheckedIngredients.map((ingredient, index) => (
+            <View key={index} style={floatingStyles.consolidatedItem}>
+              <View style={floatingStyles.consolidatedItemInfo}>
+                <Text style={floatingStyles.consolidatedItemName}>
+                  {ingredient.name}
+                </Text>
+                <Text style={floatingStyles.consolidatedItemQuantity}>
+                  {ingredient.quantities.join(" + ")}
+                  {ingredient.totalCount > 1 && (
+                    <Text style={floatingStyles.consolidatedItemCount}>
+                      {" "}
+                      (×{ingredient.totalCount})
+                    </Text>
+                  )}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={floatingStyles.consolidatedBuyButton}
+                onPress={() => handleBuyOnShopee(ingredient.name)}
+              >
+                <Ionicons name="cart-outline" size={16} color="#EE4D2D" />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+    );
+  };
+
   const renderGroupHeader = (group: ShoppingListGroup) => {
     const checkedCount = group.items.filter((item) => item.checked).length;
     const totalCount = group.items.length;
@@ -467,6 +557,11 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
       return count + group.items.filter((item) => item.checked).length;
     }, 0);
 
+    // Calculate display count based on view mode
+    const displayCount = showConsolidated
+      ? getConsolidatedIngredients().filter((ing) => !ing.isAllChecked).length
+      : totalItems;
+
     return (
       <Modal
         visible={isOpen}
@@ -479,7 +574,7 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
             {/* Header */}
             <View style={floatingStyles.modalHeader}>
               <Text style={floatingStyles.modalTitle}>
-                Danh sách mua sắm ({totalItems})
+                Danh sách mua sắm ({displayCount})
               </Text>
               <View style={floatingStyles.headerActions}>
                 {checkedItemsCount > 0 && (
@@ -498,26 +593,90 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
               </View>
             </View>
 
-            {/* Shopping List Content */}
-            <ScrollView
-              style={floatingStyles.shoppingListContent}
-              showsVerticalScrollIndicator={false}
-            >
-              {isLoading ? (
-                <View style={floatingStyles.loadingContainer}>
-                  <ActivityIndicator size="large" color="#FF6B35" />
-                  <Text style={floatingStyles.loadingText}>Đang tải...</Text>
-                </View>
-              ) : totalItems === 0 ? (
-                <View style={floatingStyles.emptyContainer}>
-                  <Text style={floatingStyles.emptyIcon}>🛒</Text>
-                  <Text style={floatingStyles.emptyTitle}>Danh sách trống</Text>
-                  <Text style={floatingStyles.emptyDescription}>
-                    Thêm nguyên liệu để bắt đầu mua sắm!
+            {/* View Toggle */}
+            {totalItems > 0 && (
+              <View style={floatingStyles.viewToggleContainer}>
+                <TouchableOpacity
+                  style={[
+                    floatingStyles.viewToggleButton,
+                    showConsolidated && floatingStyles.viewToggleButtonActive,
+                  ]}
+                  onPress={() => setShowConsolidated(true)}
+                >
+                  <Ionicons
+                    name="list"
+                    size={16}
+                    color={showConsolidated ? "#FFF" : "#FF6B35"}
+                  />
+                  <Text
+                    style={[
+                      floatingStyles.viewToggleText,
+                      showConsolidated && floatingStyles.viewToggleTextActive,
+                    ]}
+                  >
+                    Tổng hợp
                   </Text>
-                </View>
-              ) : (
-                shoppingListGroups.map((group, groupIndex) => (
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    floatingStyles.viewToggleButton,
+                    !showConsolidated && floatingStyles.viewToggleButtonActive,
+                  ]}
+                  onPress={() => setShowConsolidated(false)}
+                >
+                  <Ionicons
+                    name="albums"
+                    size={16}
+                    color={!showConsolidated ? "#FFF" : "#FF6B35"}
+                  />
+                  <Text
+                    style={[
+                      floatingStyles.viewToggleText,
+                      !showConsolidated && floatingStyles.viewToggleTextActive,
+                    ]}
+                  >
+                    Theo công thức
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Content */}
+            {isLoading ? (
+              <View style={floatingStyles.loadingContainer}>
+                <ActivityIndicator size="large" color="#FF6B35" />
+                <Text style={floatingStyles.loadingText}>Đang tải...</Text>
+              </View>
+            ) : totalItems === 0 ? (
+              <View style={floatingStyles.emptyContainer}>
+                <Text style={floatingStyles.emptyIcon}>🛒</Text>
+                <Text style={floatingStyles.emptyTitle}>Danh sách trống</Text>
+                <Text style={floatingStyles.emptyDescription}>
+                  Thêm nguyên liệu để bắt đầu mua sắm!
+                </Text>
+              </View>
+            ) : showConsolidated ? (
+              <ScrollView
+                style={floatingStyles.shoppingListContent}
+                showsVerticalScrollIndicator={false}
+              >
+                
+                  <View
+                    
+                    style={floatingStyles.shoppingGroup}
+                  >
+                    {renderConsolidatedList()}
+                    
+                  </View>
+     
+              </ScrollView>
+              
+            ) : (
+              <ScrollView
+                style={floatingStyles.shoppingListContent}
+                showsVerticalScrollIndicator={false}
+              >
+                {shoppingListGroups.map((group, groupIndex) => (
                   <View
                     key={`group-${groupIndex}`}
                     style={floatingStyles.shoppingGroup}
@@ -529,9 +688,9 @@ const ShoppingListButton: React.FC<ShoppingListButtonProps> = ({
                       )}
                     </View>
                   </View>
-                ))
-              )}
-            </ScrollView>
+                ))}
+              </ScrollView>
+            )}
 
             {/* Add Button */}
             {!showAddForm && (
