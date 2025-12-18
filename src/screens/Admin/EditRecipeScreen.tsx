@@ -18,6 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { getCategories } from "../../services/categoryService";
 import { Category } from "../../types/recipe";
 import { useRecipe } from "../../hooks/useRecipe";
+import { forkRecipeWithSuggestion } from "../../services/recipeActionService";
 
 interface Ingredient {
   id?: number;
@@ -47,6 +48,11 @@ const EditRecipeScreen = () => {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
+
+  // AI Suggestion states
+  const [showAIInput, setShowAIInput] = useState(false);
+  const [modificationRequest, setModificationRequest] = useState("");
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
 
   // Basic info
   const [categoryId, setCategoryId] = useState("1");
@@ -144,6 +150,67 @@ const EditRecipeScreen = () => {
       Alert.alert("Lỗi", "Không thể tải thông tin công thức");
     } finally {
       setInitialLoading(false);
+    }
+  };
+
+  const handleAISuggestion = async () => {
+    if (!modificationRequest.trim()) {
+      Alert.alert("Thông báo", "Vui lòng nhập yêu cầu điều chỉnh");
+      return;
+    }
+
+    setIsLoadingAI(true);
+    try {
+      const suggestedRecipe = await forkRecipeWithSuggestion(
+        recipeId,
+        modificationRequest.trim()
+      );
+
+      if (suggestedRecipe) {
+        // Update form with AI suggestions
+        setTitle(suggestedRecipe.title);
+        setDescription(suggestedRecipe.description);
+        setPrepareTime(suggestedRecipe.prepareTime.toString());
+        setCookTime(suggestedRecipe.cookTime.toString());
+        setDifficulty(suggestedRecipe.difficulty);
+        setCategoryId(suggestedRecipe.categoryId.toString());
+
+        // Update ingredients - mark as new since they need to be saved
+        setIngredients(
+          suggestedRecipe.ingredients.map((ing) => ({
+            name: ing.name,
+            quantity: ing.quantity,
+            isNew: true,
+          }))
+        );
+
+        // Update steps - mark as new since they need to be saved
+        setSteps(
+          suggestedRecipe.steps.map((step) => ({
+            stepNo: step.stepNo,
+            content: step.content,
+            suggestedTime: step.suggestedTime || 0,
+            tips: step.tips || "",
+            images: [],
+            newImages: [],
+            isNew: true,
+          }))
+        );
+
+        setShowAIInput(false);
+        setModificationRequest("");
+        Alert.alert(
+          "Thành công",
+          "Đã điều chỉnh công thức theo yêu cầu của bạn! Vui lòng lưu từng nguyên liệu và bước trước khi cập nhật."
+        );
+      } else {
+        Alert.alert("Lỗi", "Không thể điều chỉnh công thức. Vui lòng thử lại.");
+      }
+    } catch (error) {
+      console.error("Error getting AI suggestion:", error);
+      Alert.alert("Lỗi", "Đã xảy ra lỗi khi điều chỉnh công thức");
+    } finally {
+      setIsLoadingAI(false);
     }
   };
 
@@ -671,6 +738,67 @@ const EditRecipeScreen = () => {
         style={adminStyles.modernFormContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* AI Suggestion Section */}
+        <View style={adminStyles.modernSection}>
+          <View style={adminStyles.modernAIButtonsContainer}>
+            <TouchableOpacity
+              style={[
+                adminStyles.modernAIButton,
+                { backgroundColor: "#9B59B6" },
+              ]}
+              onPress={() => setShowAIInput(!showAIInput)}
+              disabled={isLoadingAI}
+            >
+              <Ionicons name="sparkles-outline" size={20} color="#FFF" />
+              <Text style={adminStyles.modernAIButtonText}>Điều chỉnh AI</Text>
+            </TouchableOpacity>
+          </View>
+
+          {showAIInput && (
+            <View style={adminStyles.modernAIInputContainer}>
+              <Text style={adminStyles.modernAIInputLabel}>
+                Nhập yêu cầu điều chỉnh:
+              </Text>
+              <TextInput
+                style={[adminStyles.modernInput, adminStyles.modernAITextArea]}
+                value={modificationRequest}
+                onChangeText={setModificationRequest}
+                placeholder="VD: Khẩu phần cho 2 người, Giảm 50% đường, Thay thế bằng nguyên liệu chay..."
+                placeholderTextColor="#999"
+                multiline
+                numberOfLines={3}
+              />
+              <View style={adminStyles.modernAIButtonRow}>
+                <TouchableOpacity
+                  style={adminStyles.modernAICancelButton}
+                  onPress={() => {
+                    setShowAIInput(false);
+                    setModificationRequest("");
+                  }}
+                >
+                  <Text style={adminStyles.modernAICancelButtonText}>Hủy</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={adminStyles.modernAIApplyButton}
+                  onPress={handleAISuggestion}
+                  disabled={isLoadingAI}
+                >
+                  {isLoadingAI ? (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : (
+                    <>
+                      <Ionicons name="checkmark" size={18} color="#FFFFFF" />
+                      <Text style={adminStyles.modernAIApplyButtonText}>
+                        Áp dụng
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        </View>
+
         {/* Cover Image Section */}
         <View style={adminStyles.modernSection}>
           <Text style={adminStyles.modernSectionTitle}>
@@ -690,16 +818,11 @@ const EditRecipeScreen = () => {
                   style={adminStyles.modernImageRemoveButton}
                   onPress={() => {
                     setNewCoverImageUri(null);
-                    if (!coverImageUrl) setCoverImageUrl(null);
+                    setCoverImageUrl(null);
                   }}
                 >
                   <Ionicons name="close-circle" size={32} color="#FFF" />
                 </TouchableOpacity>
-                {newCoverImageUri && (
-                  <View style={adminStyles.modernNewImageBadge}>
-                    <Text style={adminStyles.modernNewImageBadgeText}>MỚI</Text>
-                  </View>
-                )}
               </View>
             ) : (
               <View style={adminStyles.modernImagePlaceholder}>

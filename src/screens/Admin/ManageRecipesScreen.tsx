@@ -132,7 +132,10 @@ const ManageRecipesScreen = () => {
 
   const handleViewDetail = (recipeId: number) => {
     setShowDetailModal(false);
-    navigation.navigate("RecipeDetail", { recipeId });
+    navigation.navigate("RecipeDetail", { recipeId, showAddToCartButton: false,
+      showEditButton: false }, 
+      
+    );
   };
 
   const getDifficultyColor = (difficulty: string) => {

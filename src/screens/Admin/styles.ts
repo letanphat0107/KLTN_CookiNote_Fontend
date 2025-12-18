@@ -3006,4 +3006,57 @@ modernActionButtonUser: {
     fontWeight: "600",
     color: "#FFF",
   },
+
+    // AI Input Container Styles
+  modernAIInputContainer: {
+    marginTop: 12,
+    padding: 16,
+    backgroundColor: "#F8F9FA",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  modernAIInputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#2C3E50",
+    marginBottom: 8,
+  },
+  modernAITextArea: {
+    minHeight: 80,
+    textAlignVertical: "top",
+  },
+  modernAIButtonRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 12,
+  },
+  modernAICancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#ECF0F1",
+    borderRadius: 12,
+  },
+  modernAICancelButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#7F8C8D",
+  },
+  modernAIApplyButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#9B59B6",
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
+  },
+  modernAIApplyButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FFF",
+  },
 });
