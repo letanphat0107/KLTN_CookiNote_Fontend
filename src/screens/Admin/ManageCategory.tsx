@@ -410,7 +410,7 @@ const ManageCategory = () => {
 
         <Image
           source={{
-            uri: item.imageUrl || "https://via.placeholder.com/80",
+            uri: item.imageUrl || "https://thecrites.com/sites/all/modules/cookbook/theme/images/default-recipe-big.png",
           }}
           style={adminStyles.recipeItemImage}
         />
@@ -544,12 +544,12 @@ const ManageCategory = () => {
   // Render category detail modal
   const renderDetailModal = () => (
     <Modal visible={showDetailModal} transparent animationType="slide">
-      <View style={adminStyles.modernModalOverlay}>
+      <View style={adminStyles.modernModalOverlay1}>
         <View style={adminStyles.modernModalContainer}>
           {/* Header */}
-          <View style={adminStyles.modernModalHeader}>
+          <View style={adminStyles.modernModalHeader1}>
             <View>
-              <Text style={adminStyles.modernModalTitle}>
+              <Text style={adminStyles.modernModalTitle1}>
                 {selectedCategory?.name}
               </Text>
               <Text style={adminStyles.modernModalSubtitle}>

@@ -113,6 +113,26 @@ export interface AIEnrichResponse {
   data: AIImportedRecipe;
 }
 
+export interface LoginHistory {
+  id: number;
+  userId: number;
+  username: string;
+  loginTime: string;
+  ipAddress: string;
+  userAgent: string;
+  browser: string;
+  os: string;
+}
+
+export interface LoginHistoryResponse {
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  items: LoginHistory[];
+}
+
 class AdminService {
   // Get dashboard statistics
   async getDashboardStats(): Promise<DashboardStats> {
@@ -839,6 +859,38 @@ class AdminService {
       return data.data;
     } catch (error) {
       console.error("Error enriching recipe:", error);
+      throw error;
+    }
+  }
+
+  // Get login history
+  async getLoginHistory(
+    date: string,
+    page: number = 0,
+    size: number = 20
+  ): Promise<LoginHistoryResponse> {
+    try {
+      const params = new URLSearchParams({
+        date: date,
+        page: page.toString(),
+        size: size.toString(),
+      });
+
+      const response = await fetchWithAuth(
+        `${API_CONFIG.BASE_URL}/cookinote/admin/login-history?${params}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch login history");
+      }
+
+      const data = await response.json();
+      return data.data;
+    } catch (error) {
+      console.error("Error fetching login history:", error);
       throw error;
     }
   }

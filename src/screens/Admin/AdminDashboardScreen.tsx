@@ -9,16 +9,23 @@ import {
   Alert,
   Dimensions,
   FlatList,
+  Modal,
+  Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { logoutUser } from "../../store/authSlice";
-import adminService, { DashboardStats } from "../../services/adminService";
+import adminService, {
+  DashboardStats,
+  LoginHistory,
+  LoginHistoryResponse,
+} from "../../services/adminService";
 import { adminStyles } from "./styles";
 import { Ionicons } from "@expo/vector-icons";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import { logStreamService, LogMessage } from "../../services/logStreamService";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const { width } = Dimensions.get("window");
 
@@ -32,12 +39,19 @@ const AdminDashboardScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [exportingReport, setExportingReport] = useState(false);
 
+  // Login history states
+  const [loginHistory, setLoginHistory] = useState<LoginHistory[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+
   // Log stream states
   const [logs, setLogs] = useState<LogMessage[]>([]);
   const [isLogStreamActive, setIsLogStreamActive] = useState(false);
   const [logStreamError, setLogStreamError] = useState<string | null>(null);
   const logFlatListRef = useRef<FlatList>(null);
-  const maxLogs = 100; // Keep last 100 logs
+  const maxLogs = 100;
 
   const defaultStats: DashboardStats = {
     totalUsers: 0,
@@ -60,9 +74,32 @@ const AdminDashboardScreen = () => {
     }
   };
 
+  const fetchLoginHistory = async (date: Date) => {
+    if (!tokens?.accessToken) return;
+
+    setLoadingHistory(true);
+    try {
+      const dateString = date.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+      const data = await adminService.getLoginHistory(dateString, 0, 20);
+      setLoginHistory(data.items);
+    } catch (error) {
+      console.error("Error fetching login history:", error);
+      Alert.alert("Lỗi", "Không thể tải lịch sử đăng nhập");
+      setLoginHistory([]);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
   useEffect(() => {
     fetchStats();
   }, []);
+
+  useEffect(() => {
+    if (showHistoryModal) {
+      fetchLoginHistory(selectedDate);
+    }
+  }, [showHistoryModal, selectedDate]);
 
   // Log stream lifecycle
   useEffect(() => {
@@ -87,11 +124,9 @@ const AdminDashboardScreen = () => {
       (log: LogMessage) => {
         setLogs((prevLogs) => {
           const newLogs = [log, ...prevLogs];
-          // Keep only last maxLogs
           return newLogs.slice(0, maxLogs);
         });
 
-        // Auto scroll to top (newest log)
         setTimeout(() => {
           logFlatListRef.current?.scrollToOffset({ offset: 0, animated: true });
         }, 100);
@@ -110,7 +145,7 @@ const AdminDashboardScreen = () => {
   const toggleLogStream = () => {
     setIsLogStreamActive(!isLogStreamActive);
     if (isLogStreamActive) {
-      setLogs([]); // Clear logs when stopping
+      setLogs([]);
       setLogStreamError(null);
     }
   };
@@ -124,6 +159,25 @@ const AdminDashboardScreen = () => {
         onPress: () => setLogs([]),
       },
     ]);
+  };
+
+  const handleDateChange = (event: any, date?: Date) => {
+    setShowDatePicker(Platform.OS === "ios");
+    if (date) {
+      setSelectedDate(date);
+    }
+  };
+
+  const formatDateTime = (dateTimeString: string) => {
+    const date = new Date(dateTimeString);
+    return date.toLocaleString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   };
 
   const getLogLevelColor = (level: string) => {
@@ -160,35 +214,132 @@ const AdminDashboardScreen = () => {
     }
   };
 
+  const renderLoginHistoryItem = ({ item }: { item: LoginHistory }) => (
+    <View style={adminStyles.loginHistoryItem}>
+      <View style={adminStyles.loginHistoryHeader}>
+        <View style={adminStyles.loginHistoryUser}>
+          <Ionicons name="person-circle" size={24} color="#FF6B35" />
+          <Text style={adminStyles.loginHistoryUsername}>{item.username}</Text>
+        </View>
+        <Text style={adminStyles.loginHistoryTime}>
+          {formatDateTime(item.loginTime)}
+        </Text>
+      </View>
+
+      <View style={adminStyles.loginHistoryDetails}>
+        <View style={adminStyles.loginHistoryDetailRow}>
+          <Ionicons name="globe-outline" size={16} color="#666" />
+          <Text style={adminStyles.loginHistoryDetailText}>
+            IP: {item.ipAddress}
+          </Text>
+        </View>
+        <View style={adminStyles.loginHistoryDetailRow}>
+          <Ionicons name="desktop-outline" size={16} color="#666" />
+          <Text style={adminStyles.loginHistoryDetailText}>
+            {item.browser} • {item.os}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+
+  const renderLoginHistoryModal = () => (
+    <Modal
+      visible={showHistoryModal}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setShowHistoryModal(false)}
+    >
+      <View style={adminStyles.modalOverlay}>
+        <View style={adminStyles.modalContent}>
+          <View style={adminStyles.modalHeader}>
+            <Text style={adminStyles.modalTitle}>Lịch sử đăng nhập</Text>
+            <TouchableOpacity
+              onPress={() => setShowHistoryModal(false)}
+              style={adminStyles.modalCloseButton}
+            >
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Date Picker */}
+          <View style={adminStyles.datePickerContainer}>
+            <Text style={adminStyles.datePickerLabel}>Chọn ngày:</Text>
+            <TouchableOpacity
+              style={adminStyles.datePickerButton}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Ionicons name="calendar-outline" size={20} color="#FF6B35" />
+              <Text style={adminStyles.datePickerText}>
+                {selectedDate.toLocaleDateString("vi-VN")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={selectedDate}
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={handleDateChange}
+              maximumDate={new Date()}
+            />
+          )}
+
+          {/* Login History List */}
+          {loadingHistory ? (
+            <View style={adminStyles.modalLoadingContainer}>
+              <ActivityIndicator size="large" color="#FF6B35" />
+              <Text style={adminStyles.modalLoadingText}>Đang tải...</Text>
+            </View>
+          ) : loginHistory.length > 0 ? (
+            <FlatList
+              data={loginHistory}
+              renderItem={renderLoginHistoryItem}
+              keyExtractor={(item) => item.id.toString()}
+              style={adminStyles.loginHistoryList}
+              showsVerticalScrollIndicator={true}
+            />
+          ) : (
+            <View style={adminStyles.emptyStateContainer}>
+              <Ionicons name="calendar-outline" size={48} color="#CCC" />
+              <Text style={adminStyles.emptyStateText}>
+                Không có lịch sử đăng nhập trong ngày này
+              </Text>
+            </View>
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
 
   const renderLogStreamSection = () => (
-  <View style={adminStyles.modernDashboardSection}>
-    <View style={adminStyles.modernSectionHeader}>
-      <Text style={adminStyles.modernSectionTitle}>
-        <Ionicons name="terminal" size={20} color="#FF6B6B" /> Logs Realtime
-      </Text>
-    </View>
+    <View style={adminStyles.modernDashboardSection}>
+      <View style={adminStyles.modernSectionHeader}>
+        <Text style={adminStyles.modernSectionTitle}>
+          <Ionicons name="terminal" size={20} color="#FF6B6B" /> Logs Realtime
+        </Text>
+      </View>
 
-    <TouchableOpacity
-      style={adminStyles.logStreamNavigateCard}
-      onPress={() => navigation.navigate("LogStream" as never)}
-    >
-      <View style={adminStyles.logStreamNavigateIcon}>
-        <Ionicons name="terminal-outline" size={48} color="#4A90E2" />
-      </View>
-      <Text style={adminStyles.logStreamNavigateTitle}>
-        Xem Logs Realtime
-      </Text>
-      <Text style={adminStyles.logStreamNavigateSubtitle}>
-        Theo dõi hoạt động hệ thống trực tiếp
-      </Text>
-      <View style={adminStyles.logStreamNavigateArrow}>
-        <Ionicons name="arrow-forward-circle" size={32} color="#4A90E2" />
-      </View>
-    </TouchableOpacity>
-  </View>
-);
-  
+      <TouchableOpacity
+        style={adminStyles.logStreamNavigateCard}
+        onPress={() => navigation.navigate("LogStream" as never)}
+      >
+        <View style={adminStyles.logStreamNavigateIcon}>
+          <Ionicons name="terminal-outline" size={48} color="#4A90E2" />
+        </View>
+        <Text style={adminStyles.logStreamNavigateTitle}>
+          Xem Logs Realtime
+        </Text>
+        <Text style={adminStyles.logStreamNavigateSubtitle}>
+          Theo dõi hoạt động hệ thống trực tiếp
+        </Text>
+        <View style={adminStyles.logStreamNavigateArrow}>
+          <Ionicons name="arrow-forward-circle" size={32} color="#4A90E2" />
+        </View>
+      </TouchableOpacity>
+    </View>
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -577,74 +728,61 @@ const AdminDashboardScreen = () => {
         </View>
       </View>
 
-      {/* Recent Activity Preview */}
+      {/* Login History Section - Replaced Recent Activity Preview */}
       <View style={adminStyles.modernDashboardSection}>
         <View style={adminStyles.modernSectionHeader}>
           <Text style={adminStyles.modernSectionTitle}>
-            <Ionicons name="time" size={20} color="#FF6B6B" /> Hoạt động gần đây
+            <Ionicons name="time" size={20} color="#FF6B6B" /> Lịch sử đăng nhập
           </Text>
+          <TouchableOpacity
+            onPress={() => setShowHistoryModal(true)}
+            style={adminStyles.viewAllButton}
+          >
+            <Text style={adminStyles.viewAllButtonText}>Xem chi tiết</Text>
+            <Ionicons name="arrow-forward" size={16} color="#FF6B35" />
+          </TouchableOpacity>
         </View>
 
-        <View style={adminStyles.modernActivityPreview}>
-          <View style={adminStyles.modernActivityItem}>
-            <View
-              style={[
-                adminStyles.modernActivityIcon,
-                { backgroundColor: "#E3F2FD" },
-              ]}
-            >
-              <Ionicons name="person-add" size={20} color="#2196F3" />
-            </View>
-            <View style={adminStyles.modernActivityContent}>
-              <Text style={adminStyles.modernActivityTitle}>
-                {stats?.newUsersToday || 0} người dùng mới
+        <TouchableOpacity
+          style={adminStyles.loginHistoryPreviewCard}
+          onPress={() => setShowHistoryModal(true)}
+        >
+          <View style={adminStyles.loginHistoryPreviewIcon}>
+            <Ionicons name="finger-print" size={48} color="#4A90E2" />
+          </View>
+          <Text style={adminStyles.loginHistoryPreviewTitle}>
+            Xem lịch sử đăng nhập
+          </Text>
+          <Text style={adminStyles.loginHistoryPreviewSubtitle}>
+            Theo dõi hoạt động đăng nhập của người dùng
+          </Text>
+          <View style={adminStyles.loginHistoryPreviewStats}>
+            <View style={adminStyles.loginHistoryPreviewStatItem}>
+              <Text style={adminStyles.loginHistoryPreviewStatNumber}>
+                {stats?.activeUsers || 0}
               </Text>
-              <Text style={adminStyles.modernActivityTime}>Hôm nay</Text>
+              <Text style={adminStyles.loginHistoryPreviewStatLabel}>
+                Đang online
+              </Text>
+            </View>
+            <View style={adminStyles.loginHistoryPreviewStatDivider} />
+            <View style={adminStyles.loginHistoryPreviewStatItem}>
+              <Text style={adminStyles.loginHistoryPreviewStatNumber}>
+                {stats?.newUsersToday || 0}
+              </Text>
+              <Text style={adminStyles.loginHistoryPreviewStatLabel}>
+                Mới hôm nay
+              </Text>
             </View>
           </View>
-
-          <View style={adminStyles.modernActivityDivider} />
-
-          <View style={adminStyles.modernActivityItem}>
-            <View
-              style={[
-                adminStyles.modernActivityIcon,
-                { backgroundColor: "#E8F5E9" },
-              ]}
-            >
-              <Ionicons name="restaurant-outline" size={20} color="#4CAF50" />
-            </View>
-            <View style={adminStyles.modernActivityContent}>
-              <Text style={adminStyles.modernActivityTitle}>
-                Tổng {stats?.totalRecipes || 0} công thức
-              </Text>
-              <Text style={adminStyles.modernActivityTime}>Trong hệ thống</Text>
-            </View>
-          </View>
-
-          <View style={adminStyles.modernActivityDivider} />
-
-          <View style={adminStyles.modernActivityItem}>
-            <View
-              style={[
-                adminStyles.modernActivityIcon,
-                { backgroundColor: "#FFF3E0" },
-              ]}
-            >
-              <Ionicons name="pulse-outline" size={20} color="#FF9800" />
-            </View>
-            <View style={adminStyles.modernActivityContent}>
-              <Text style={adminStyles.modernActivityTitle}>
-                {stats?.activeUsers || 0} người hoạt động
-              </Text>
-              <Text style={adminStyles.modernActivityTime}>Hiện tại</Text>
-            </View>
-          </View>
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* Log Stream Section */}
       {renderLogStreamSection()}
+
+      {/* Login History Modal */}
+      {renderLoginHistoryModal()}
 
       <View style={{ height: 30 }} />
     </ScrollView>

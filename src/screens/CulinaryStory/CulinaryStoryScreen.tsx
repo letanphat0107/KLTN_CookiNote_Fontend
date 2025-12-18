@@ -123,7 +123,7 @@ const CulinaryStoryScreen: React.FC<CulinaryStoryScreenProps> = ({
         <View style={culinaryStoryStyles.authorInfo}>
           <Image
             source={{
-              uri: post.authorAvatarUrl || "https://via.placeholder.com/40",
+              uri: post.authorAvatarUrl || "https://thecrites.com/sites/all/modules/cookbook/theme/images/default-recipe-big.png",
             }}
             style={culinaryStoryStyles.authorAvatarImage}
           />

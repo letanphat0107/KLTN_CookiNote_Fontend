@@ -3059,4 +3059,205 @@ modernActionButtonUser: {
     fontWeight: "600",
     color: "#FFF",
   },
+
+
+  // Recent Activities Card
+    viewAllButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  viewAllButtonText: {
+    fontSize: 14,
+    color: "#FF6B35",
+    fontWeight: "600",
+  },
+
+  loginHistoryPreviewCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "#E8F4F8",
+  },
+  loginHistoryPreviewIcon: {
+    marginBottom: 16,
+  },
+  loginHistoryPreviewTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#2C3E50",
+    marginBottom: 8,
+  },
+  loginHistoryPreviewSubtitle: {
+    fontSize: 14,
+    color: "#7F8C8D",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  loginHistoryPreviewStats: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    justifyContent: "space-around",
+  },
+  loginHistoryPreviewStatItem: {
+    alignItems: "center",
+  },
+  loginHistoryPreviewStatNumber: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#4A90E2",
+    marginBottom: 4,
+  },
+  loginHistoryPreviewStatLabel: {
+    fontSize: 12,
+    color: "#7F8C8D",
+  },
+  loginHistoryPreviewStatDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: "#E0E0E0",},
+
+    loginHistoryItem: {
+    backgroundColor: "#F8F9FA",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "#FF6B35",
+  },
+  loginHistoryHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  loginHistoryUser: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  loginHistoryUsername: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#2C3E50",
+  },
+  loginHistoryTime: {
+    fontSize: 12,
+    color: "#7F8C8D",
+  },
+  loginHistoryDetails: {
+    gap: 6,
+  },
+  loginHistoryDetailRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  loginHistoryDetailText: {
+    fontSize: 13,
+    color: "#666",
+  },
+
+  modalCloseButton: {
+    padding: 4,
+  },
+  datePickerContainer: {
+    marginBottom: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  datePickerLabel: {
+    fontSize: 16,
+    color: "#666",
+    fontWeight: "500",
+  },
+  datePickerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF3E0",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "#FF6B35",
+  },
+  datePickerText: {
+    fontSize: 15,
+    color: "#FF6B35",
+    fontWeight: "600",
+  },
+
+    modalLoadingContainer: {
+    paddingVertical: 60,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalLoadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: "#7F8C8D",
+  },
+  emptyStateContainer: {
+    paddingVertical: 60,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyStateText: {
+    marginTop: 16,
+    fontSize: 15,
+    color: "#95A5A6",
+    textAlign: "center",
+  },
+
+  loginHistoryList: {
+    maxHeight: 400,
+  },
+
+  // Add these to adminStyles:
+
+  loadMoreContainer: {
+    paddingVertical: 16,
+    alignItems: "center",
+  },
+  loadMoreButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    backgroundColor: "#FFF3E0",
+    borderRadius: 8,
+    gap: 8,
+  },
+  loadMoreButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FF6B6B",
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: "#7F8C8D",
+  },
+  clearSearchButton: {
+    marginTop: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: "#FF6B35",
+    borderRadius: 8,
+  },
+  clearSearchButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
 });

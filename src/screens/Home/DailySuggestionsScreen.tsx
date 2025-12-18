@@ -7,7 +7,9 @@ import {
   Image,
   ActivityIndicator,
   StyleSheet,
+  Platform,
 } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { getDailySuggestions } from "../../services/dailyMenuService";
 import { DailyMenuSuggestion } from "../../types/recipe";
 
@@ -21,15 +23,18 @@ const DailySuggestionsScreen: React.FC<DailySuggestionsScreenProps> = ({
   const [suggestions, setSuggestions] = useState<DailyMenuSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [generatedDate, setGeneratedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
-    fetchSuggestions();
+    fetchSuggestions(selectedDate);
   }, []);
 
-  const fetchSuggestions = async () => {
+  const fetchSuggestions = async (date: Date) => {
     setIsLoading(true);
     try {
-      const response = await getDailySuggestions();
+      const dateString = date.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+      const response = await getDailySuggestions(dateString);
       if (response?.data) {
         setSuggestions(response.data.suggestions);
         setGeneratedDate(response.data.generatedDate);
@@ -38,6 +43,14 @@ const DailySuggestionsScreen: React.FC<DailySuggestionsScreenProps> = ({
       console.error("Error fetching suggestions:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDateChange = (event: any, date?: Date) => {
+    setShowDatePicker(Platform.OS === "ios");
+    if (date) {
+      setSelectedDate(date);
+      fetchSuggestions(date);
     }
   };
 
@@ -89,10 +102,10 @@ const DailySuggestionsScreen: React.FC<DailySuggestionsScreenProps> = ({
           onPress={() => navigation.goBack()}
         >
           <Image
-                      source={require("../../../assets/images/vector.png")}
-                      style={styles.backIcon}
-                      resizeMode="contain"
-                    />
+            source={require("../../../assets/images/vector.png")}
+            style={styles.backIcon}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Gợi ý hôm nay</Text>
         <View style={styles.placeholder} />
@@ -102,100 +115,134 @@ const DailySuggestionsScreen: React.FC<DailySuggestionsScreenProps> = ({
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        {/* Date Banner */}
+        {/* Date Banner with Date Picker */}
         <View style={styles.dateBanner}>
           <Text style={styles.dateBannerIcon}>📅</Text>
-          <Text style={styles.dateBannerText}>
-            {new Date(generatedDate).toLocaleDateString("vi-VN", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </Text>
+          <View style={styles.dateBannerContent}>
+            <Text style={styles.dateBannerText}>
+              {selectedDate.toLocaleDateString("vi-VN", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </Text>
+            <TouchableOpacity
+              style={styles.changeDateButton}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text style={styles.changeDateButtonText}>Đổi ngày</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Suggestions List */}
-        {suggestions.map((suggestion, index) => {
-          const mealType = getMealTypeLabel(suggestion.mealType);
-          return (
-            <View key={index} style={styles.suggestionSection}>
-              {/* Meal Type Header */}
-              <View style={styles.mealTypeHeader}>
-                <Text style={styles.mealTypeIcon}>{mealType.icon}</Text>
-                <Text style={styles.mealTypeText}>{mealType.text}</Text>
-              </View>
+        {/* Date Picker */}
+        {showDatePicker && (
+          <DateTimePicker
+            value={selectedDate}
+            mode="date"
+            display={Platform.OS === "ios" ? "spinner" : "default"}
+            onChange={handleDateChange}
+            maximumDate={new Date(2099, 11, 31)}
+          />
+        )}
 
-              {/* Recipe Card */}
-              <TouchableOpacity
-                style={styles.recipeCard}
-                onPress={() => handleRecipePress(suggestion.recipe.id)}
-              >
-                <Image
-                  source={{ uri: suggestion.recipe.imageUrl }}
-                  style={styles.recipeImage}
-                />
-                <View style={styles.recipeInfo}>
-                  <Text style={styles.recipeTitle} numberOfLines={2}>
-                    {suggestion.recipe.title}
-                  </Text>
-                  <Text style={styles.recipeDescription} numberOfLines={2}>
-                    {suggestion.recipe.description}
-                  </Text>
+        {/* Empty State */}
+        {suggestions.length === 0 ? (
+          <View style={styles.emptyStateContainer}>
+            <Text style={styles.emptyStateIcon}>🍽️</Text>
+            <Text style={styles.emptyStateTitle}>
+              Chưa có gợi ý cho ngày này
+            </Text>
+            <Text style={styles.emptyStateText}>
+              Vui lòng chọn ngày khác hoặc thử lại sau
+            </Text>
+          </View>
+        ) : (
+          /* Suggestions List */
+          suggestions.map((suggestion, index) => {
+            const mealType = getMealTypeLabel(suggestion.mealType);
+            return (
+              <View key={index} style={styles.suggestionSection}>
+                {/* Meal Type Header */}
+                <View style={styles.mealTypeHeader}>
+                  <Text style={styles.mealTypeIcon}>{mealType.icon}</Text>
+                  <Text style={styles.mealTypeText}>{mealType.text}</Text>
+                </View>
 
-                  {/* Owner Info */}
-                  <View style={styles.ownerInfo}>
-                    <Image
-                      source={{ uri: suggestion.recipe.ownerAvatar }}
-                      style={styles.ownerAvatar}
-                    />
-                    <Text style={styles.ownerName}>
-                      {suggestion.recipe.ownerName}
+                {/* Recipe Card */}
+                <TouchableOpacity
+                  style={styles.recipeCard}
+                  onPress={() => handleRecipePress(suggestion.recipe.id)}
+                >
+                  <Image
+                    source={{ uri: suggestion.recipe.imageUrl }}
+                    style={styles.recipeImage}
+                  />
+                  <View style={styles.recipeInfo}>
+                    <Text style={styles.recipeTitle} numberOfLines={2}>
+                      {suggestion.recipe.title}
                     </Text>
-                  </View>
+                    <Text style={styles.recipeDescription} numberOfLines={2}>
+                      {suggestion.recipe.description}
+                    </Text>
 
-                  {/* Recipe Meta */}
-                  <View style={styles.recipeMeta}>
-                    <View style={styles.metaItem}>
-                      <Text style={styles.metaIcon}>⏱️</Text>
-                      <Text style={styles.metaText}>
-                        {suggestion.recipe.prepareTime +
-                          suggestion.recipe.cookTime}{" "}
-                        phút
+                    {/* Owner Info */}
+                    <View style={styles.ownerInfo}>
+                      <Image
+                        source={{ uri: suggestion.recipe.ownerAvatar }}
+                        style={styles.ownerAvatar}
+                      />
+                      <Text style={styles.ownerName}>
+                        {suggestion.recipe.ownerName}
                       </Text>
                     </View>
-                    <View
-                      style={[
-                        styles.difficultyBadge,
-                        {
-                          backgroundColor: getDifficultyColor(
-                            suggestion.recipe.difficulty
-                          ),
-                        },
-                      ]}
-                    >
-                      <Text style={styles.difficultyText}>
-                        {suggestion.recipe.difficulty}
-                      </Text>
-                    </View>
-                  </View>
 
-                  {/* Justifications */}
-                  <View style={styles.justificationsContainer}>
-                    {suggestion.justifications.map((justification, jIndex) => (
-                      <View key={jIndex} style={styles.justificationItem}>
-                        <Text style={styles.justificationDot}>•</Text>
-                        <Text style={styles.justificationText}>
-                          {justification}
+                    {/* Recipe Meta */}
+                    <View style={styles.recipeMeta}>
+                      <View style={styles.metaItem}>
+                        <Text style={styles.metaIcon}>⏱️</Text>
+                        <Text style={styles.metaText}>
+                          {suggestion.recipe.prepareTime +
+                            suggestion.recipe.cookTime}{" "}
+                          phút
                         </Text>
                       </View>
-                    ))}
+                      <View
+                        style={[
+                          styles.difficultyBadge,
+                          {
+                            backgroundColor: getDifficultyColor(
+                              suggestion.recipe.difficulty
+                            ),
+                          },
+                        ]}
+                      >
+                        <Text style={styles.difficultyText}>
+                          {suggestion.recipe.difficulty}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Justifications */}
+                    <View style={styles.justificationsContainer}>
+                      {suggestion.justifications.map(
+                        (justification, jIndex) => (
+                          <View key={jIndex} style={styles.justificationItem}>
+                            <Text style={styles.justificationDot}>•</Text>
+                            <Text style={styles.justificationText}>
+                              {justification}
+                            </Text>
+                          </View>
+                        )
+                      )}
+                    </View>
                   </View>
-                </View>
-              </TouchableOpacity>
-            </View>
-          );
-        })}
+                </TouchableOpacity>
+              </View>
+            );
+          })
+        )}
 
         <View style={{ height: 20 }} />
       </ScrollView>
@@ -263,11 +310,51 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginRight: 12,
   },
+  dateBannerContent: {
+    flex: 1,
+  },
   dateBannerText: {
     fontSize: 16,
     fontWeight: "600",
     color: "#fff",
-    flex: 1,
+    marginBottom: 8,
+  },
+  changeDateButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.5)",
+  },
+  changeDateButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#fff",
+  },
+  emptyStateContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+    paddingHorizontal: 32,
+  },
+  emptyStateIcon: {
+    fontSize: 64,
+    marginBottom: 16,
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#2D3436",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    lineHeight: 20,
   },
   suggestionSection: {
     marginBottom: 24,

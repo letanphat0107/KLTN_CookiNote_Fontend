@@ -36,6 +36,10 @@ const ManageUsersScreen = () => {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [userRecipes, setUserRecipes] = useState<any[]>([]);
   const [loadingRecipes, setLoadingRecipes] = useState(false);
+  const [loadingMoreRecipes, setLoadingMoreRecipes] = useState(false);
+  const [recipesPage, setRecipesPage] = useState(0);
+  const [recipesTotalPages, setRecipesTotalPages] = useState(0);
+  const [recipesHasNext, setRecipesHasNext] = useState(false);
   const [processingAction, setProcessingAction] = useState(false);
 
   useEffect(() => {
@@ -88,16 +92,38 @@ const ManageUsersScreen = () => {
     }
   };
 
-  const fetchUserRecipes = async (userId: number) => {
+  const fetchUserRecipes = async (userId: number, pageNum: number = 0, isLoadMore: boolean = false) => {
     try {
-      setLoadingRecipes(true);
-      const data = await adminService.getUserRecipes(userId, 0, 20);
-      setUserRecipes(data.items);
+      if (isLoadMore) {
+        setLoadingMoreRecipes(true);
+      } else {
+        setLoadingRecipes(true);
+        setUserRecipes([]);
+      }
+
+      const data = await adminService.getUserRecipes(userId, pageNum, 10);
+      
+      if (isLoadMore) {
+        setUserRecipes((prev) => [...prev, ...data.items]);
+      } else {
+        setUserRecipes(data.items);
+      }
+
+      setRecipesPage(pageNum);
+      setRecipesTotalPages(data.totalPages);
+      setRecipesHasNext(data.hasNext);
     } catch (error) {
       console.error("Error fetching user recipes:", error);
       Alert.alert("Lỗi", "Không thể tải danh sách công thức");
     } finally {
       setLoadingRecipes(false);
+      setLoadingMoreRecipes(false);
+    }
+  };
+
+  const loadMoreRecipes = () => {
+    if (recipesHasNext && !loadingMoreRecipes && selectedUser) {
+      fetchUserRecipes(selectedUser.userId, recipesPage + 1, true);
     }
   };
 
@@ -114,8 +140,11 @@ const ManageUsersScreen = () => {
   const handleUserPress = async (user: AdminUser) => {
     setSelectedUser(user);
     setUserRecipes([]);
+    setRecipesPage(0);
+    setRecipesTotalPages(0);
+    setRecipesHasNext(false);
     setShowDetailModal(true);
-    await fetchUserRecipes(user.userId);
+    await fetchUserRecipes(user.userId, 0, false);
   };
 
   const handleToggleUserStatus = async (user: AdminUser) => {
@@ -184,9 +213,9 @@ const ManageUsersScreen = () => {
             await adminService.deleteRecipe(recipeId);
             Alert.alert("Thành công", "Đã xóa món ăn");
             
-            // Refresh user's recipes
+            // Refresh user's recipes from first page
             if (selectedUser) {
-              await fetchUserRecipes(selectedUser.userId);
+              await fetchUserRecipes(selectedUser.userId, 0, false);
             }
           } catch (error: any) {
             Alert.alert("Lỗi", error.message || "Không thể xóa món ăn");
@@ -338,80 +367,102 @@ const ManageUsersScreen = () => {
   );
 
   const renderRecipeItem = ({ item }: { item: any }) => (
-  <View style={adminStyles.modernUserRecipeCardUser}>
-    <Image
-      source={{
-        uri: item.imageUrl || "https://thecrites.com/sites/all/modules/cookbook/theme/images/default-recipe-big.png",
-      }}
-      style={adminStyles.modernUserRecipeImage}
-    />
+    <View style={adminStyles.modernUserRecipeCardUser}>
+      <Image
+        source={{
+          uri: item.imageUrl || "https://thecrites.com/sites/all/modules/cookbook/theme/images/default-recipe-big.png",
+        }}
+        style={adminStyles.modernUserRecipeImage}
+      />
 
-    <View style={adminStyles.modernUserRecipeContentWrapper}>
-      <View style={adminStyles.modernUserRecipeInfo}>
-        <Text style={adminStyles.modernUserRecipeTitle} numberOfLines={2}>
-          {item.title}
-        </Text>
-
-        <View style={adminStyles.modernUserRecipeMeta}>
-          <View
-            style={[
-              adminStyles.modernUserRecipeDifficulty,
-              { backgroundColor: getDifficultyColor(item.difficulty) },
-            ]}
-          >
-            <Text style={adminStyles.modernUserRecipeDifficultyText}>
-              {getDifficultyText(item.difficulty)}
-            </Text>
-          </View>
-
-          <View style={adminStyles.modernUserRecipeMetaItem}>
-            <Ionicons name="eye-outline" size={14} color="#7F8C8D" />
-            <Text style={adminStyles.modernUserRecipeMetaText}>
-              {item.view}
-            </Text>
-          </View>
-
-          <Text style={adminStyles.modernUserRecipeDate}>
-            {new Date(item.createdAt).toLocaleDateString("vi-VN")}
+      <View style={adminStyles.modernUserRecipeContentWrapper}>
+        <View style={adminStyles.modernUserRecipeInfo}>
+          <Text style={adminStyles.modernUserRecipeTitle} numberOfLines={2}>
+            {item.title}
           </Text>
+
+          <View style={adminStyles.modernUserRecipeMeta}>
+            <View
+              style={[
+                adminStyles.modernUserRecipeDifficulty,
+                { backgroundColor: getDifficultyColor(item.difficulty) },
+              ]}
+            >
+              <Text style={adminStyles.modernUserRecipeDifficultyText}>
+                {getDifficultyText(item.difficulty)}
+              </Text>
+            </View>
+
+            <View style={adminStyles.modernUserRecipeMetaItem}>
+              <Ionicons name="eye-outline" size={14} color="#7F8C8D" />
+              <Text style={adminStyles.modernUserRecipeMetaText}>
+                {item.view}
+              </Text>
+            </View>
+
+            <Text style={adminStyles.modernUserRecipeDate}>
+              {new Date(item.createdAt).toLocaleDateString("vi-VN")}
+            </Text>
+          </View>
+        </View>
+
+        {/* Recipe Actions */}
+        <View style={adminStyles.modernRecipeActionsRow}>
+          <TouchableOpacity
+            style={[adminStyles.modernActionButtonUser, { backgroundColor: '#E3F2FD' }]}
+            onPress={() => handleViewRecipeDetail(item.id)}
+          >
+            <Ionicons name="eye-outline" size={18} color="#4A90E2" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[adminStyles.modernActionButtonUser, { backgroundColor: '#E8F5E9' }]}
+            onPress={() => handleEditRecipe(item.id)}
+          >
+            <Ionicons name="create-outline" size={18} color="#4CAF50" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[adminStyles.modernActionButtonUser, { backgroundColor: '#FFEBEE' }]}
+            onPress={() => handleDeleteRecipe(item.id, item.title)}
+          >
+            <Ionicons name="trash-outline" size={18} color="#E74C3C" />
+          </TouchableOpacity>
         </View>
       </View>
-
-      {/* Recipe Actions - Now below recipe info */}
-      <View style={adminStyles.modernRecipeActionsRow}>
-        <TouchableOpacity
-          style={[adminStyles.modernActionButtonUser, { backgroundColor: '#E3F2FD' }]}
-          onPress={() => handleViewRecipeDetail(item.id)}
-        >
-          <Ionicons name="eye-outline" size={18} color="#4A90E2" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[adminStyles.modernActionButtonUser, { backgroundColor: '#E8F5E9' }]}
-          onPress={() => handleEditRecipe(item.id)}
-        >
-          <Ionicons name="create-outline" size={18} color="#4CAF50" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[adminStyles.modernActionButtonUser, { backgroundColor: '#FFEBEE' }]}
-          onPress={() => handleDeleteRecipe(item.id, item.title)}
-        >
-          <Ionicons name="trash-outline" size={18} color="#E74C3C" />
-        </TouchableOpacity>
-      </View>
     </View>
-  </View>
-);
+  );
+
+  const renderRecipeFooter = () => {
+    if (!recipesHasNext) return null;
+
+    return (
+      <View style={adminStyles.loadMoreContainer}>
+        {loadingMoreRecipes ? (
+          <ActivityIndicator size="small" color="#FF6B6B" />
+        ) : (
+          <TouchableOpacity
+            style={adminStyles.loadMoreButton}
+            onPress={loadMoreRecipes}
+          >
+            <Ionicons name="chevron-down-outline" size={20} color="#FF6B6B" />
+            <Text style={adminStyles.loadMoreButtonText}>
+              Kéo xuống để xem thêm
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
 
   const renderDetailModal = () => (
     <Modal visible={showDetailModal} transparent animationType="slide">
-      <View style={adminStyles.modernModalOverlay}>
+      <View style={adminStyles.modernModalOverlay1}>
         <View style={adminStyles.modernModalContainer}>
           {/* Header */}
-          <View style={adminStyles.modernModalHeader}>
+          <View style={adminStyles.modernModalHeader1}>
             <View style={{ flex: 1 }}>
-              <Text style={adminStyles.modernModalTitle} numberOfLines={1}>
+              <Text style={adminStyles.modernModalTitle1} numberOfLines={1}>
                 {selectedUser?.displayName}
               </Text>
               <Text style={adminStyles.modernModalSubtitle}>
@@ -545,6 +596,9 @@ const ManageUsersScreen = () => {
                 keyExtractor={(item) => item.id.toString()}
                 style={adminStyles.modernUserRecipesList}
                 showsVerticalScrollIndicator={false}
+                onEndReached={loadMoreRecipes}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={renderRecipeFooter()}
               />
             ) : (
               <View style={adminStyles.modernUserRecipesEmpty}>

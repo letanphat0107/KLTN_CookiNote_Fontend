@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Share,
   Alert,
+  Clipboard,
 } from "react-native";
 
 interface ShareQRModalProps {
@@ -28,18 +28,15 @@ const ShareQRModal: React.FC<ShareQRModalProps> = ({
   shareData,
   recipeTitle,
 }) => {
-  const handleShareLink = async () => {
+  const handleCopyShareCode = () => {
     if (!shareData) return;
 
-    try {
-      await Share.share({
-        message: `Xem công thức "${recipeTitle}" tại: ${shareData.shareUrl}`,
-        url: shareData.shareUrl,
-        title: `Chia sẻ công thức: ${recipeTitle}`,
-      });
-    } catch (error) {
-      console.error("Error sharing link:", error);
-    }
+    Clipboard.setString(shareData.shareCode);
+    Alert.alert(
+      "Đã sao chép",
+      `Mã chia sẻ "${shareData.shareCode}" đã được sao chép vào bộ nhớ tạm. Bạn có thể gửi mã này cho người khác.`,
+      [{ text: "OK" }]
+    );
   };
 
   if (!shareData) return null;
@@ -85,21 +82,14 @@ const ShareQRModal: React.FC<ShareQRModalProps> = ({
             <Text style={styles.shareCodeText}>{shareData.shareCode}</Text>
           </View>
 
-          {/* Share URL */}
-          {/* <View style={styles.shareUrlContainer}>
-            <Text style={styles.shareUrlText} numberOfLines={2}>
-              {shareData.shareUrl}
-            </Text>
-          </View> */}
-
           {/* Action Buttons */}
           <View style={styles.actionButtons}>
-            {/* <TouchableOpacity
-              style={styles.shareLinkButton}
-              onPress={handleShareLink}
+            <TouchableOpacity
+              style={styles.copyButton}
+              onPress={handleCopyShareCode}
             >
-              <Text style={styles.shareLinkButtonText}>📤 Chia sẻ link</Text>
-            </TouchableOpacity> */}
+              <Text style={styles.copyButtonText}>📋 Sao chép mã</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity style={styles.closeModalButton} onPress={onClose}>
               <Text style={styles.closeModalButtonText}>Đóng</Text>
@@ -199,27 +189,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#FF6B35",
   },
-  shareUrlContainer: {
-    padding: 12,
-    backgroundColor: "#F5F5F5",
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-  shareUrlText: {
-    fontSize: 12,
-    color: "#666",
-    textAlign: "center",
-  },
   actionButtons: {
     gap: 12,
   },
-  shareLinkButton: {
+  copyButton: {
     backgroundColor: "#FF6B35",
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
   },
-  shareLinkButtonText: {
+  copyButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "bold",

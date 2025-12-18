@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useAppSelector } from "../../store/hooks";
 import adminService from "../../services/adminService";
+import { searchRecipesByQuery } from "../../services/recipeService";
 import { Recipe } from "../../types/recipe";
 import { adminStyles } from "./styles";
 import { useNavigation } from "@react-navigation/native";
@@ -28,6 +29,7 @@ const ManageRecipesScreen = () => {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [search, setSearch] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("");
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
@@ -60,19 +62,42 @@ const ManageRecipesScreen = () => {
     }
   };
 
-  // Filter recipes locally
+  const performSearch = async (query: string) => {
+    if (!query.trim()) {
+      setIsSearching(false);
+      fetchRecipes(0);
+      return;
+    }
+
+    try {
+      setIsSearching(true);
+      setLoading(true);
+
+      const result = await searchRecipesByQuery(query.trim(), 0, 50);
+
+      setRecipes(result.items || []);
+      setTotalPages(result.totalPages || 1);
+      setPage(0);
+    } catch (error) {
+      console.error("Error searching recipes:", error);
+      Alert.alert("Lỗi", "Không thể tìm kiếm món ăn");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Debounce search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      performSearch(search);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [search]);
+
+  // Filter recipes locally by difficulty
   useEffect(() => {
     let result = [...recipes];
-
-    // Filter by search
-    if (search.trim()) {
-      const searchLower = search.toLowerCase().trim();
-      result = result.filter(
-        (recipe) =>
-          recipe.title.toLowerCase().includes(searchLower) ||
-          recipe.ownerName?.toLowerCase().includes(searchLower)
-      );
-    }
 
     // Filter by difficulty
     if (selectedDifficulty) {
@@ -82,18 +107,21 @@ const ManageRecipesScreen = () => {
     }
 
     setFilteredRecipes(result);
-  }, [recipes, search, selectedDifficulty]);
+  }, [recipes, selectedDifficulty]);
 
   useEffect(() => {
     fetchRecipes(0);
   }, []);
 
   const onRefresh = () => {
+    setSearch("");
+    setSelectedDifficulty("");
+    setIsSearching(false);
     fetchRecipes(0, true);
   };
 
   const loadMore = () => {
-    if (page < totalPages - 1 && !loading) {
+    if (page < totalPages - 1 && !loading && !isSearching) {
       fetchRecipes(page + 1);
     }
   };
@@ -132,10 +160,11 @@ const ManageRecipesScreen = () => {
 
   const handleViewDetail = (recipeId: number) => {
     setShowDetailModal(false);
-    navigation.navigate("RecipeDetail", { recipeId, showAddToCartButton: false,
-      showEditButton: false }, 
-      
-    );
+    navigation.navigate("RecipeDetail", {
+      recipeId,
+      showAddToCartButton: false,
+      showEditButton: false,
+    });
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -186,7 +215,9 @@ const ManageRecipesScreen = () => {
       <View style={adminStyles.modernRecipeImageWrapper}>
         <Image
           source={{
-            uri: item.imageUrl || "https://thecrites.com/sites/all/modules/cookbook/theme/images/default-recipe-big.png",
+            uri:
+              item.imageUrl ||
+              "https://thecrites.com/sites/all/modules/cookbook/theme/images/default-recipe-big.png",
           }}
           style={adminStyles.modernRecipeImage}
         />
@@ -224,13 +255,6 @@ const ManageRecipesScreen = () => {
             <Ionicons name="eye-outline" size={14} color="#7F8C8D" />
             <Text style={adminStyles.modernRecipeMetaText}>{item.view}</Text>
           </View>
-
-          {/* <View style={adminStyles.modernRecipeMeta}>
-            <Ionicons name="heart-outline" size={14} color="#7F8C8D" />
-            <Text style={adminStyles.modernRecipeMetaText}>
-              {item.favoriteCount || 0}
-            </Text>
-          </View> */}
         </View>
       </View>
 
@@ -315,14 +339,6 @@ const ManageRecipesScreen = () => {
                   {selectedRecipe?.view || 0}
                 </Text>
               </View>
-
-              {/* <View style={adminStyles.detailInfoItem}>
-                <Ionicons name="heart-outline" size={20} color="#FF6B6B" />
-                <Text style={adminStyles.detailInfoLabel}>Yêu thích</Text>
-                <Text style={adminStyles.detailInfoValue}>
-                  {selectedRecipe?.favoriteCount || 0}
-                </Text>
-              </View> */}
             </View>
 
             <View style={adminStyles.detailDifficultyRow}>
@@ -412,6 +428,11 @@ const ManageRecipesScreen = () => {
             value={search}
             onChangeText={setSearch}
           />
+          {search.length > 0 && (
+            <TouchableOpacity onPress={() => setSearch("")}>
+              <Ionicons name="close-circle" size={20} color="#999" />
+            </TouchableOpacity>
+          )}
         </View>
 
         <TouchableOpacity
@@ -424,40 +445,6 @@ const ManageRecipesScreen = () => {
 
       {/* Difficulty Filter */}
       <View style={adminStyles.modernFilterContainer}>
-        {/*
-          { key: "", label: "Tất cả", icon: "apps-outline" },
-          { key: "EASY", label: "Dễ", icon: "leaf-outline" },
-          { key: "MEDIUM", label: "TB", icon: "flame-outline" },
-          { key: "HARD", label: "Khó", icon: "flash-outline" },
-        ].map((filter) => (
-          <TouchableOpacity
-            key={filter.key}
-            style={[
-              adminStyles.modernFilterButton,
-              selectedDifficulty === filter.key &&
-                adminStyles.modernFilterButtonActive,
-            ]}
-            onPress={() => setSelectedDifficulty(filter.key)}
-          >
-            <Ionicons
-              name={filter.icon as any}
-              size={16}
-              color={
-                selectedDifficulty === filter.key ? "#FFFFFF" : "#7F8C8D"
-              }
-            />
-            <Text
-              style={[
-                adminStyles.modernFilterButtonText,
-                selectedDifficulty === filter.key &&
-                  adminStyles.modernFilterButtonTextActive,
-              ]}
-            >
-              {filter.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      */}
         <TouchableOpacity
           style={[
             adminStyles.filterButton,
@@ -531,6 +518,9 @@ const ManageRecipesScreen = () => {
       {loading && page === 0 ? (
         <View style={adminStyles.loadingContainer}>
           <ActivityIndicator size="large" color="#FF6B6B" />
+          <Text >
+            {isSearching ? "Đang tìm kiếm..." : "Đang tải..."}
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -555,7 +545,21 @@ const ManageRecipesScreen = () => {
           ListEmptyComponent={
             <View style={adminStyles.emptyContainer}>
               <Ionicons name="restaurant-outline" size={80} color="#CCC" />
-              <Text style={adminStyles.emptyText}>Không tìm thấy món ăn</Text>
+              <Text style={adminStyles.emptyText}>
+                {search
+                  ? "Không tìm thấy món ăn phù hợp"
+                  : "Không tìm thấy món ăn"}
+              </Text>
+              {search && (
+                <TouchableOpacity
+                  style={adminStyles.emptyText}
+                  onPress={() => setSearch("")}
+                >
+                  <Text style={adminStyles.emptyText}>
+                    Xóa tìm kiếm
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           }
         />
