@@ -79,7 +79,33 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         const errorMessage = result.message || "Đăng nhập thất bại";
         dispatch(loginFailure(errorMessage));
 
-        if (response.status === 401) {
+        if (response.status === 403 && result.data?.email) {
+          // Account not verified - redirect to OTP verification
+          Alert.alert(
+            "Tài khoản chưa xác thực",
+            "Chúng tôi đã gửi mã OTP đến email của bạn. Vui lòng xác thực tài khoản để tiếp tục.",
+            [
+              {
+                text: "Xác thực ngay",
+                onPress: () => {
+                  dispatch(setLoading(false));
+                  navigation?.navigate("OTPVerification", {
+                    email: result.data.email,
+                    purpose: "register",
+                  });
+                },
+              },
+              {
+                text: "Để sau",
+                style: "cancel",
+                onPress: () => {
+                  dispatch(setLoading(false));
+                },
+              },
+            ]
+          );
+          return; // Exit early to prevent showing other error alerts
+        } else if (response.status === 401) {
           Alert.alert(
             "Lỗi đăng nhập",
             "Tên đăng nhập hoặc mật khẩu không đúng"
@@ -103,6 +129,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
       dispatch(loginFailure(errorMessage));
       Alert.alert("Lỗi kết nối", errorMessage);
+    } finally {
+      dispatch(setLoading(false));
     }
   };
 

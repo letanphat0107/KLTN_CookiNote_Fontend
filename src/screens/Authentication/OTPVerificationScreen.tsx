@@ -16,7 +16,7 @@ interface OTPVerificationScreenProps {
   route: {
     params: {
       email: string;
-      purpose: "register" | "email_change";
+      purpose: "register" | "email_change" | "forgot_password";
     };
   };
   navigation: any;
@@ -59,41 +59,60 @@ const OTPVerificationScreen: React.FC<OTPVerificationScreenProps> = ({
     setIsLoading(true);
 
     try {
-      const verifyData = {
+      // Use different endpoints based on purpose
+      let endpoint = "";
+      let verifyData: any = {
         email: email,
         otp: otp.trim(),
       };
 
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.VERIFY_OTP}`,
-        {
-          method: "POST",
-          headers: API_HEADERS,
-          body: JSON.stringify(verifyData),
-        }
-      );
+      if (purpose === "forgot_password") {
+        endpoint = "/cookinote/auth/forgot/check-otp";
+      } else {
+        endpoint = API_CONFIG.ENDPOINTS.AUTH.VERIFY_OTP;
+      }
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
+        method: "POST",
+        headers: API_HEADERS,
+        body: JSON.stringify(verifyData),
+      });
 
       const result = await response.json();
 
       if (response.ok) {
         // OTP verification successful
-        const successMessage =
-          purpose === "register"
-            ? "Xác thực email thành công! Tài khoản của bạn đã được kích hoạt."
-            : "Xác thực email thành công!";
-
-        Alert.alert("Thành công", successMessage, [
-          {
-            text: "OK",
-            onPress: () => {
-              if (purpose === "register") {
-                navigation.navigate("Login");
-              } else {
-                navigation.goBack();
-              }
+        if (purpose === "forgot_password") {
+          Alert.alert("Xác thực thành công", "Vui lòng nhập mật khẩu mới", [
+            {
+              text: "OK",
+              onPress: () =>
+                navigation.navigate("NewPassword", {
+                  email: email,
+                  otp: otp.trim(),
+                  mode: "reset",
+                }),
             },
-          },
-        ]);
+          ]);
+        } else {
+          const successMessage =
+            purpose === "register"
+              ? "Xác thực email thành công! Vui lòng đăng nhập lại để tiếp tục."
+              : "Xác thực email thành công!";
+
+          Alert.alert("Thành công", successMessage, [
+            {
+              text: "OK",
+              onPress: () => {
+                if (purpose === "register") {
+                  navigation.navigate("Login");
+                } else {
+                  navigation.goBack();
+                }
+              },
+            },
+          ]);
+        }
       } else {
         // Handle specific error messages from API
         const errorMessage =
@@ -127,14 +146,19 @@ const OTPVerificationScreen: React.FC<OTPVerificationScreenProps> = ({
         email: email,
       };
 
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.RESEND_OTP}`,
-        {
-          method: "POST",
-          headers: API_HEADERS,
-          body: JSON.stringify(resendData),
-        }
-      );
+      // Use different endpoints based on purpose
+      let endpoint = "";
+      if (purpose === "forgot_password") {
+        endpoint = "/cookinote/auth/forgot";
+      } else {
+        endpoint = API_CONFIG.ENDPOINTS.AUTH.RESEND_OTP;
+      }
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
+        method: "POST",
+        headers: API_HEADERS,
+        body: JSON.stringify(resendData),
+      });
 
       const result = await response.json();
 
@@ -170,10 +194,13 @@ const OTPVerificationScreen: React.FC<OTPVerificationScreenProps> = ({
   };
 
   const getTitle = () => {
+    if (purpose === "forgot_password") return "Xác thực OTP";
     return purpose === "register" ? "Xác thực tài khoản" : "Xác thực email";
   };
 
   const getDescription = () => {
+    if (purpose === "forgot_password")
+      return "Nhập mã OTP để xác thực và đặt lại mật khẩu.";
     return purpose === "register"
       ? "Chúng tôi đã gửi mã xác thực đến email của bạn để hoàn tất đăng ký."
       : "Chúng tôi đã gửi mã xác thực đến email mới của bạn.";

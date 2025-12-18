@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import AuthHeader from "../../components/AuthHeader";
 import { authStyles } from "./styles";
+import { API_CONFIG, API_HEADERS } from "../../config/api";
 
 interface ForgotPasswordScreenProps {
   navigation: any;
@@ -36,21 +37,43 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      Alert.alert(
-        "Mã xác nhận đã được gửi",
-        "Vui lòng kiểm tra email để lấy mã xác nhận",
-        [
-          {
-            text: "OK",
-            onPress: () => navigation.navigate("NewPassword", { email }),
-          },
-        ]
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}/cookinote/auth/forgot`,
+        {
+          method: "POST",
+          headers: API_HEADERS,
+          body: JSON.stringify({ email: email.trim() }),
+        }
       );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        Alert.alert(
+          "Mã OTP đã được gửi",
+          "Vui lòng kiểm tra email để lấy mã OTP",
+          [
+            {
+              text: "OK",
+              onPress: () =>
+                navigation.navigate("OTPVerification", {
+                  email: email.trim(),
+                  purpose: "forgot_password",
+                }),
+            },
+          ]
+        );
+      } else {
+        const errorMessage =
+          result.message || "Không thể gửi mã OTP. Vui lòng thử lại.";
+        Alert.alert("Lỗi", errorMessage);
+      }
     } catch (error) {
-      Alert.alert("Lỗi", "Có lỗi xảy ra. Vui lòng thử lại.");
+      console.error("Forgot password error:", error);
+      Alert.alert(
+        "Lỗi kết nối",
+        "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -74,14 +97,14 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 
       <View style={authStyles.form}>
         <Text style={authStyles.subtitle}>
-          Nhập email của bạn để nhận mã xác nhận
+          Nhập email của bạn để nhận mã OTP
         </Text>
 
         <View style={authStyles.inputGroup}>
           <Text style={authStyles.inputLabel}>Email</Text>
           <TextInput
             style={authStyles.roundedInput}
-            placeholder=""
+            placeholder="Nhập email của bạn"
             placeholderTextColor="#999"
             value={email}
             onChangeText={setEmail}
@@ -103,7 +126,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
           {isLoading ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
-            <Text style={authStyles.roundedButtonText}>Gửi mã xác nhận</Text>
+            <Text style={authStyles.roundedButtonText}>Gửi mã OTP</Text>
           )}
         </TouchableOpacity>
       </View>

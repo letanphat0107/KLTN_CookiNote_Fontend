@@ -13,7 +13,7 @@ import {
 import { useAppSelector } from "../../store/hooks";
 import AuthHeader from "../../components/AuthHeader";
 import { authStyles } from "./styles";
-import { API_URLS, createAuthHeaders } from "../../config/api";
+import { API_URLS, createAuthHeaders, API_CONFIG, API_HEADERS } from "../../config/api";
 
 interface NewPasswordScreenProps {
   navigation: any;
@@ -24,7 +24,7 @@ const NewPasswordScreen: React.FC<NewPasswordScreenProps> = ({
   navigation,
   route,
 }) => {
-  const { mode = "reset", email } = route.params || {};
+  const { mode = "reset", email, otp } = route.params || {};
   const { tokens, user } = useAppSelector((state) => state.auth);
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -34,6 +34,7 @@ const NewPasswordScreen: React.FC<NewPasswordScreenProps> = ({
 
   // Check if this is change password mode (user is logged in)
   const isChangePasswordMode = mode === "change" && tokens && user;
+  const isResetPasswordMode = mode === "reset" && email && otp;
 
   const validatePassword = (password: string) => {
     // Check if password has at least 6 characters
@@ -72,7 +73,6 @@ const NewPasswordScreen: React.FC<NewPasswordScreenProps> = ({
     if (Platform.OS === "android") {
       ToastAndroid.show(message, ToastAndroid.SHORT);
     } else {
-      // For iOS, you might want to use a toast library or Alert
       Alert.alert("Thông báo", message);
     }
   };
@@ -112,9 +112,11 @@ const NewPasswordScreen: React.FC<NewPasswordScreenProps> = ({
       if (isChangePasswordMode) {
         // Change password for logged in user
         await changePasswordAPI();
+      } else if (isResetPasswordMode) {
+        // Reset password with OTP
+        await resetPasswordWithOTP();
       } else {
-        // Reset password flow (implement if needed)
-        await resetPasswordAPI();
+        Alert.alert("Lỗi", "Thông tin không hợp lệ");
       }
     } catch (error) {
       console.error("Password change error:", error);
@@ -183,13 +185,55 @@ const NewPasswordScreen: React.FC<NewPasswordScreenProps> = ({
     }
   };
 
-  const resetPasswordAPI = async () => {
-    // Implement reset password API if needed
-    // This would be for forgot password flow
-    Alert.alert(
-      "Chức năng đang phát triển",
-      "Tính năng đặt lại mật khẩu đang được phát triển"
-    );
+  const resetPasswordWithOTP = async () => {
+    try {
+      const resetData = {
+        email: email,
+        otp: otp,
+        newPassword: newPassword,
+      };
+
+      console.log("Reset password data:", {
+        ...resetData,
+        otp: "[HIDDEN]",
+        newPassword: "[HIDDEN]",
+      });
+
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}/cookinote/auth/forgot/reset-with-otp`,
+        {
+          method: "PUT",
+          headers: API_HEADERS,
+          body: JSON.stringify(resetData),
+        }
+      );
+
+      const result = await response.json();
+      console.log("Reset password response:", result);
+
+      if (response.ok) {
+        Alert.alert(
+          "Thành công",
+          "Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại.",
+          [
+            {
+              text: "OK",
+              onPress: () => navigation.navigate("Login"),
+            },
+          ]
+        );
+      } else {
+        const errorMessage =
+          result.message || "Đặt lại mật khẩu thất bại. Vui lòng thử lại.";
+        Alert.alert("Lỗi", errorMessage);
+      }
+    } catch (error) {
+      console.error("Reset password API error:", error);
+      Alert.alert(
+        "Lỗi kết nối",
+        "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng."
+      );
+    }
   };
 
   const handleBack = () => {
@@ -223,13 +267,16 @@ const NewPasswordScreen: React.FC<NewPasswordScreenProps> = ({
   const passwordStrength = getPasswordStrength(newPassword);
 
   const getTitle = () => {
-    return isChangePasswordMode ? "Đổi mật khẩu" : "Đặt mật khẩu mới";
+    if (isChangePasswordMode) return "Đổi mật khẩu";
+    if (isResetPasswordMode) return "Đặt mật khẩu mới";
+    return "Mật khẩu";
   };
 
   const getSubtitle = () => {
-    return isChangePasswordMode
-      ? "Nhập mật khẩu hiện tại và mật khẩu mới"
-      : "Nhập mật khẩu mới cho tài khoản của bạn";
+    if (isChangePasswordMode)
+      return "Nhập mật khẩu hiện tại và mật khẩu mới";
+    if (isResetPasswordMode) return "Nhập mật khẩu mới cho tài khoản của bạn";
+    return "";
   };
 
   return (
@@ -247,13 +294,13 @@ const NewPasswordScreen: React.FC<NewPasswordScreenProps> = ({
       <View style={authStyles.form}>
         <Text style={authStyles.subtitle}>{getSubtitle()}</Text>
 
-        {/* Show email if available */}
-        {/* {email && (
-          <View style={authStyles.emailContainer}>
+        {/* Show email in reset mode */}
+        {isResetPasswordMode && (
+          <View style={authStyles.otpEmailContainer}>
             <Text style={authStyles.emailLabel}>Email:</Text>
-            <Text style={authStyles.emailText}>{email}</Text>
+            <Text style={authStyles.otpEmailText}>{email}</Text>
           </View>
-        )} */}
+        )}
 
         {/* Current Password - only show in change mode */}
         {isChangePasswordMode && (
@@ -348,23 +395,6 @@ const NewPasswordScreen: React.FC<NewPasswordScreenProps> = ({
             </Text>
           )}
         </TouchableOpacity>
-
-        {/* Password Requirements Info */}
-        {/* <View style={authStyles.passwordRequirements}>
-          <Text style={authStyles.requirementsTitle}>Yêu cầu mật khẩu:</Text>
-          <Text style={authStyles.requirementItem}>• Ít nhất 6 ký tự</Text>
-          <Text style={authStyles.requirementItem}>
-            • Có ít nhất một chữ cái (a-z, A-Z)
-          </Text>
-          <Text style={authStyles.requirementItem}>
-            • Có ít nhất một chữ số (0-9)
-          </Text>
-          {isChangePasswordMode && (
-            <Text style={authStyles.requirementItem}>
-              • Khác mật khẩu hiện tại
-            </Text>
-          )}
-        </View> */}
       </View>
     </ScrollView>
   );
