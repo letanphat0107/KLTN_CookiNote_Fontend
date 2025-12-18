@@ -257,12 +257,12 @@ const ManageRecipesScreen = () => {
 
   const renderDetailModal = () => (
     <Modal visible={showDetailModal} transparent animationType="slide">
-      <View style={adminStyles.modernModalOverlay}>
+      <View style={adminStyles.modernModalOverlay1}>
         <View style={adminStyles.modernModalContainer}>
           {/* Header */}
-          <View style={adminStyles.modernModalHeader}>
+          <View style={adminStyles.modernModalHeader1}>
             <View style={{ flex: 1 }}>
-              <Text style={adminStyles.modernModalTitle} numberOfLines={2}>
+              <Text style={adminStyles.modernModalTitle1} numberOfLines={2}>
                 {selectedRecipe?.title}
               </Text>
               <Text style={adminStyles.modernModalSubtitle}>
@@ -280,7 +280,7 @@ const ManageRecipesScreen = () => {
               source={{
                 uri:
                   selectedRecipe?.imageUrl ||
-                  "https://via.placeholder.com/400x300",
+                  "https://thecrites.com/sites/all/modules/cookbook/theme/images/default-recipe-big.png",
               }}
               style={adminStyles.detailRecipeImage}
             />

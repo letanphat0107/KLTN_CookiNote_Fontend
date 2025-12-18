@@ -57,7 +57,7 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
   const recipeId = route?.params?.recipeId;
   const showEditButton = route?.params?.showEditButton ?? true; // Default: true
   const showAddToCartButton = route?.params?.showAddToCartButton ?? true; // Default: true
-    const showRating = route?.params?.showRating ?? true; // Default: true
+  const showRating = route?.params?.showRating ?? true; // Default: true
   const showComments = route?.params?.showComments ?? true; // Default: true
 
   const { isAuthenticated } = useAppSelector((state) => state.auth);
@@ -377,212 +377,212 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = ({
   };
 
   const handleRating = async (score: number) => {
-  if (!isAuthenticated) {
-    showToastMessage("⭐ Vui lòng đăng nhập để đánh giá!", 3000);
-    setTimeout(() => {
-      if (navigation) {
-        navigation.navigate("Login");
-      }
-    }, 2000);
-    return;
-  }
-
-  if (!recipe?.id) return;
-
-  setIsRating(true);
-  try {
-    const success = await rateRecipe(recipe.id, score);
-
-    if (success) {
-      setCurrentRating(score);
-      showToastMessage(`⭐ Đã đánh giá ${score} sao!`, 2000);
-      
-      // Update recipe state locally instead of reloading
-      setRecipe(prev => {
-        if (!prev) return prev;
-        
-        const oldRating = currentRating;
-        const oldCount = prev.ratingCount || 0;
-        const oldAverage = prev.averageRating || 0;
-        
-        let newCount = oldCount;
-        let newAverage = oldAverage;
-        
-        if (oldRating === 0) {
-          // New rating
-          newCount = oldCount + 1;
-          newAverage = ((oldAverage * oldCount) + score) / newCount;
-        } else {
-          // Update existing rating
-          newAverage = ((oldAverage * oldCount) - oldRating + score) / oldCount;
+    if (!isAuthenticated) {
+      showToastMessage("⭐ Vui lòng đăng nhập để đánh giá!", 3000);
+      setTimeout(() => {
+        if (navigation) {
+          navigation.navigate("Login");
         }
-        
-        return {
-          ...prev,
-          ratingCount: newCount,
-          averageRating: newAverage,
-          myRating: score
-        };
-      });
-    } else {
-      showToastMessage("❌ Không thể đánh giá. Thử lại sau!", 3000);
+      }, 2000);
+      return;
     }
-  } catch (error) {
-    console.error("Error rating recipe:", error);
-    showToastMessage("❌ Đã xảy ra lỗi. Vui lòng thử lại!", 3000);
-  } finally {
-    setIsRating(false);
-  }
-};
 
-  const handleDeleteRating = async () => {
-  if (!recipe?.id || !currentRating) return;
+    if (!recipe?.id) return;
 
-  Alert.alert("Xác nhận", "Bạn có chắc muốn xóa đánh giá của mình?", [
-    { text: "Hủy", style: "cancel" },
-    {
-      text: "Xóa",
-      style: "destructive",
-      onPress: async () => {
-        setIsRating(true);
-        try {
-          const success = await deleteRating(recipe.id);
-
-          if (success) {
-            const oldRating = currentRating;
-            setCurrentRating(0);
-            showToastMessage("🗑️ Đã xóa đánh giá!", 2000);
-            
-            // Update recipe state locally
-            setRecipe(prev => {
-              if (!prev) return prev;
-              
-              const oldCount = prev.ratingCount || 0;
-              const oldAverage = prev.averageRating || 0;
-              const newCount = Math.max(0, oldCount - 1);
-              
-              let newAverage = 0;
-              if (newCount > 0) {
-                newAverage = ((oldAverage * oldCount) - oldRating) / newCount;
-              }
-              
-              return {
-                ...prev,
-                ratingCount: newCount,
-                averageRating: newAverage,
-                myRating: 0
-              };
-            });
-          } else {
-            showToastMessage("❌ Không thể xóa đánh giá!", 3000);
-          }
-        } catch (error) {
-          console.error("Error deleting rating:", error);
-          showToastMessage("❌ Đã xảy ra lỗi!", 3000);
-        } finally {
-          setIsRating(false);
-        }
-      },
-    },
-  ]);
-};
-
-  // Add comment functions
-const loadComments = async (showLoading = true) => {
-  if (!recipe?.id) return;
-
-  if (showLoading) {
-    setIsLoadingComments(true);
-  }
-  
-  try {
-    const commentsData = await getRecipeComments(recipe.id);
-
-    // Add isOwner flag to each comment and reply
-    const commentsWithOwnership = commentsData.map((comment) => ({
-      ...comment,
-      isOwner: comment.authorId === userId,
-      replies: comment.replies?.map((reply) => ({
-        ...reply,
-        isOwner: reply.authorId === userId,
-      })),
-    }));
-
-    setComments(commentsWithOwnership);
-  } catch (error) {
-    console.error("Error loading comments:", error);
-  } finally {
-    if (showLoading) {
-      setIsLoadingComments(false);
-    }
-  }
-};
-
-  const handleSubmitComment = async () => {
-  if (!isAuthenticated) {
-    showToastMessage("💬 Vui lòng đăng nhập để bình luận!", 3000);
-    setTimeout(() => {
-      if (navigation) {
-        navigation.navigate("Login");
-      }
-    }, 2000);
-    return;
-  }
-
-  if (!recipe?.id || !commentText.trim()) return;
-
-  setIsSubmittingComment(true);
-  try {
-    if (editingCommentId) {
-      // Update existing comment
-      const success = await updateComment(
-        editingCommentId,
-        commentText.trim()
-      );
-      if (success) {
-        showToastMessage("✅ Đã cập nhật bình luận!", 2000);
-        setEditingCommentId(null);
-        setCommentText("");
-        loadComments(); // Only reload comments, not entire recipe
-      } else {
-        showToastMessage("❌ Không thể cập nhật bình luận!", 3000);
-      }
-    } else {
-      // Add new comment or reply
-      const success = await addComment(
-        recipe.id,
-        commentText.trim(),
-        replyToCommentId || undefined
-      );
+    setIsRating(true);
+    try {
+      const success = await rateRecipe(recipe.id, score);
 
       if (success) {
-        showToastMessage(
-          replyToCommentId ? "💬 Đã trả lời!" : "💬 Đã bình luận!",
-          2000
-        );
-        setCommentText("");
-        setReplyToCommentId(null);
-        loadComments(); // Only reload comments
-        
-        // Update comment count locally
-        setRecipe(prev => {
+        setCurrentRating(score);
+        showToastMessage(`⭐ Đã đánh giá ${score} sao!`, 2000);
+
+        // Update recipe state locally instead of reloading
+        setRecipe((prev) => {
           if (!prev) return prev;
+
+          const oldRating = currentRating;
+          const oldCount = prev.ratingCount || 0;
+          const oldAverage = prev.averageRating || 0;
+
+          let newCount = oldCount;
+          let newAverage = oldAverage;
+
+          if (oldRating === 0) {
+            // New rating
+            newCount = oldCount + 1;
+            newAverage = (oldAverage * oldCount + score) / newCount;
+          } else {
+            // Update existing rating
+            newAverage = (oldAverage * oldCount - oldRating + score) / oldCount;
+          }
+
           return {
             ...prev,
-            commentCount: (prev.commentCount || 0) + 1
+            ratingCount: newCount,
+            averageRating: newAverage,
+            myRating: score,
           };
         });
       } else {
-        showToastMessage("❌ Không thể gửi bình luận!", 3000);
+        showToastMessage("❌ Không thể đánh giá. Thử lại sau!", 3000);
+      }
+    } catch (error) {
+      console.error("Error rating recipe:", error);
+      showToastMessage("❌ Đã xảy ra lỗi. Vui lòng thử lại!", 3000);
+    } finally {
+      setIsRating(false);
+    }
+  };
+
+  const handleDeleteRating = async () => {
+    if (!recipe?.id || !currentRating) return;
+
+    Alert.alert("Xác nhận", "Bạn có chắc muốn xóa đánh giá của mình?", [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Xóa",
+        style: "destructive",
+        onPress: async () => {
+          setIsRating(true);
+          try {
+            const success = await deleteRating(recipe.id);
+
+            if (success) {
+              const oldRating = currentRating;
+              setCurrentRating(0);
+              showToastMessage("🗑️ Đã xóa đánh giá!", 2000);
+
+              // Update recipe state locally
+              setRecipe((prev) => {
+                if (!prev) return prev;
+
+                const oldCount = prev.ratingCount || 0;
+                const oldAverage = prev.averageRating || 0;
+                const newCount = Math.max(0, oldCount - 1);
+
+                let newAverage = 0;
+                if (newCount > 0) {
+                  newAverage = (oldAverage * oldCount - oldRating) / newCount;
+                }
+
+                return {
+                  ...prev,
+                  ratingCount: newCount,
+                  averageRating: newAverage,
+                  myRating: 0,
+                };
+              });
+            } else {
+              showToastMessage("❌ Không thể xóa đánh giá!", 3000);
+            }
+          } catch (error) {
+            console.error("Error deleting rating:", error);
+            showToastMessage("❌ Đã xảy ra lỗi!", 3000);
+          } finally {
+            setIsRating(false);
+          }
+        },
+      },
+    ]);
+  };
+
+  // Add comment functions
+  const loadComments = async (showLoading = true) => {
+    if (!recipe?.id) return;
+
+    if (showLoading) {
+      setIsLoadingComments(true);
+    }
+
+    try {
+      const commentsData = await getRecipeComments(recipe.id);
+
+      // Add isOwner flag to each comment and reply
+      const commentsWithOwnership = commentsData.map((comment) => ({
+        ...comment,
+        isOwner: comment.authorId === userId,
+        replies: comment.replies?.map((reply) => ({
+          ...reply,
+          isOwner: reply.authorId === userId,
+        })),
+      }));
+
+      setComments(commentsWithOwnership);
+    } catch (error) {
+      console.error("Error loading comments:", error);
+    } finally {
+      if (showLoading) {
+        setIsLoadingComments(false);
       }
     }
-  } catch (error) {
-    console.error("Error submitting comment:", error);
-    showToastMessage("❌ Đã xảy ra lỗi!", 3000);
-  } finally {
-    setIsSubmittingComment(false);
-  }
-};
+  };
+
+  const handleSubmitComment = async () => {
+    if (!isAuthenticated) {
+      showToastMessage("💬 Vui lòng đăng nhập để bình luận!", 3000);
+      setTimeout(() => {
+        if (navigation) {
+          navigation.navigate("Login");
+        }
+      }, 2000);
+      return;
+    }
+
+    if (!recipe?.id || !commentText.trim()) return;
+
+    setIsSubmittingComment(true);
+    try {
+      if (editingCommentId) {
+        // Update existing comment
+        const success = await updateComment(
+          editingCommentId,
+          commentText.trim()
+        );
+        if (success) {
+          showToastMessage("✅ Đã cập nhật bình luận!", 2000);
+          setEditingCommentId(null);
+          setCommentText("");
+          loadComments(); // Only reload comments, not entire recipe
+        } else {
+          showToastMessage("❌ Không thể cập nhật bình luận!", 3000);
+        }
+      } else {
+        // Add new comment or reply
+        const success = await addComment(
+          recipe.id,
+          commentText.trim(),
+          replyToCommentId || undefined
+        );
+
+        if (success) {
+          showToastMessage(
+            replyToCommentId ? "💬 Đã trả lời!" : "💬 Đã bình luận!",
+            2000
+          );
+          setCommentText("");
+          setReplyToCommentId(null);
+          loadComments(); // Only reload comments
+
+          // Update comment count locally
+          setRecipe((prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              commentCount: (prev.commentCount || 0) + 1,
+            };
+          });
+        } else {
+          showToastMessage("❌ Không thể gửi bình luận!", 3000);
+        }
+      }
+    } catch (error) {
+      console.error("Error submitting comment:", error);
+      showToastMessage("❌ Đã xảy ra lỗi!", 3000);
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  };
 
   const handleEditComment = (comment: Comment) => {
     setEditingCommentId(comment.id);
@@ -591,38 +591,38 @@ const loadComments = async (showLoading = true) => {
   };
 
   const handleDeleteComment = async (commentId: number) => {
-  Alert.alert("Xác nhận", "Bạn có chắc muốn xóa bình luận này?", [
-    { text: "Hủy", style: "cancel" },
-    {
-      text: "Xóa",
-      style: "destructive",
-      onPress: async () => {
-        try {
-          const success = await deleteComment(commentId);
+    Alert.alert("Xác nhận", "Bạn có chắc muốn xóa bình luận này?", [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Xóa",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            const success = await deleteComment(commentId);
 
-          if (success) {
-            showToastMessage("🗑️ Đã xóa bình luận!", 2000);
-            loadComments(); // Only reload comments
-            
-            // Update comment count locally
-            setRecipe(prev => {
-              if (!prev) return prev;
-              return {
-                ...prev,
-                commentCount: Math.max(0, (prev.commentCount || 0) - 1)
-              };
-            });
-          } else {
-            showToastMessage("❌ Không thể xóa bình luận!", 3000);
+            if (success) {
+              showToastMessage("🗑️ Đã xóa bình luận!", 2000);
+              loadComments(); // Only reload comments
+
+              // Update comment count locally
+              setRecipe((prev) => {
+                if (!prev) return prev;
+                return {
+                  ...prev,
+                  commentCount: Math.max(0, (prev.commentCount || 0) - 1),
+                };
+              });
+            } else {
+              showToastMessage("❌ Không thể xóa bình luận!", 3000);
+            }
+          } catch (error) {
+            console.error("Error deleting comment:", error);
+            showToastMessage("❌ Đã xảy ra lỗi!", 3000);
           }
-        } catch (error) {
-          console.error("Error deleting comment:", error);
-          showToastMessage("❌ Đã xảy ra lỗi!", 3000);
-        }
+        },
       },
-    },
-  ]);
-};
+    ]);
+  };
 
   const handleReplyComment = (commentId: number, authorName: string) => {
     setReplyToCommentId(commentId);
@@ -667,7 +667,7 @@ const loadComments = async (showLoading = true) => {
     }
     // Fallback image
     return {
-      uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_2BWz0CukYGFT9pvza-w6su7smU_xUkoEOg&s",
+      uri: "https://thecrites.com/sites/all/modules/cookbook/theme/images/default-recipe-big.png",
     };
   };
 
@@ -1035,24 +1035,22 @@ const loadComments = async (showLoading = true) => {
           </View>
 
           {/* Servings */}
-  {recipe.servings != null && recipe.servings > 0 && (
-    <View style={recipeStyles.infoRow}>
-      <Text style={recipeStyles.infoLabel}>Khẩu phần:</Text>
-      <Text style={recipeStyles.infoValue}>
-        {recipe.servings} người
-      </Text>
-    </View>
-  )}
-  
-  {/* Calories */}
-  {recipe.calories != null && recipe.calories > 0 && (
-    <View style={recipeStyles.infoRow}>
-      <Text style={recipeStyles.infoLabel}>Năng lượng:</Text>
-      <Text style={recipeStyles.infoValue}>
-        {recipe.calories} kcal
-      </Text>
-    </View>
-  )}
+          {recipe.servings != null && recipe.servings > 0 && (
+            <View style={recipeStyles.infoRow}>
+              <Text style={recipeStyles.infoLabel}>Khẩu phần:</Text>
+              <Text style={recipeStyles.infoValue}>
+                {recipe.servings} người
+              </Text>
+            </View>
+          )}
+
+          {/* Calories */}
+          {recipe.calories != null && recipe.calories > 0 && (
+            <View style={recipeStyles.infoRow}>
+              <Text style={recipeStyles.infoLabel}>Năng lượng:</Text>
+              <Text style={recipeStyles.infoValue}>{recipe.calories} kcal</Text>
+            </View>
+          )}
         </View>
 
         {/* Button Chỉnh sửa va Button Thêm vào Shopping Cart */}

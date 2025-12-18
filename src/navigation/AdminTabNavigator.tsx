@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import AdminDashboardScreen from "../screens/Admin/AdminDashboardScreen";
@@ -7,7 +6,7 @@ import ManageRecipesScreen from "../screens/Admin/ManageRecipesScreen";
 import ManageCategory from "../screens/Admin/ManageCategory";
 
 const AdminTabNavigator = () => {
-  const [activeTab, setActiveTab] = useState("Dashboard");
+  const [activeTab, setActiveTab] = useState("AdminDashboard");
 
   const renderScreen = () => {
     switch (activeTab) {
@@ -26,13 +25,15 @@ const AdminTabNavigator = () => {
     <View style={{ flex: 1 }}>
       {/* --- Thanh Tab --- */}
       <View style={styles.tabBar}>
-        {["AdminDashboard", "ManageUsers", "ManageCategory", "ManageRecipe"].map((tab) => (
+        {[
+          "AdminDashboard",
+          "ManageUsers",
+          "ManageCategory",
+          "ManageRecipe",
+        ].map((tab) => (
           <TouchableOpacity
             key={tab}
-            style={[
-              styles.tabItem,
-              activeTab === tab && styles.activeTabItem,
-            ]}
+            style={[styles.tabItem, activeTab === tab && styles.activeTabItem]}
             onPress={() => setActiveTab(tab)}
           >
             <Text
@@ -65,11 +66,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
-    marginTop:40
+    marginTop: 40,
   },
   tabItem: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 16,
     alignItems: "center",
   },
   activeTabItem: {
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#FF6B6B",
   },
   tabLabel: {
-    fontSize: 13,
+    fontSize: 14,
     color: "#666",
     fontWeight: "500",
   },

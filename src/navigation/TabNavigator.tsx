@@ -28,9 +28,9 @@ const TabNavigator = () => {
           backgroundColor: "#FFFFFF",
           borderTopWidth: 1,
           borderTopColor: "#E0E0E0",
-          paddingBottom: 8,
+          paddingBottom: 12,
           paddingTop: 8,
-          height: 65,
+          height: 80,
           position: "absolute",
           bottom: 0,
           left: 0,
@@ -45,6 +45,7 @@ const TabNavigator = () => {
           fontSize: 12,
           fontWeight: "600",
           marginTop: 4,
+          marginBottom: 2,
         },
         tabBarIconStyle: {
           marginTop: 2,
@@ -107,10 +108,10 @@ const TabNavigator = () => {
           tabBarLabel: "Công thức",
           tabBarIcon: ({ color, focused, size }) => (
             <Ionicons
-        name={focused ? "restaurant" : "restaurant-outline"}
-        size={focused ? 26 : 24}
-        color={color}
-      />
+              name={focused ? "restaurant" : "restaurant-outline"}
+              size={focused ? 26 : 24}
+              color={color}
+            />
           ),
         }}
       />

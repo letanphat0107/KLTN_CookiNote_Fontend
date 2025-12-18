@@ -1004,7 +1004,7 @@ const CreateRecipeScreen = () => {
               </Text>
             </View>
 
-            <View style={adminStyles.modernModalFooter}>
+            <View style={adminStyles.modernModalFooter2}>
               <TouchableOpacity
                 style={adminStyles.modernModalCancelButton}
                 onPress={() => {

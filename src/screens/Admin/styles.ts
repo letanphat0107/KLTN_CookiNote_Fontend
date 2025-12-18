@@ -928,6 +928,12 @@ export const adminStyles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
 
+  // Modern Modal
+  modernModalOverlay1: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "flex-end",
+  },
 
   modernModalContainer: {
     backgroundColor: "#FFFFFF",
@@ -937,6 +943,21 @@ export const adminStyles = StyleSheet.create({
     overflow: "hidden",
   },
 
+  modernModalHeader1: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+  },
+
+  modernModalTitle1: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#2C3E50",
+  },
 
   modernModalSubtitle: {
     fontSize: 14,
@@ -992,6 +1013,14 @@ export const adminStyles = StyleSheet.create({
     marginBottom: 8,
   },
 
+  modernModalFooter: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#F0F0F0",
+  },
 
   modernCancelButton: {
     flex: 1,
@@ -2942,7 +2971,7 @@ modernActionButtonUser: {
     marginTop: 8,
     fontStyle: "italic",
   },
-  modernModalFooter: {
+  modernModalFooter2: {
     flexDirection: "row",
     padding: 20,
     gap: 12,
