@@ -243,6 +243,7 @@ export const culinaryStoryStyles = StyleSheet.create({
   detailContainer: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+    paddingBottom: 50,
   },
   detailHeader: {
     flexDirection: "row",
@@ -506,6 +507,76 @@ loadMoreText: {
   fontSize: 16,
   fontWeight: "600",
 },
+
+  // Formatted Content Styles
+  formattedContentContainer: {
+    gap: 8,
+  },
+  contentText: {
+    fontSize: 16,
+    lineHeight: 26,
+    color: "#2C3E50",
+  },
+  boldText: {
+    fontWeight: "700",
+    color: "#1A1A1A",
+  },
+  headingOne: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  headingTwo: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    marginTop: 14,
+    marginBottom: 6,
+  },
+  headingThree: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#2C3E50",
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  listItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginVertical: 4,
+    paddingLeft: 8,
+  },
+  bulletIcon: {
+    fontSize: 16,
+    color: "#FF6B6B",
+    marginRight: 12,
+    marginTop: 4,
+    fontWeight: "700",
+  },
+  listNumber: {
+    fontSize: 16,
+    color: "#FF6B6B",
+    marginRight: 12,
+    fontWeight: "700",
+    minWidth: 24,
+  },
+  quoteBlock: {
+    backgroundColor: "#F8F9FA",
+    borderLeftWidth: 4,
+    borderLeftColor: "#FF6B6B",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginVertical: 8,
+    borderRadius: 4,
+  },
+  quoteText: {
+    fontSize: 15,
+    fontStyle: "italic",
+    color: "#555",
+    lineHeight: 24,
+  },
 });
 
 export default culinaryStoryStyles;

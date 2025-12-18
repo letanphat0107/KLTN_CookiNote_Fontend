@@ -95,7 +95,7 @@ const CulinaryStoryDetailScreen: React.FC<CulinaryStoryDetailScreenProps> = ({
 
     try {
       await Share.share({
-        message: `Đọc bài viết hay: "${post.title}" trên CookiNote`,
+        message: `Tải ứng dụng và đọc "${post.title}" trên CookiNote`,
         url: `https://cookinote.app/posts/${postId}`,
       });
     } catch (error) {
@@ -114,6 +114,144 @@ const CulinaryStoryDetailScreen: React.FC<CulinaryStoryDetailScreenProps> = ({
     if (diffDays < 7) return `${diffDays} ngày trước`;
     if (diffDays < 30) return `${Math.floor(diffDays / 7)} tuần trước`;
     return date.toLocaleDateString("vi-VN");
+  };
+
+  const formatContent = (content: string) => {
+    const lines = content.split("\n");
+    const formattedElements: React.ReactNode[] = [];
+    let key = 0;
+
+    lines.forEach((line, index) => {
+      const trimmedLine = line.trim();
+
+      // Skip empty lines but add spacing
+      if (!trimmedLine) {
+        formattedElements.push(
+          <View key={`space-${key++}`} style={{ height: 12 }} />
+        );
+        return;
+      }
+
+      // Headings (lines starting with #)
+      if (trimmedLine.startsWith("###")) {
+        const headingText = trimmedLine.replace(/^###\s*/, "");
+        formattedElements.push(
+          <Text key={`h3-${index}`} style={culinaryStoryStyles.headingThree}>
+            {headingText}
+          </Text>
+        );
+        return;
+      }
+
+      if (trimmedLine.startsWith("##")) {
+        const headingText = trimmedLine.replace(/^##\s*/, "");
+        formattedElements.push(
+          <Text key={`h2-${index}`} style={culinaryStoryStyles.headingTwo}>
+            {headingText}
+          </Text>
+        );
+        return;
+      }
+
+      if (trimmedLine.startsWith("#")) {
+        const headingText = trimmedLine.replace(/^#\s*/, "");
+        formattedElements.push(
+          <Text key={`h1-${index}`} style={culinaryStoryStyles.headingOne}>
+            {headingText}
+          </Text>
+        );
+        return;
+      }
+
+      // Bold text between ** **
+      if (trimmedLine.includes("**")) {
+        const parts = trimmedLine.split("**");
+        const formattedParts = parts.map((part, i) => {
+          if (i % 2 === 1) {
+            return (
+              <Text key={`bold-${key++}`} style={culinaryStoryStyles.boldText}>
+                {part}
+              </Text>
+            );
+          }
+          return <Text key={`normal-${key++}`}>{part}</Text>;
+        });
+
+        formattedElements.push(
+          <Text key={`line-${index}`} style={culinaryStoryStyles.contentText}>
+            {formattedParts}
+          </Text>
+        );
+        return;
+      }
+
+      // Numbered list (lines starting with number.)
+      if (/^\d+\.\s/.test(trimmedLine)) {
+        const [numberPart, ...textParts] = trimmedLine.split(/\.\s(.+)/);
+        const listText = textParts.join(". ");
+
+        formattedElements.push(
+          <View key={`numbered-${index}`} style={culinaryStoryStyles.listItem}>
+            <Text style={culinaryStoryStyles.listNumber}>{numberPart}.</Text>
+            <Text style={culinaryStoryStyles.contentText}>{listText}</Text>
+          </View>
+        );
+        return;
+      }
+
+      // Bullet points (lines starting with * or -)
+      if (trimmedLine.startsWith("*") || trimmedLine.startsWith("-")) {
+        const bulletText = trimmedLine.substring(1).trim();
+        const colonIndex = bulletText.indexOf(":");
+
+        if (colonIndex > 0) {
+          const beforeColon = bulletText.substring(0, colonIndex);
+          const afterColon = bulletText.substring(colonIndex);
+
+          formattedElements.push(
+            <View key={`bullet-${index}`} style={culinaryStoryStyles.listItem}>
+              <Text style={culinaryStoryStyles.bulletIcon}>•</Text>
+              <Text style={culinaryStoryStyles.contentText}>
+                <Text style={culinaryStoryStyles.boldText}>{beforeColon}</Text>
+                {afterColon}
+              </Text>
+            </View>
+          );
+        } else {
+          formattedElements.push(
+            <View key={`bullet-${index}`} style={culinaryStoryStyles.listItem}>
+              <Text style={culinaryStoryStyles.bulletIcon}>•</Text>
+              <Text style={culinaryStoryStyles.contentText}>{bulletText}</Text>
+            </View>
+          );
+        }
+        return;
+      }
+
+      // Quote (lines starting with >)
+      if (trimmedLine.startsWith(">")) {
+        const quoteText = trimmedLine.substring(1).trim();
+        formattedElements.push(
+          <View key={`quote-${index}`} style={culinaryStoryStyles.quoteBlock}>
+            <Text style={culinaryStoryStyles.quoteText}>{quoteText}</Text>
+          </View>
+        );
+        return;
+      }
+
+      // Regular paragraph
+      formattedElements.push(
+        <Text key={`line-${index}`} style={culinaryStoryStyles.contentText}>
+          {trimmedLine}
+        </Text>
+      );
+    });
+
+    return (
+      <View style={culinaryStoryStyles.formattedContentContainer}>
+        {formattedElements}
+      </View>
+    );
   };
 
   if (isLoading) {
@@ -222,7 +360,7 @@ const CulinaryStoryDetailScreen: React.FC<CulinaryStoryDetailScreenProps> = ({
 
           {/* Content */}
           <View style={culinaryStoryStyles.contentSection}>
-            <Text style={culinaryStoryStyles.fullContent}>{post.content}</Text>
+            {formatContent(post.content)}
           </View>
 
           {/* Action Buttons */}
