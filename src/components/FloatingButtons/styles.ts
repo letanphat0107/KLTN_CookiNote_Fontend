@@ -1057,4 +1057,48 @@ shopeeGroupButton: {
     fontWeight: "600",
     textAlign: "center",
   },
+
+    // Category Tabs
+  categoryTabs: {
+    maxHeight: 50,
+    marginBottom: 12,
+    paddingHorizontal: 16,
+  },
+  categoryTab: {
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    marginRight: 8,
+    borderRadius: 20,
+    backgroundColor: "#F5F5F5",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  categoryTabActive: {
+    backgroundColor: "#FF6B35",
+    borderColor: "#FF6B35",
+  },
+  categoryTabText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#666",
+  },
+  categoryTabTextActive: {
+    color: "#FFF",
+  },
+
+  // Check Icon for selected ingredients
+  checkIcon: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    fontSize: 12,
+    color: "#FFF",
+    backgroundColor: "#4CAF50",
+    borderRadius: 10,
+    width: 16,
+    height: 16,
+    textAlign: "center",
+    lineHeight: 16,
+    fontWeight: "bold",
+  },
 });

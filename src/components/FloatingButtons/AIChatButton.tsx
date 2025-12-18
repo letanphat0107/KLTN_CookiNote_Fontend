@@ -75,44 +75,194 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
   const scaleAnim = useState(new Animated.Value(1))[0];
 
   // Common ingredients list
-  const commonIngredients = [
-    "Sả",
-    "Nước cốt dừa",
-    "Sữa đặc",
-    "Đường",
-    "Muối",
-    "Dừa nạo",
-    "Vừng rang",
-    "Lá dứa",
-    "Chuối chín",
-    "Bột mì",
-    "Bơ lạt",
-    "Bột ca cao",
-    "Milo",
-    "Sữa tươi không đường",
-    "Trứng gà",
-    "Baking powder",
-    "Baking soda",
-    "Bột mì đa dụng",
-    "Nước đường",
-    "Dầu ăn",
-    "Thịt heo",
-    "Thịt bò",
-    "Gà",
-    "Tôm",
-    "Cá",
-    "Hành tây",
-    "Tỏi",
-    "Gừng",
-    "Cà chua",
-    "Khoai tây",
-    "Cà rốt",
-    "Rau xanh",
-    "Nước mắm",
-    "Dầu hào",
-    "Tương ớt",
-    "Mayonnaise",
+  const [selectedCategory, setSelectedCategory] = useState<string>("meat");
+  const ingredientCategories = [
+    {
+      id: "meat",
+      name: "🥩 Thịt & Hải sản",
+      items: [
+        "Thịt heo",
+        "Thịt bò",
+        "Thịt gà",
+        "Thịt vịt",
+        "Sườn heo",
+        "Ba chỉ",
+        "Nạc vai",
+        "Thăn lợn",
+        "Tôm",
+        "Cá",
+        "Mực",
+        "Nghêu",
+        "Sò",
+        "Cua",
+        "Ghẹ",
+        "Cá hồi",
+        "Cá thu",
+        "Cá basa",
+      ],
+    },
+    {
+      id: "vegetables",
+      name: "🥬 Rau & Củ",
+      items: [
+        "Cải thảo",
+        "Cải ngọt",
+        "Rau muống",
+        "Rau cải",
+        "Bắp cải",
+        "Xà lách",
+        "Cà chua",
+        "Dưa chuột",
+        "Bí đỏ",
+        "Bí ngòi",
+        "Bí xanh",
+        "Đậu que",
+        "Đậu cove",
+        "Mướp",
+        "Khế",
+        "Cà tím",
+        "Ớt chuông",
+        "Bắp ngô",
+        "Nấm",
+        "Nấm rơm",
+        "Nấm hương",
+      ],
+    },
+    {
+      id: "tubers",
+      name: "🥔 Củ quả",
+      items: [
+        "Khoai tây",
+        "Khoai lang",
+        "Khoai môn",
+        "Củ cải trắng",
+        "Củ cải đỏ",
+        "Cà rốt",
+        "Su hào",
+        "Su su",
+        "Củ dền",
+        "Củ sen",
+        "Bí đao",
+        "Bầu",
+      ],
+    },
+    {
+      id: "grain",
+      name: "🌾 Ngũ cốc & Đậu",
+      items: [
+        "Gạo tẻ",
+        "Gạo nếp",
+        "Bột mì",
+        "Bột gạo",
+        "Bột năng",
+        "Bột bắp",
+        "Đậu xanh",
+        "Đậu đỏ",
+        "Đậu đen",
+        "Đậu phộng",
+        "Đậu hũ",
+        "Đậu phụ",
+        "Mì gói",
+        "Mì sợi",
+        "Bún",
+        "Phở khô",
+        "Miến",
+        "Bánh đa",
+      ],
+    },
+    {
+      id: "fruit",
+      name: "🍎 Trái cây",
+      items: [
+        "Chuối",
+        "Táo",
+        "Cam",
+        "Chanh",
+        "Quýt",
+        "Bưởi",
+        "Xoài",
+        "Dứa",
+        "Dưa hấu",
+        "Dưa lưới",
+        "Ổi",
+        "Mãng cầu",
+        "Thanh long",
+        "Chôm chôm",
+        "Sầu riêng",
+        "Măng cụt",
+        "Mít",
+        "Dâu tây",
+      ],
+    },
+    {
+      id: "dairy",
+      name: "🥛 Sữa & Trứng",
+      items: [
+        "Trứng gà",
+        "Trứng vịt",
+        "Sữa tươi",
+        "Sữa đặc có đường",
+        "Sữa đặc không đường",
+        "Sữa chua",
+        "Phô mai",
+        "Bơ lạt",
+        "Bơ mặn",
+        "Kem tươi",
+        "Nước cốt dừa",
+        "Dừa nạo",
+        "Dừa tươi",
+      ],
+    },
+    {
+      id: "baking",
+      name: "🍰 Nguyên liệu làm bánh",
+      items: [
+        "Bột mì đa dụng",
+        "Bột mì số 8",
+        "Bột mì số 13",
+        "Bột nở (Baking powder)",
+        "Baking soda",
+        "Men nở",
+        "Bột ca cao",
+        "Chocolate",
+        "Bột matcha",
+        "Vani",
+        "Gelatin",
+        "Bột rau câu",
+        "Đường trắng",
+        "Đường nâu",
+        "Đường bột",
+        "Mật ong",
+        "Siro glucose",
+      ],
+    },
+    {
+      id: "herbs",
+      name: "🌿 Rau thơm & Gia vị tươi",
+      items: [
+        "Sả",
+        "Gừng",
+        "Tỏi",
+        "Hành tây",
+        "Hành tím",
+        "Hành lá",
+        "Rau mùi",
+        "Húng quế",
+        "Húng lủi",
+        "Kinh giới",
+        "Tía tô",
+        "Ngò gai",
+        "Ngò ôm",
+        "Rau răm",
+        "Lá chanh",
+        "Lá dứa",
+        "Ớt",
+        "Ớt hiểm",
+        "Ớt chuông",
+      ],
+    },
   ];
+
 
   // Load chat history when component mounts or when opened
   useEffect(() => {
@@ -829,36 +979,74 @@ const AIChatButton: React.FC<AIChatButtonProps> = ({
             Đã chọn: {selectedIngredients.length} nguyên liệu
           </Text>
 
+          {/* Category Tabs */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={floatingStyles.categoryTabs}
+          >
+            {ingredientCategories.map((category) => (
+              <TouchableOpacity
+                key={category.id}
+                style={[
+                  floatingStyles.categoryTab,
+                  selectedCategory === category.id &&
+                    floatingStyles.categoryTabActive,
+                ]}
+                onPress={() => setSelectedCategory(category.id)}
+              >
+                <Text
+                  style={[
+                    floatingStyles.categoryTabText,
+                    selectedCategory === category.id &&
+                      floatingStyles.categoryTabTextActive,
+                  ]}
+                >
+                  {category.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* Ingredient List for Selected Category */}
           <ScrollView style={floatingStyles.ingredientList}>
             <View style={floatingStyles.ingredientGrid}>
-              {commonIngredients.map((ingredient) => (
-                <TouchableOpacity
-                  key={ingredient}
-                  style={[
-                    floatingStyles.ingredientChip,
-                    selectedIngredients.includes(ingredient) &&
-                      floatingStyles.ingredientChipSelected,
-                  ]}
-                  onPress={() => toggleIngredient(ingredient)}
-                >
-                  <Text
+              {ingredientCategories
+                .find((cat) => cat.id === selectedCategory)
+                ?.items.map((ingredient) => (
+                  <TouchableOpacity
+                    key={ingredient}
                     style={[
-                      floatingStyles.ingredientChipText,
+                      floatingStyles.ingredientChip,
                       selectedIngredients.includes(ingredient) &&
-                        floatingStyles.ingredientChipTextSelected,
+                        floatingStyles.ingredientChipSelected,
                     ]}
+                    onPress={() => toggleIngredient(ingredient)}
                   >
-                    {ingredient}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    {selectedIngredients.includes(ingredient) && (
+                      <Text style={floatingStyles.checkIcon}>✓</Text>
+                    )}
+                    <Text
+                      style={[
+                        floatingStyles.ingredientChipText,
+                        selectedIngredients.includes(ingredient) &&
+                          floatingStyles.ingredientChipTextSelected,
+                      ]}
+                    >
+                      {ingredient}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
             </View>
           </ScrollView>
 
           <View style={floatingStyles.ingredientActions}>
             <TouchableOpacity
               style={floatingStyles.cancelButton}
-              onPress={() => setShowIngredientSelector(false)}
+              onPress={() => {
+                setShowIngredientSelector(false);
+                setSelectedCategory("meat");
+              }}
             >
               <Text style={floatingStyles.cancelButtonText}>Hủy</Text>
             </TouchableOpacity>
