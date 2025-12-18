@@ -152,8 +152,6 @@ export const markRecipeAsCooked = async (
   }
 };
 
-
-
 // Remove from cooked history
 export const removeFromCookedHistory = async (
   historyId: number
@@ -258,12 +256,9 @@ export const checkFavoriteStatus = async (
     console.log("Checking favorite status for recipe:", recipeId);
 
     const now = Date.now();
-    
+
     // Use cache if valid
-    if (
-      favoritesCache && 
-      now - favoritesCache.timestamp < CACHE_DURATION
-    ) {
+    if (favoritesCache && now - favoritesCache.timestamp < CACHE_DURATION) {
       console.log("Using cached favorites list");
       const isFavorited = favoritesCache.items.some(
         (recipe) => recipe.id === recipeId
@@ -274,7 +269,7 @@ export const checkFavoriteStatus = async (
     // Fetch fresh data
     console.log("Fetching fresh favorites list");
     const favoriteResponse = await getFavoriteRecipes(0, 100);
-    
+
     // Update cache
     favoritesCache = {
       items: favoriteResponse.items,
@@ -286,8 +281,8 @@ export const checkFavoriteStatus = async (
       (recipe) => recipe.id === recipeId
     );
 
-    console.log(`Recipe ${recipeId} is ${isFavorited ? '' : 'not '}favorited`);
-    
+    console.log(`Recipe ${recipeId} is ${isFavorited ? "" : "not "}favorited`);
+
     return isFavorited;
   } catch (error) {
     console.error("Error checking favorite status:", error);

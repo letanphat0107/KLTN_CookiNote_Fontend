@@ -1782,6 +1782,41 @@ editedLabel: {
   color: "#95A5A6",
   fontStyle: "italic",
 },
+
+// Add these new styles to recipeStyles
+
+ttsButton: {
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  backgroundColor: "#F5F5F5",
+  justifyContent: "center",
+  alignItems: "center",
+  borderWidth: 2,
+  borderColor: "#E0E0E0",
+},
+
+ttsButtonActive: {
+  backgroundColor: "#FFE5E5",
+  borderColor: "#FF6B6B",
+},
+
+ttsBanner: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#E8F5E9",
+  paddingVertical: 8,
+  paddingHorizontal: 16,
+  borderRadius: 8,
+  marginTop: 8,
+  gap: 8,
+},
+
+ttsBannerText: {
+  fontSize: 14,
+  color: "#4CAF50",
+  fontWeight: "500",
+},
 });
 
 export default recipeStyles;

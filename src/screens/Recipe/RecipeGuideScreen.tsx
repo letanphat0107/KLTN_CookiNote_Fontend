@@ -15,6 +15,7 @@ import { recipeStyles } from "./styles";
 import { RecipeStep } from "../../types/recipe";
 import { markRecipeAsCooked } from "../../services/favoriteService";
 import { Ionicons } from "@expo/vector-icons";
+import * as Speech from "expo-speech";
 
 const { width } = Dimensions.get("window");
 
@@ -45,6 +46,10 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
   const [countdownTimer, setCountdownTimer] = useState(0);
   const [isCountingDown, setIsCountingDown] = useState(false);
   const [isMarkingCooked, setIsMarkingCooked] = useState(false);
+
+  // NEW: Text-to-Speech state
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [ttsEnabled, setTtsEnabled] = useState(false);
 
   // Toast state
   const [toastMessage, setToastMessage] = useState("");
@@ -104,6 +109,77 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
       });
     }
   };
+
+  // NEW: Text-to-Speech functions
+  const speakStepContent = async () => {
+    if (!currentStepData) return;
+
+    try {
+      // Stop any ongoing speech
+      await Speech.stop();
+
+      // Build the text to speak
+      let textToSpeak = `Bước ${currentStepData.stepNo || currentStep + 1}. `;
+      textToSpeak += currentStepData.content;
+
+      if (currentStepData.tips) {
+        textToSpeak += `. Mẹo hữu ích: ${currentStepData.tips}`;
+      }
+
+      // Speak the text
+      Speech.speak(textToSpeak, {
+        language: "vi-VN",
+        pitch: 1.0,
+        rate: 0.9,
+        onStart: () => setIsSpeaking(true),
+        onDone: () => setIsSpeaking(false),
+        onStopped: () => setIsSpeaking(false),
+        onError: () => {
+          setIsSpeaking(false);
+          showToastMessage("Không thể đọc nội dung. Vui lòng thử lại.");
+        },
+      });
+    } catch (error) {
+      console.error("Error speaking:", error);
+      setIsSpeaking(false);
+      showToastMessage("Lỗi khi đọc nội dung");
+    }
+  };
+
+  const stopSpeaking = async () => {
+    try {
+      await Speech.stop();
+      setIsSpeaking(false);
+    } catch (error) {
+      console.error("Error stopping speech:", error);
+    }
+  };
+
+  const toggleTTS = async () => {
+    if (isSpeaking) {
+      // Stop if currently speaking
+      await stopSpeaking();
+      setTtsEnabled(false);
+    } else {
+      // Start speaking
+      setTtsEnabled(true);
+      await speakStepContent();
+    }
+  };
+
+  // Auto-speak when step changes if TTS is enabled
+  useEffect(() => {
+    if (ttsEnabled && currentStepData) {
+      speakStepContent();
+    } else {
+      stopSpeaking();
+    }
+
+    return () => {
+      // Cleanup: stop speech when component unmounts
+      Speech.stop();
+    };
+  }, [currentStep, ttsEnabled]);
 
   // Progress animation
   useEffect(() => {
@@ -280,6 +356,10 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
   const handleComplete = async () => {
     setIsMarkingCooked(true);
 
+    // Stop speech when completing
+    await stopSpeaking();
+    setTtsEnabled(false);
+
     showToastMessage(
       `🎉 Hoàn thành! Chúc mừng bạn đã hoàn thành món ${recipeTitle}!`,
       4000
@@ -351,7 +431,6 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
                 resizeMode="cover"
               />
               <View style={recipeStyles.modernImageBadge}>
-                <Ionicons name="images" size={12} color="#FFF" />
                 <Text style={recipeStyles.modernImageBadgeText}>
                   {index + 1}/{images.length}
                 </Text>
@@ -414,7 +493,26 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
             Bước {currentStep + 1} / {steps.length}
           </Text>
         </View>
-        <View style={{ width: 40 }} />
+        {/* NEW: TTS Toggle Button */}
+        <TouchableOpacity
+          style={[
+            recipeStyles.ttsButton,
+            (ttsEnabled || isSpeaking) && recipeStyles.ttsButtonActive,
+          ]}
+          onPress={toggleTTS}
+        >
+          <Ionicons
+            name={
+              isSpeaking
+                ? "volume-high"
+                : ttsEnabled
+                ? "volume-medium"
+                : "volume-mute"
+            }
+            size={24}
+            color={ttsEnabled || isSpeaking ? "#FF6B6B" : "#95A5A6"}
+          />
+        </TouchableOpacity>
       </View>
 
       {/* Progress Bar */}
@@ -484,6 +582,16 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
           </View>
         )}
 
+        {/* TTS Status Banner */}
+        {isSpeaking && (
+          <View style={recipeStyles.ttsBanner}>
+            <Ionicons name="volume-high" size={16} color="#4CAF50" />
+            <Text style={recipeStyles.ttsBannerText}>
+              Đang đọc nội dung bước...
+            </Text>
+          </View>
+        )}
+
         {/* Timer Quick Actions */}
         <ScrollView
           horizontal
@@ -491,110 +599,7 @@ const RecipeGuideScreen: React.FC<RecipeGuideScreenProps> = ({
           style={recipeStyles.modernTimerQuickActions}
           contentContainerStyle={{ paddingHorizontal: 20 }}
         >
-          {/*
-          <TouchableOpacity
-            style={recipeStyles.modernTimerPreset}
-            onPress={() => startTimer(3)}
-            disabled={isCountingDown}
-          >
-            <Text style={recipeStyles.timerButtonText}>3p</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={recipeStyles.modernTimerPreset}
-            onPress={() => startTimer(5)}
-            disabled={isCountingDown}
-          >
-            <Text style={recipeStyles.timerButtonText}>5p</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={recipeStyles.modernTimerPreset}
-            onPress={() => startTimer(10)}
-            disabled={isCountingDown}
-          >
-            <Text style={recipeStyles.timerButtonText}>10p</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={recipeStyles.modernTimerPreset}
-            onPress={() => startTimer(currentStepData?.suggestedTime || 5)}
-            disabled={isCountingDown}
-          >
-            <Text style={recipeStyles.timerButtonText}>Gợi ý</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={recipeStyles.modernTimerPreset}
-            onPress={() => setShowTimerModal(true)}
-            disabled={isCountingDown}
-          >
-            <Text style={recipeStyles.timerButtonText}>Tùy chỉnh</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={recipeStyles.modernTimerPreset}
-            onPress={resetTimer}
-            disabled={isCountingDown}
-          >
-            <Text style={recipeStyles.timerButtonText}>Reset</Text>
-          </TouchableOpacity>
-          */}
-          {/*
-          <TouchableOpacity
-            style={recipeStyles.modernTimerPreset}
-            onPress={() => startTimer(3)}
-            disabled={isCountingDown}
-          >
-            <Ionicons name="time-outline" size={18} color="#FF6B6B" />
-            <Text style={recipeStyles.modernTimerPresetText}>3 phút</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={recipeStyles.modernTimerPreset}
-            onPress={() => startTimer(5)}
-            disabled={isCountingDown}
-          >
-            <Ionicons name="time-outline" size={18} color="#FF6B6B" />
-            <Text style={recipeStyles.modernTimerPresetText}>5 phút</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={recipeStyles.modernTimerPreset}
-            onPress={() => startTimer(10)}
-            disabled={isCountingDown}
-          >
-            <Ionicons name="time-outline" size={18} color="#FF6B6B" />
-            <Text style={recipeStyles.modernTimerPresetText}>10 phút</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={recipeStyles.modernTimerPreset}
-            onPress={() => startTimer(currentStepData?.suggestedTime || 5)}
-            disabled={isCountingDown}
-          >
-            <Ionicons name="bulb-outline" size={18} color="#FF6B6B" />
-            <Text style={recipeStyles.modernTimerPresetText}>Gợi ý</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={recipeStyles.modernTimerPreset}
-            onPress={() => setShowTimerModal(true)}
-            disabled={isCountingDown}
-          >
-            <Ionicons name="create-outline" size={18} color="#FF6B6B" />
-            <Text style={recipeStyles.modernTimerPresetText}>Tùy chỉnh</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              recipeStyles.modernTimerPreset,
-              recipeStyles.modernTimerPresetReset,
-            ]}
-            onPress={resetTimer}
-            disabled={isCountingDown}
-          >
-            <Ionicons name="refresh-outline" size={18} color="#E74C3C" />
-            <Text
-              style={[
-                recipeStyles.modernTimerPresetText,
-                { color: "#E74C3C" },
-              ]}
-            >
-              Reset
-            </Text>
-          </TouchableOpacity>
-          */}
+          {/* Keep existing timer actions or leave empty */}
         </ScrollView>
       </View>
 
